@@ -1,0 +1,19 @@
+export CC=/usr/bin/gcc
+
+export CXX=/usr/bin/g++
+
+export CPP=/usr/bin/cpp
+
+export LD=/usr/bin/ld
+
+alias c++=/usr/bin/c++
+
+alias g++=/usr/bin/g++
+
+alias gcc=/usr/bin/gcc
+
+alias cpp=/usr/bin/cpp
+
+alias cc=/usr/bin/gcc
+
+alias ld=/usr/bin/ld
