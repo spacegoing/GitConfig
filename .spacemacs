@@ -270,6 +270,10 @@ layers configuration. You are free to put any user code."
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
+
+;; markdown mode variables
+(setq markdown-local-header "/home/spacegoing/ubuntuCodeLab/spacegoing.github.io/Pandoc_Header/programming_notes_header")
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -280,9 +284,7 @@ layers configuration. You are free to put any user code."
  '(dired-hide-details-hide-symlink-targets t)
  '(evil-vsplit-window-right t)
  '(helm-split-window-default-side (quote below))
- '(markdown-command
-   "pandoc -c https://spacegoing.github.io/CSS/kevinburke-md-css.css")
- '(markdown-css-paths "https://spacegoing.github.io/CSS/kevinburke-md-css.css" )
+ '(markdown-command (concat "pandoc -H " markdown-local-header))
  '(split-height-threshold nil)
  '(split-width-threshold 80))
 (custom-set-faces
