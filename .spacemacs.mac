@@ -280,8 +280,12 @@ directory in another window."
   "Configuration function for user code.
 This function is called at the very end of Spacemacs initialization after
 layers configuration. You are free to put any user code."
-  (set-frame-font "nil 22")
+
   (require 'bookmark+)
+
+  (set-frame-font "nil 22")
+
+  ;; Clang Config
   (setq-default c-basic-offset 4)
   (setq-default dotspacemacs-configuration-layers
                 '((c-c++ :variables
@@ -295,7 +299,15 @@ layers configuration. You are free to put any user code."
   (defun clang-format-bindings ()
     (define-key c++-mode-map [tab] 'clang-format-buffer))
 
+
   (add-hook 'doc-view-mode-hook 'auto-revert-mode)
+
+  ;; Pandoc Config
+  ;; markdown mode variables
+  (setq markdown-local-header "/Users/spacegoing/macCodeLab-MBP2015/MarkdownConfig/Pandoc_Header/programming_notes_header")
+
+  ;; paradox config
+  (setq paradox-github-token "9a43680a53cf280d4342761b4d75e311380bbb5f")
 
   ;; My Keymaps
   (define-key evil-insert-state-map (kbd "C-p") 'previous-line)
@@ -308,11 +320,6 @@ layers configuration. You are free to put any user code."
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
-
-;; markdown mode variables
-(setq markdown-local-header "/Users/spacegoing/macCodeLab-MBP2015/MarkdownConfig/Pandoc_Header/programming_notes_header")
-;; paradox config
-(setq paradox-github-token "9a43680a53cf280d4342761b4d75e311380bbb5f")
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
