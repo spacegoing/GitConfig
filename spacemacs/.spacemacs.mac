@@ -18,6 +18,9 @@ values."
    ;; of a list then all discovered layers will be installed.
    dotspacemacs-configuration-layers
    '(
+     ruby
+     yaml
+     octave
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
      ;; Uncomment some layer names and press <SPC f e R> (Vim style) or
@@ -30,7 +33,6 @@ values."
      semantic
      github
      c-c++
-     latex
      python
      html
      javascript
@@ -38,11 +40,18 @@ values."
      markdown
      org
      pandoc
+
+     latex
+     (latex :variables latex-enable-auto-fill t)
+     (latex :variables latex-build-command "LaTeX")
+     (latex :variables latex-enable-folding t)
+
+
      ;; (shell :variables
      ;;        shell-default-height 30
      ;;        shell-default-position 'bottom)
-     ;; spell-checking
-     ;; syntax-checking
+     spell-checking
+     syntax-checking
      ;; version-control
      )
    ;; List of additional packages that will be installed without being
@@ -247,14 +256,37 @@ values."
 It is called immediately after `dotspacemacs/init'.  You are free to put almost
 any user code here.  The exception is org related code, which should be placed
 in `dotspacemacs/user-config'."
+
+  ;; My Functions
+  ;; Same as `dired-up-directory', except for wrapping with `file-truename'.
+  (defun my-dired-up-directory (&optional other-window)
+    "Run Dired on parent directory of current directory.
+Follows symlinks for current directory.
+Find the parent directory either in this buffer or another buffer.
+Creates a buffer if necessary.
+If OTHER-WINDOW (the optional prefix arg), display the parent
+directory in another window."
+    (interactive "P")
+    (let* ((dir  (file-truename (dired-current-directory)))
+           (up   (file-name-directory (directory-file-name dir))))
+      (or (dired-goto-file (directory-file-name dir))
+          ;; Only try dired-goto-subdir if buffer has more than one dir.
+          (and (cdr dired-subdir-alist)  (dired-goto-subdir up))
+          (progn (if other-window (dired-other-window up) (dired up))
+                 (dired-goto-file dir)))))
   )
 
 (defun dotspacemacs/user-config ()
   "Configuration function for user code.
 This function is called at the very end of Spacemacs initialization after
 layers configuration. You are free to put any user code."
-  (set-frame-font "nil 22")
+
   (require 'bookmark+)
+
+  (set-frame-font "nil 22")
+
+  ;; Clang Config
+  (setq-default c-basic-offset 4)
   (setq-default dotspacemacs-configuration-layers
                 '((c-c++ :variables
                          c-c++-default-mode-for-headers 'c++-mode)))
@@ -266,13 +298,28 @@ layers configuration. You are free to put any user code."
   (add-hook 'c++-mode-hook 'clang-format-bindings)
   (defun clang-format-bindings ()
     (define-key c++-mode-map [tab] 'clang-format-buffer))
+
+
+  (add-hook 'doc-view-mode-hook 'auto-revert-mode)
+
+  ;; Pandoc Config
+  ;; markdown mode variables
+  (setq markdown-local-header "/Users/spacegoing/macCodeLab-MBP2015/MarkdownConfig/Pandoc_Header/programming_notes_header")
+
+  ;; paradox config
+  (setq paradox-github-token "9a43680a53cf280d4342761b4d75e311380bbb5f")
+
+  ;; My Keymaps
+  (define-key evil-insert-state-map (kbd "C-p") 'previous-line)
+  (define-key evil-insert-state-map (kbd "C-n") 'next-line)
+  (define-key evil-insert-state-map (kbd "C-a") 'beginning-of-line-text)
+  (define-key evil-insert-state-map (kbd "C-e") 'end-of-line)
+  (define-key dired-mode-map (kbd "P") 'my-dired-up-directory)
+
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
-
-;; markdown mode variables
-(setq markdown-local-header "/home/spacegoing/ubuntuCodeLab/spacegoing.github.io/Pandoc_Header/programming_notes_header")
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -280,11 +327,28 @@ layers configuration. You are free to put any user code."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(bmkp-last-as-first-bookmark-file "~/.emacs.d/.cache/bookmarks")
+ '(c-default-style
+   (quote
+    ((c-mode . "k&r")
+     (c++-mode . "k&r")
+     (java-mode . "java")
+     (awk-mode . "awk")
+     (other . "gnu"))))
+ '(custom-safe-themes
+   (quote
+    ("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" default)))
  '(dired-hide-details-hide-information-lines t)
  '(dired-hide-details-hide-symlink-targets t)
  '(evil-vsplit-window-right t)
+ '(fill-column 65)
  '(helm-split-window-default-side (quote below))
- '(markdown-command (concat "pandoc -H " markdown-local-header))
+ '(markdown-command
+   (concat "pandoc --mathjax=https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML -H " markdown-local-header))
+ '(package-selected-packages
+   (quote
+    (yapfify ws-butler which-key web-mode web-beautify use-package tagedit srefactor sql-indent spaceline powerline smeargle restart-emacs pytest pug-mode persp-mode paradox spinner pandoc-mode ox-pandoc orgit org org-projectile org-pomodoro alert org-plus-contrib org-download open-junk-file neotree move-text markdown-toc markdown-mode magit-gh-pulls macrostep live-py-mode link-hint js2-refactor multiple-cursors info+ indent-guide hydra hungry-delete htmlize hl-todo highlight-indentation hide-comnt help-fns+ helm-projectile helm-make projectile helm-flx helm-company helm-ag google-translate git-timemachine git-messenger git-link gist flyspell-correct-helm flyspell-correct flycheck-pos-tip flycheck eyebrowse expand-region exec-path-from-shell evil-surround evil-nerd-commenter evil-mc evil-matchit evil-magit emmet-mode dumb-jump company-statistics company-auctex column-enforce-mode coffee-mode chruby bookmark+ bind-key auctex aggressive-indent ace-window ace-link auto-complete anaconda-mode tern company anzu iedit smartparens bind-map highlight undo-tree gh pcache ht yasnippet request helm helm-core skewer-mode js2-mode magit magit-popup git-commit with-editor async inf-ruby dash pcre2el haml-mode spacemacs-theme yaml-mode window-numbering volatile-highlights vi-tilde-fringe uuidgen toc-org stickyfunc-enhance slim-mode simple-httpd scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe rbenv rake rainbow-delimiters quelpa pyvenv pyenv-mode py-isort pos-tip popwin popup pkg-info pip-requirements org-present org-bullets mwim mmm-mode minitest marshal magit-gitflow lorem-ipsum logito log4e livid-mode linum-relative let-alist less-css-mode json-mode js-doc ido-vertical-mode hy-mode highlight-parentheses highlight-numbers helm-themes helm-swoop helm-pydoc helm-mode-manager helm-gitignore helm-descbinds helm-css-scss helm-c-yasnippet golden-ratio gnuplot gntp github-search github-clone github-browse-file gitconfig-mode gitattributes-mode gh-md flx-ido fill-column-indicator fancy-battery evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-search-highlight-persist evil-numbers evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu elisp-slime-nav disaster diminish define-word cython-mode company-web company-tern company-c-headers company-anaconda cmake-mode clean-aindent-mode clang-format bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile adaptive-wrap ace-jump-helm-line ac-ispell)))
+ '(paradox-automatically-star t)
+ '(setq-default fill-column t)
  '(split-height-threshold nil)
  '(split-width-threshold 80))
 (custom-set-faces

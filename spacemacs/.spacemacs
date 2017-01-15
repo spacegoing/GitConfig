@@ -18,9 +18,6 @@ values."
    ;; of a list then all discovered layers will be installed.
    dotspacemacs-configuration-layers
    '(
-     ruby
-     yaml
-     octave
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
      ;; Uncomment some layer names and press <SPC f e R> (Vim style) or
@@ -40,18 +37,11 @@ values."
      markdown
      org
      pandoc
-
-     latex
-     (latex :variables latex-enable-auto-fill t)
-     (latex :variables latex-build-command "LaTeX")
-     (latex :variables latex-enable-folding t)
-
-
      ;; (shell :variables
      ;;        shell-default-height 30
      ;;        shell-default-position 'bottom)
-     spell-checking
-     syntax-checking
+     ;; spell-checking
+     ;; syntax-checking
      ;; version-control
      )
    ;; List of additional packages that will be installed without being
@@ -256,37 +246,14 @@ values."
 It is called immediately after `dotspacemacs/init'.  You are free to put almost
 any user code here.  The exception is org related code, which should be placed
 in `dotspacemacs/user-config'."
-
-  ;; My Functions
-  ;; Same as `dired-up-directory', except for wrapping with `file-truename'.
-  (defun my-dired-up-directory (&optional other-window)
-    "Run Dired on parent directory of current directory.
-Follows symlinks for current directory.
-Find the parent directory either in this buffer or another buffer.
-Creates a buffer if necessary.
-If OTHER-WINDOW (the optional prefix arg), display the parent
-directory in another window."
-    (interactive "P")
-    (let* ((dir  (file-truename (dired-current-directory)))
-           (up   (file-name-directory (directory-file-name dir))))
-      (or (dired-goto-file (directory-file-name dir))
-          ;; Only try dired-goto-subdir if buffer has more than one dir.
-          (and (cdr dired-subdir-alist)  (dired-goto-subdir up))
-          (progn (if other-window (dired-other-window up) (dired up))
-                 (dired-goto-file dir)))))
   )
 
 (defun dotspacemacs/user-config ()
   "Configuration function for user code.
 This function is called at the very end of Spacemacs initialization after
 layers configuration. You are free to put any user code."
-
-  (require 'bookmark+)
-
   (set-frame-font "nil 22")
-
-  ;; Clang Config
-  (setq-default c-basic-offset 4)
+  (require 'bookmark+)
   (setq-default dotspacemacs-configuration-layers
                 '((c-c++ :variables
                          c-c++-default-mode-for-headers 'c++-mode)))
@@ -298,54 +265,25 @@ layers configuration. You are free to put any user code."
   (add-hook 'c++-mode-hook 'clang-format-bindings)
   (defun clang-format-bindings ()
     (define-key c++-mode-map [tab] 'clang-format-buffer))
-
-
-  (add-hook 'doc-view-mode-hook 'auto-revert-mode)
-
-  ;; Pandoc Config
-  ;; markdown mode variables
-  (setq markdown-local-header "/Users/spacegoing/macCodeLab-MBP2015/MarkdownConfig/Pandoc_Header/programming_notes_header")
-
-  ;; paradox config
-  (setq paradox-github-token "9a43680a53cf280d4342761b4d75e311380bbb5f")
-
-  ;; My Keymaps
-  (define-key evil-insert-state-map (kbd "C-p") 'previous-line)
-  (define-key evil-insert-state-map (kbd "C-n") 'next-line)
-  (define-key evil-insert-state-map (kbd "C-a") 'beginning-of-line-text)
-  (define-key evil-insert-state-map (kbd "C-e") 'end-of-line)
-  (define-key dired-mode-map (kbd "P") 'my-dired-up-directory)
-
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
+
+;; markdown mode variables
+(setq markdown-local-header "/home/spacegoing/ubuntuCodeLab/spacegoing.github.io/Pandoc_Header/programming_notes_header")
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(bmkp-last-as-first-bookmark-file "/Users/spacegoing/.emacs.d/.cache/bookmarks")
- '(c-default-style
-   (quote
-    ((c-mode . "k&r")
-     (c++-mode . "k&r")
-     (java-mode . "java")
-     (awk-mode . "awk")
-     (other . "gnu"))))
- '(custom-safe-themes
-   (quote
-    ("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" default)))
+ '(bmkp-last-as-first-bookmark-file "~/.emacs.d/.cache/bookmarks")
  '(dired-hide-details-hide-information-lines t)
  '(dired-hide-details-hide-symlink-targets t)
  '(evil-vsplit-window-right t)
- '(fill-column 65)
  '(helm-split-window-default-side (quote below))
- '(markdown-command
-   (concat "pandoc --mathjax=https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML -H " markdown-local-header))
- '(paradox-automatically-star t)
- '(setq-default fill-column t)
+ '(markdown-command (concat "pandoc -H " markdown-local-header))
  '(split-height-threshold nil)
  '(split-width-threshold 80))
 (custom-set-faces
