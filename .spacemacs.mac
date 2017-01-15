@@ -18,6 +18,9 @@ values."
    ;; of a list then all discovered layers will be installed.
    dotspacemacs-configuration-layers
    '(
+     ruby
+     yaml
+     octave
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
      ;; Uncomment some layer names and press <SPC f e R> (Vim style) or
@@ -279,6 +282,7 @@ This function is called at the very end of Spacemacs initialization after
 layers configuration. You are free to put any user code."
   (set-frame-font "nil 22")
   (require 'bookmark+)
+  (setq-default c-basic-offset 4)
   (setq-default dotspacemacs-configuration-layers
                 '((c-c++ :variables
                          c-c++-default-mode-for-headers 'c++-mode)))
@@ -315,12 +319,24 @@ layers configuration. You are free to put any user code."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(bmkp-last-as-first-bookmark-file "~/.emacs.d/.cache/bookmarks")
+ '(bmkp-last-as-first-bookmark-file "/Users/spacegoing/.emacs.d/.cache/bookmarks")
+ '(c-default-style
+   (quote
+    ((c-mode . "k&r")
+     (c++-mode . "k&r")
+     (java-mode . "java")
+     (awk-mode . "awk")
+     (other . "gnu"))))
+ '(custom-safe-themes
+   (quote
+    ("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" default)))
  '(dired-hide-details-hide-information-lines t)
  '(dired-hide-details-hide-symlink-targets t)
  '(evil-vsplit-window-right t)
+ '(fill-column 65)
  '(helm-split-window-default-side (quote below))
  '(markdown-command (concat "pandoc -H " markdown-local-header))
+ '(setq-default fill-column t)
  '(split-height-threshold nil)
  '(split-width-threshold 80))
 (custom-set-faces
