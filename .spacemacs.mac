@@ -284,7 +284,14 @@ layers configuration. You are free to put any user code."
   (add-hook 'c++-mode-hook 'clang-format-bindings)
   (defun clang-format-bindings ()
     (define-key c++-mode-map [tab] 'clang-format-buffer))
+
+  (add-hook 'doc-view-mode-hook 'auto-revert-mode)
+
   ;; My Keymaps
+  (define-key evil-insert-state-map (kbd "C-p") 'previous-line)
+  (define-key evil-insert-state-map (kbd "C-n") 'next-line)
+  (define-key evil-insert-state-map (kbd "C-a") 'beginning-of-line-text)
+  (define-key evil-insert-state-map (kbd "C-e") 'end-of-line)
   (define-key dired-mode-map (kbd "P") 'my-dired-up-directory)
 
   )
