@@ -335,7 +335,9 @@ layers configuration. You are free to put any user code."
  '(evil-vsplit-window-right t)
  '(fill-column 65)
  '(helm-split-window-default-side (quote below))
- '(markdown-command (concat "pandoc -H " markdown-local-header))
+ '(markdown-command
+   (concat "pandoc --mathjax=https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML -H " markdown-local-header))
+ '(paradox-automatically-star t)
  '(setq-default fill-column t)
  '(split-height-threshold nil)
  '(split-width-threshold 80))
