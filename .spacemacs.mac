@@ -116,7 +116,7 @@ values."
    ;; Default font. `powerline-scale' allows to quickly tweak the mode-line
    ;; size to make separators look not too crappy.
    dotspacemacs-default-font '("Source Code Pro"
-                               :size 16
+                               :size 22
                                :weight normal
                                :width normal
                                :powerline-scale 1.1)
@@ -253,7 +253,7 @@ in `dotspacemacs/user-config'."
   "Configuration function for user code.
 This function is called at the very end of Spacemacs initialization after
 layers configuration. You are free to put any user code."
-  (set-frame-font "Mono-16")
+  (set-frame-font "nil 22")
   (require 'bookmark+)
   (setq-default dotspacemacs-configuration-layers
                 '((c-c++ :variables
