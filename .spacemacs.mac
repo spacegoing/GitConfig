@@ -306,7 +306,7 @@ layers configuration. You are free to put any user code."
 ;; auto-generate custom variable definitions.
 
 ;; markdown mode variables
-(setq markdown-local-header "/Users/spacegoing/macCodeLab-MBP2015/spacegoing.github.io/Pandoc_Header/programming_notes_header")
+(setq markdown-local-header "/Users/spacegoing/macCodeLab-MBP2015/MarkdownConfig/Pandoc_Header/programming_notes_header")
 ;; paradox config
 (setq paradox-github-token "9a43680a53cf280d4342761b4d75e311380bbb5f")
 
