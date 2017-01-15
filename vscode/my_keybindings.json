@@ -1,0 +1,136 @@
+// Place your key bindings in this file to overwrite the defaults
+[
+    {
+        "key": "ctrl+f",
+        "command": "cursorRight",
+        "when": "editorTextFocus && !inDebugRepl"
+    },
+    {
+        "key": "ctrl+b",
+        "command": "cursorLeft",
+        "when": "editorTextFocus && !inDebugRepl"
+    },
+    {
+        "key": "ctrl+e",
+        "command": "cursorEnd",
+        "when": "editorTextFocus && !inDebugRepl"
+    },
+    {
+        "key": "ctrl+a",
+        "command": "cursorHome",
+        "when": "editorTextFocus && !inDebugRepl"
+    },
+    {
+        "key": "ctrl+n",
+        "command": "repl.action.historyNext",
+        "when": "editorTextFocus && inDebugRepl && onFirsteDebugReplLine"
+    },
+    {
+        "key": "ctrl+p",
+        "command": "repl.action.historyPrevious",
+        "when": "editorTextFocus && inDebugRepl && onFirsteDebugReplLine"
+    },
+    {
+        "key": "ctrl+n",
+        "command": "search.focus.nextInputBox",
+        "when": "inputBoxFocus && searchViewletVisible && !searchInputBoxFocus"
+    },
+    {
+        "key": "ctrl+p",
+        "command": "search.focus.previousInputBox",
+        "when": "inputBoxFocus && searchViewletVisible && !searchInputBoxFocus"
+    },
+    {
+        "key": "ctrl+n",
+        "command": "workbench.action.quickOpenNavigateNext",
+        "when": "inQuickOpen"
+    },
+    {
+        "key": "ctrl+p",
+        "command": "workbench.action.quickOpenNavigatePrevious",
+        "when": "inQuickOpen"
+    },
+    {
+        "key": "ctrl+t",
+        "command": "workbench.action.toggleActivityBarVisibility"
+    },
+    {
+        "key": "ctrl+t",
+        "command": "-extension.vim_ctrl+t"
+    },
+    {
+        "command": "closeReferenceSearchEditor",
+        "when": "inReferenceSearchEditor && !config.editor.stablePeek",
+        "key": "ctrl+g"
+    },
+    {
+        "command": "cancelSelection",
+        "when": "editorHasSelection && editorTextFocus",
+        "key": "ctrl+g"
+    },
+    {
+        "command": "removeSecondaryCursors",
+        "when": "editorHasMultipleSelections && editorTextFocus",
+        "key": "ctrl+g"
+    },
+    {
+        "command": "closeFindWidget",
+        "when": "editorFocus && findWidgetVisible",
+        "key": "ctrl+g"
+    },
+    {
+        "command": "closeBreakpointWidget",
+        "when": "breakpointWidgetVisible && editorFocus",
+        "key": "ctrl+g"
+    },
+    {
+        "command": "leaveSnippet",
+        "when": "editorTextFocus && inSnippetMode",
+        "key": "ctrl+g"
+    },
+    {
+        "command": "closeMarkersNavigation",
+        "when": "editorFocus && markersNavigationVisible",
+        "key": "ctrl+g"
+    },
+    {
+        "command": "closeReferenceSearch",
+        "when": "referenceSearchVisible && !config.editor.stablePeek",
+        "key": "ctrl+g"
+    },
+    {
+        "command": "closeParameterHints",
+        "when": "editorTextFocus && parameterHintsVisible",
+        "key": "ctrl+g"
+    },
+    {
+        "command": "hideSuggestWidget",
+        "when": "editorTextFocus && suggestWidgetVisible",
+        "key": "ctrl+g"
+    },
+    {
+        "command": "cancelRenameInput",
+        "when": "editorFocus && renameInputVisible",
+        "key": "ctrl+g"
+    },
+    {
+        "command": "closeAccessibilityHelp",
+        "when": "accessibilityHelpWidgetVisible && editorFocus",
+        "key": "ctrl+g"
+    },
+    {
+        "command": "closeReplaceInFilesWidget",
+        "when": "replaceInputBoxFocus && searchViewletVisible",
+        "key": "ctrl+g"
+    },
+    {
+        "command": "workbench.action.closeMessages",
+        "when": "globalMessageVisible",
+        "key": "ctrl+g"
+    },
+    {
+        "command": "workbench.action.closeQuickOpen",
+        "when": "inQuickOpen",
+        "key": "ctrl+g"
+    }
+]
