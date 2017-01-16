@@ -257,7 +257,34 @@ It is called immediately after `dotspacemacs/init'.  You are free to put almost
 any user code here.  The exception is org related code, which should be placed
 in `dotspacemacs/user-config'."
 
-  ;; My Functions
+  ;; --------------- My Hooks --------------------
+
+  ;; AutoFill Mode
+  (add-hook 'text-mode-hook 'turn-on-auto-fill)
+
+  ;; Recentf record buffers
+  ;; todo: create banners in helm mini-buffer
+  (eval-after-load "recentf"
+    '(progn
+       (defun recentf-track-opened-file ()
+         "Insert the name of the dired or file just opened or written into the recent list."
+         (let ((buff-name (or buffer-file-name (and (derived-mode-p 'dired-mode) default-directory))))
+           (and buff-name
+                (recentf-add-file buff-name)))
+         ;; Must return nil because it is run from `write-file-functions'.
+         nil)
+
+       (defun recentf-track-closed-file ()
+         "Update the recent list when a file or dired buffer is killed.
+That is, remove a non kept file from the recent list."
+         (let ((buff-name (or buffer-file-name (and (derived-mode-p 'dired-mode) default-directory))))
+           (and buff-name
+                (recentf-remove-if-non-kept buff-name))))
+
+       (add-hook 'dired-after-readin-hook 'recentf-track-opened-file)))
+
+
+  ;; --------------- My Functions --------------------
   ;; Same as `dired-up-directory', except for wrapping with `file-truename'.
   (defun my-dired-up-directory (&optional other-window)
     "Run Dired on parent directory of current directory.
@@ -284,6 +311,10 @@ layers configuration. You are free to put any user code."
   (require 'bookmark+)
 
   (set-frame-font "nil 22")
+
+  ;; AutoFill Mode
+  (setq-default fill-column 65)
+
 
   ;; Clang Config
   (setq-default c-basic-offset 4)
@@ -340,7 +371,6 @@ layers configuration. You are free to put any user code."
  '(dired-hide-details-hide-information-lines t)
  '(dired-hide-details-hide-symlink-targets t)
  '(evil-vsplit-window-right t)
- '(fill-column 65)
  '(helm-split-window-default-side (quote below))
  '(markdown-command
    (concat "pandoc --mathjax=https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML -H " markdown-local-header))
