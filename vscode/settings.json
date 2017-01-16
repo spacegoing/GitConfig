@@ -1,0 +1,19 @@
+// Place your settings in this file to overwrite the default settings
+{
+    "editor.fontSize": 15,
+    "files.autoSave": "afterDelay",
+    "window.zoomLevel": 2.5,
+    "workbench.activityBar.visible": false,
+    "vim.useSystemClipboard": true,
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/.DS_Store": true,
+        "**/*.js": {
+            "when": "$(basename).ts"
+        }
+    },
+    "editor.wrappingColumn": 65,
+    "files.autoSaveDelay": 1
+}

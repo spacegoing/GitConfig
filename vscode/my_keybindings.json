@@ -132,5 +132,13 @@
         "command": "workbench.action.closeQuickOpen",
         "when": "inQuickOpen",
         "key": "ctrl+g"
+    },
+    {
+        "key": "ctrl+/",
+        "command": "workbench.action.splitEditor"
+    },
+    {
+        "key": "ctrl+\\",
+        "command": "workbench.action.toggleSidebarVisibility"
     }
 ]
