@@ -301,6 +301,14 @@ That is, remove a non kept file from the recent list."
           (and (cdr dired-subdir-alist)  (dired-goto-subdir up))
           (progn (if other-window (dired-other-window up) (dired up))
                  (dired-goto-file dir)))))
+
+  ;; Open file's parent directory
+  (defun my-file-up-directory ()
+    (interactive)
+    (if default-directory
+        (dired (expand-file-name default-directory))
+      (error "No `default-directory' to open")))
+
   )
 
 (defun dotspacemacs/user-config ()
@@ -340,12 +348,17 @@ layers configuration. You are free to put any user code."
   ;; paradox config
   (setq paradox-github-token "9a43680a53cf280d4342761b4d75e311380bbb5f")
 
-  ;; My Keymaps
+  ;; --------------- My Keybindings --------------------
+
+  ;; Enable emacs keybindings in evil
   (define-key evil-insert-state-map (kbd "C-p") 'previous-line)
   (define-key evil-insert-state-map (kbd "C-n") 'next-line)
   (define-key evil-insert-state-map (kbd "C-a") 'beginning-of-line-text)
   (define-key evil-insert-state-map (kbd "C-e") 'end-of-line)
-  (define-key dired-mode-map (kbd "P") 'my-dired-up-directory)
+
+  ;; go to parent dir ( dired symlink / in evil mode )
+  (define-key dired-mode-map (kbd "P") 'my-dired-up-directory) ;; for symlink
+  (define-key evil-normal-state-map (kbd "^") 'my-file-up-directory) ;; for text edit buffer
 
   )
 
