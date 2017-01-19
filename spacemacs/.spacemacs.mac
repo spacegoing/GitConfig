@@ -358,7 +358,7 @@ layers configuration. You are free to put any user code."
 
   ;; go to parent dir ( dired symlink / in evil mode )
   (define-key dired-mode-map (kbd "P") 'my-dired-up-directory) ;; for symlink
-  (define-key evil-normal-state-map (kbd "^") 'my-file-up-directory) ;; for text edit buffer
+  (define-key evil-motion-state-map (kbd "^") 'my-file-up-directory) ;; for text edit buffer
 
   )
 
