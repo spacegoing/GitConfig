@@ -15,5 +15,8 @@
         }
     },
     "editor.wrappingColumn": 65,
-    "files.autoSaveDelay": 1
+    "files.autoSaveDelay": 1000,
+    "explorer.openEditors.visible": 0,
+    "editor.renderIndentGuides": true,
+    "extensions.autoUpdate": true
 }
