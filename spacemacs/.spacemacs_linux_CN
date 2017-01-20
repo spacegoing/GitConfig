@@ -257,6 +257,9 @@ in `dotspacemacs/user-config'."
   ;; AutoFill Mode
   (add-hook 'text-mode-hook 'turn-on-auto-fill)
 
+  ;; Dired hide details
+  (add-hook 'dired-mode-hook 'dired-hide-details-mode)
+
   ;; Recentf record buffers
   ;; todo: create banners in helm mini-buffer
   (eval-after-load "recentf"
