@@ -31,7 +31,11 @@ values."
      semantic
      github
      sql
+
+     ;; markdown config
      markdown
+     (markdown :variables markdown-live-preview-engine 'vmd)
+     ;; npm install -g vmd
 
      ;; c-c++
      ;; python
