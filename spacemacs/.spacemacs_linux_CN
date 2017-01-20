@@ -23,20 +23,22 @@ values."
      ;; Uncomment some layer names and press <SPC f e R> (Vim style) or
      ;; <M-m f e R> (Emacs style) to install them.
      ;; ----------------------------------------------------------------
+
      auto-completion
      better-defaults
      emacs-lisp
      git
      semantic
      github
-     c-c++
-     python
-     html
-     javascript
      sql
      markdown
-     org
-     pandoc
+
+     ;; c-c++
+     ;; python
+     ;; html
+     ;; javascript
+     ;; org
+     ;; pandoc
      ;; (shell :variables
      ;;        shell-default-height 30
      ;;        shell-default-position 'bottom)
@@ -246,32 +248,125 @@ values."
 It is called immediately after `dotspacemacs/init'.  You are free to put almost
 any user code here.  The exception is org related code, which should be placed
 in `dotspacemacs/user-config'."
+  ;; --------------- My Hooks --------------------
+
+  ;; AutoFill Mode
+  (add-hook 'text-mode-hook 'turn-on-auto-fill)
+
+  ;; Recentf record buffers
+  ;; todo: create banners in helm mini-buffer
+  (eval-after-load "recentf"
+    '(progn
+       (defun recentf-track-opened-file ()
+         "Insert the name of the dired or file just opened or written into the recent list."
+         (let ((buff-name (or buffer-file-name (and (derived-mode-p 'dired-mode) default-directory))))
+           (and buff-name
+                (recentf-add-file buff-name)))
+         ;; Must return nil because it is run from `write-file-functions'.
+         nil)
+
+       (defun recentf-track-closed-file ()
+         "Update the recent list when a file or dired buffer is killed.
+That is, remove a non kept file from the recent list."
+         (let ((buff-name (or buffer-file-name (and (derived-mode-p 'dired-mode) default-directory))))
+           (and buff-name
+                (recentf-remove-if-non-kept buff-name))))
+
+       (add-hook 'dired-after-readin-hook 'recentf-track-opened-file)
+       )
+    )
+
+
+  ;; --------------- My Functions --------------------
+
+  ;; Same as `dired-up-directory', except for wrapping with `file-truename'.
+  (defun my-dired-up-directory (&optional other-window)
+    ;; Run Dired on parent directory of current directory.
+    ;; Follows symlinks for current directory. Find the parent
+    ;; directory either in this buffer or another buffer. Creates a
+    ;; buffer if necessary. If OTHER-WINDOW (the optional prefix
+    ;; arg), display the parent directory in another window."
+    (interactive "P")
+    (let* ((dir  (file-truename (dired-current-directory)))
+           (up   (file-name-directory (directory-file-name dir))))
+      (or (dired-goto-file (directory-file-name dir))
+          ;; Only try dired-goto-subdir if buffer has more than one dir.
+          (and (cdr dired-subdir-alist)  (dired-goto-subdir up))
+          (progn (if other-window (dired-other-window up) (dired up))
+                 (dired-goto-file dir)))))
+
+  ;; Open file's parent directory
+  (defun my-file-up-directory ()
+    (interactive)
+    (if default-directory
+        (dired (expand-file-name default-directory))
+      (error "No `default-directory' to open")))
+
+  ;; ------------------ Config Elpa ------------------
+  (setq configuration-layer--elpa-archives
+        '(("melpa-cn" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")
+          ("org-cn"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/org/")
+          ("gnu-cn"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")))
+
+
   )
 
 (defun dotspacemacs/user-config ()
   "Configuration function for user code.
 This function is called at the very end of Spacemacs initialization after
 layers configuration. You are free to put any user code."
-  (set-frame-font "nil 22")
+
   (require 'bookmark+)
-  (setq-default dotspacemacs-configuration-layers
-                '((c-c++ :variables
-                         c-c++-default-mode-for-headers 'c++-mode)))
-  (setq-default dotspacemacs-configuration-layers
-                '((c-c++ :variables c-c++-enable-clang-support t)))
-  ;; Bind clang-format-region to C-M-tab in all modes:
-  (global-set-key [C-M-tab] 'clang-format-region)
-  ;; Bind clang-format-buffer to tab on the c++-mode only:
-  (add-hook 'c++-mode-hook 'clang-format-bindings)
-  (defun clang-format-bindings ()
-    (define-key c++-mode-map [tab] 'clang-format-buffer))
+
+  (set-frame-font "nil 22")
+
+  ;; AutoFill Mode
+  (setq-default fill-column 65)
+
+  ;; Magit Configuration
+  (setq magit-visit-ref-behavior '(checkout-any focus-on-ref))
+  (add-to-list 'magit-visit-ref-behavior 'create-branch)
+
+
+  ;; ;; Clang Config
+  ;; (setq-default c-basic-offset 4)
+  ;; (setq-default dotspacemacs-configuration-layers
+  ;;               '((c-c++ :variables
+  ;;                        c-c++-default-mode-for-headers 'c++-mode)))
+  ;; (setq-default dotspacemacs-configuration-layers
+  ;;               '((c-c++ :variables c-c++-enable-clang-support t)))
+  ;; ;; Bind clang-format-region to C-M-tab in all modes:
+  ;; (global-set-key [C-M-tab] 'clang-format-region)
+  ;; ;; Bind clang-format-buffer to tab on the c++-mode only:
+  ;; (add-hook 'c++-mode-hook 'clang-format-bindings)
+  ;; (defun clang-format-bindings ()
+  ;;   (define-key c++-mode-map [tab] 'clang-format-buffer))
+
+
+  (add-hook 'doc-view-mode-hook 'auto-revert-mode)
+
+  ;; ;; Pandoc Config
+  ;; ;; markdown mode variables
+  ;; (setq markdown-local-header "/Users/spacegoing/macCodeLab-MBP2015/MarkdownConfig/Pandoc_Header/programming_notes_header")
+
+  ;; ;; paradox config
+  ;; (setq paradox-github-token "9a43680a53cf280d4342761b4d75e311380bbb5f")
+
+  ;; --------------- My Keybindings --------------------
+
+  ;; Enable emacs keybindings in evil
+  (define-key evil-insert-state-map (kbd "C-p") 'previous-line)
+  (define-key evil-insert-state-map (kbd "C-n") 'next-line)
+  (define-key evil-insert-state-map (kbd "C-a") 'beginning-of-line-text)
+  (define-key evil-insert-state-map (kbd "C-e") 'end-of-line)
+
+  ;; go to parent dir ( dired symlink / in evil mode )
+  (define-key dired-mode-map (kbd "P") 'my-dired-up-directory) ;; for symlink
+  (define-key evil-motion-state-map (kbd "^") 'my-file-up-directory) ;; for text edit buffer
+
   )
 
-;; Do not write anything past this comment. This is where Emacs will
-;; auto-generate custom variable definitions.
 
-;; markdown mode variables
-(setq markdown-local-header "/home/spacegoing/ubuntuCodeLab/spacegoing.github.io/Pandoc_Header/programming_notes_header")
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.

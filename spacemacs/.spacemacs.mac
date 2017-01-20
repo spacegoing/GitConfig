@@ -32,12 +32,13 @@ values."
      git
      semantic
      github
+     sql
+     markdown
+
      c-c++
      python
      html
      javascript
-     sql
-     markdown
      org
      pandoc
 
@@ -46,12 +47,12 @@ values."
      (latex :variables latex-build-command "LaTeX")
      (latex :variables latex-enable-folding t)
 
+     spell-checking
+     syntax-checking
 
      ;; (shell :variables
      ;;        shell-default-height 30
      ;;        shell-default-position 'bottom)
-     spell-checking
-     syntax-checking
      ;; version-control
      )
    ;; List of additional packages that will be installed without being
@@ -322,6 +323,10 @@ layers configuration. You are free to put any user code."
 
   ;; AutoFill Mode
   (setq-default fill-column 65)
+
+  ;; Magit Configuration
+  (setq magit-visit-ref-behavior '(checkout-any focus-on-ref))
+  (add-to-list 'magit-visit-ref-behavior 'create-branch)
 
 
   ;; Clang Config
