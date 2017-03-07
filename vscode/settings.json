@@ -14,9 +14,22 @@
             "when": "$(basename).ts"
         }
     },
-    "editor.wrappingColumn": 65,
+    "editor.wordWrap": "wordWrapColumn",
+    "editor.wordWrapColumn": 65,
     "files.autoSaveDelay": 1000,
     "explorer.openEditors.visible": 0,
     "editor.renderIndentGuides": true,
-    "extensions.autoUpdate": true
+    "extensions.autoUpdate": true,
+    "vsicons.projectDetection.autoReload": true,
+    "eslint.autoFixOnSave": true,
+    "editor.formatOnType": true,
+    "eslint.validate": [
+        {"language": "javascript","autoFix": true},
+        {"language": "javascriptreact","autoFix": true}
+    ],
+    "markdown-pdf.styles": [
+        "/Users/spacegoing/macCodeLab-MBP2015/GitConfig/vscode/markdown-pdf.css"
+    ],
+    "vsicons.dontShowNewVersionMessage": true,
+    "workbench.iconTheme": "vscode-icons"
 }

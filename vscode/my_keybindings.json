@@ -140,5 +140,14 @@
     {
         "key": "ctrl+\\",
         "command": "workbench.action.toggleSidebarVisibility"
+    },
+    {
+        "key": "ctrl+cmd+\\",
+        "command": "editor.action.formatDocument",
+        "when": "editorHasDocumentFormattingProvider && editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "ctrl+cmd+f",
+        "command": "eslint.executeAutofix"
     }
 ]
