@@ -2,9 +2,11 @@
 {
     "editor.fontSize": 15,
     "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000,
     "window.zoomLevel": 2.5,
     "workbench.activityBar.visible": false,
     "vim.useSystemClipboard": true,
+    "vim.disableAnnoyingNeovimMessage": true,
     "files.exclude": {
         "**/.git": true,
         "**/.svn": true,
@@ -16,20 +18,19 @@
     },
     "editor.wordWrap": "wordWrapColumn",
     "editor.wordWrapColumn": 65,
-    "files.autoSaveDelay": 1000,
-    "explorer.openEditors.visible": 0,
-    "editor.renderIndentGuides": true,
-    "extensions.autoUpdate": true,
-    "vsicons.projectDetection.autoReload": true,
-    "eslint.autoFixOnSave": true,
     "editor.formatOnType": true,
+    "editor.renderIndentGuides": true,
+    "explorer.openEditors.visible": 0,
+    "extensions.autoUpdate": true,
+    "eslint.autoFixOnSave": true,
     "eslint.validate": [
         {"language": "javascript","autoFix": true},
         {"language": "javascriptreact","autoFix": true}
     ],
     "markdown-pdf.styles": [
-        "/Users/spacegoing/macCodeLab-MBP2015/GitConfig/vscode/markdown-pdf.css"
+        "/home/spacegoing/ubuntuCodeLab/GitConfig/vscode/markdown-pdf.css"
     ],
     "vsicons.dontShowNewVersionMessage": true,
+    "vsicons.projectDetection.autoReload": true,
     "workbench.iconTheme": "vscode-icons"
 }
