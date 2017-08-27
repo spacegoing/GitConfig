@@ -1,0 +1,3 @@
+#!/bin/bash
+cd /Users/spacegoing/macCodeLab-MBP2015/DNTG/RC_DNTG_Private/Odoo_GXQ/Itchat_Odoo
+python /Users/spacegoing/macCodeLab-MBP2015/DNTG/RC_DNTG_Private/Odoo_GXQ/Itchat_Odoo/testWechat.py

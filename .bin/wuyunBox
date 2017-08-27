@@ -1,0 +1,2 @@
+#!/bin/bash
+docker start 3b 95 && dbash 3b

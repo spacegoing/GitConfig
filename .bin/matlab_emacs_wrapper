@@ -1,0 +1,6 @@
+#!/bin/bash
+# https://cn.mathworks.com/matlabcentral/answers/319655-why-does-matlab-r2016b-crash-when-launched-from-matlab-emacs
+shell_stack_size=$(ulimit -s)
+# round stack size to next 4K boundary:
+adjusted_stack_size=$[4*((($shell_stack_size-1)/4)+1)]
+ulimit -s $adjusted_stack_size && /Applications/MATLAB_R2016b.app/bin/matlab $@
