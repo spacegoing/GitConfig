@@ -2,7 +2,7 @@
 {
     "editor.fontSize": 15,
     "files.autoSave": "afterDelay",
-    "window.zoomLevel": 2.5,
+    "window.zoomLevel": 2,
     "workbench.activityBar.visible": false,
     "vim.useSystemClipboard": true,
     "files.exclude": {
@@ -31,5 +31,12 @@
         "/Users/spacegoing/macCodeLab-MBP2015/GitConfig/vscode/markdown-pdf.css"
     ],
     "vsicons.dontShowNewVersionMessage": true,
-    "workbench.iconTheme": "vscode-icons"
+    "workbench.iconTheme": "vscode-icons",
+    "vim.disableAnnoyingNeovimMessage": true,
+    "php.executablePath": "/usr/local/opt/php71/bin/php",
+    "php.validate.executablePath": "/usr/local/opt/php71/bin/php",
+    "editor.multiCursorModifier": "alt",
+    "vim.disableAnnoyingGcMessage": true,
+    "extensions.ignoreRecommendations": false,
+    "editor.minimap.enabled": false
 }
