@@ -18,9 +18,10 @@ values."
    ;; of a list then all discovered layers will be installed.
    dotspacemacs-configuration-layers
    '(
+     csv
+     nginx
      ruby
      yaml
-     octave
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
      ;; Uncomment some layer names and press <SPC f e R> (Vim style) or
@@ -38,6 +39,13 @@ values."
      html
      javascript
      org
+
+     docker
+     vagrant
+
+     php
+     clojure
+     haskell
 
      markdown
      (markdown :variables markdown-live-preview-engine 'vmd)
@@ -60,7 +68,7 @@ values."
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '(bookmark+)
+   dotspacemacs-additional-packages '(bookmark+ sphinx-doc matlab-mode)
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '()
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
@@ -258,8 +266,20 @@ values."
 It is called immediately after `dotspacemacs/init'.  You are free to put almost
 any user code here.  The exception is org related code, which should be placed
 in `dotspacemacs/user-config'."
+  ;;
+  (defconst spacemacs-buffer-name "*spacegoing*"
+    "The name of the spacemacs buffer.")
 
+  (defconst spacemacs-buffer-logo-title "[S P A C E G O I N G]"
+    "The title displayed beneath the logo.")
   ;; --------------- My Hooks --------------------
+
+  ;; (setq dotspacemacs-auto-save-file-location 'nil)
+  ;; ;; store all backup and autosave files in the tmp dir
+  ;; (setq backup-directory-alist
+  ;;       `((".*" . ,temporary-file-directory)))
+  ;; (setq auto-save-file-name-transforms
+  ;;       `((".*" ,temporary-file-directory t)))
 
   ;; AutoFill Mode
   (add-hook 'text-mode-hook 'turn-on-auto-fill)
@@ -314,12 +334,63 @@ That is, remove a non kept file from the recent list."
         (dired (expand-file-name default-directory))
       (error "No `default-directory' to open")))
 
+  ;; advise tab to use yas-expand for 'indent-for-tab-command
+  ;; very useful, provide, alternatives to 1 keybinding
+  ;; from http://joaotavora.github.io/yasnippet/faq.html
+  (defun yas-advise-indent-function (function-symbol)
+    (eval `(defadvice ,function-symbol (around yas-try-expand-first activate)
+             ,(format
+               "Try to expand a snippet before point, then call `%s' as usual"
+               function-symbol)
+             (let ((yas-fallback-behavior nil))
+               (unless (and (called-interactively-p 'interactive)
+                            (yas-expand))
+                 ad-do-it)))))
+
+  (yas-advise-indent-function 'indent-for-tab-command)
+
+  ;; sphinx mode for gen python docstring
+  (add-hook 'python-mode-hook (lambda ()
+                                (require 'sphinx-doc)
+                                (sphinx-doc-mode t)))
+
+  ;; Open shell under tramp mode
+  ;; (defun my-odoo-docker-shell ()
+  ;;   (interactive)
+  ;;   (let ((default-directory "/docker:root@odoodocker_web_1:/"))
+  ;;     (shell)))
+
+  ;; Matlab mode
+  (autoload 'matlab-mode "matlab" "Matlab Editing Mode" t)
+  (add-to-list
+   'auto-mode-alist
+   '("\\.m$" . matlab-mode))
+  (setq matlab-indent-function t)
+  (setq matlab-shell-command "matlab_emacs_wrapper")
+  (setq matlab-shell-command-switches (list "-nodesktop -nosplash"))
+
+  (with-eval-after-load 'org
+    (setq org-startup-indented t))
+
+  ;; 主动加载 Dired Mode
+  ;; (require 'dired)
+  ;; (defined-key dired-mode-map (kbd "RET") 'dired-find-alternate-file)
+  ;; 延迟加载
+  ;; (put 'dired-find-alternate-file 'disabled nil)
+  ;; (with-eval-after-load 'dired
+  ;;   (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file))
   )
 
 (defun dotspacemacs/user-config ()
   "Configuration function for user code.
 This function is called at the very end of Spacemacs initialization after
 layers configuration. You are free to put any user code."
+
+  (setq ns-use-srgb-colorspace nil)
+  (setq powerline-default-separator 'arrow)
+  ;; Add company mode
+  (require 'auto-complete)
+  (global-auto-complete-mode t)
 
   (require 'bookmark+)
 
@@ -347,7 +418,6 @@ layers configuration. You are free to put any user code."
   (defun clang-format-bindings ()
     (define-key c++-mode-map [tab] 'clang-format-buffer))
 
-
   (add-hook 'doc-view-mode-hook 'auto-revert-mode)
 
   ;; Pandoc Config
@@ -369,6 +439,33 @@ layers configuration. You are free to put any user code."
   (define-key dired-mode-map (kbd "P") 'my-dired-up-directory) ;; for symlink
   (define-key evil-motion-state-map (kbd "^") 'my-file-up-directory) ;; for text edit buffer
 
+  ;; tuna mirror
+  (setq configuration-layer--elpa-archives
+        '(("melpa-cn" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")
+          ("org-cn"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/org/")
+          ("gnu-cn"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")))
+
+  (require 'tramp)
+  (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
+
+  ;; -------------- emacs rock ------------------
+  (setq initial-frame-alist (quote ((fullscreen . maximized))))
+
+  ;; org mode
+
+  ;; org agenda
+  (setq org-agenda-files '("/Users/spacegoing/macCodeLab-MBP2015/MyPrivate/orgagenda"))
+
+  ;; alter auto-major-mode. overwrite default settings
+  ;; todo: Don't know why if these line before function
+  ;; my-dired-up-directory, that function will not be defined
+  ;; So I moved this code block to the very end of .spacemacs
+  ;; Other side effects are unknown
+  (require 'matlab-mode)
+  (setq auto-mode-alist
+        (append
+         '(("\\.m\\'" . matlab-mode))
+         auto-mode-alist))
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -379,6 +476,9 @@ layers configuration. You are free to put any user code."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(auto-save-default t)
+ '(auto-save-interval 0)
+ '(auto-save-timeout 1)
  '(bmkp-last-as-first-bookmark-file "~/.emacs.d/.cache/bookmarks")
  '(c-default-style
    (quote
@@ -393,16 +493,35 @@ layers configuration. You are free to put any user code."
  '(dired-hide-details-hide-information-lines t)
  '(dired-hide-details-hide-symlink-targets t)
  '(evil-vsplit-window-right t)
+ '(exec-path-from-shell-arguments (quote ("-l")))
  '(helm-split-window-default-side (quote below))
+ '(make-backup-files nil)
  '(markdown-command
    (concat "pandoc --mathjax=https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML -H " markdown-local-header))
  '(package-selected-packages
    (quote
-    (vmd-mode yapfify ws-butler which-key web-mode web-beautify use-package tagedit srefactor sql-indent spaceline powerline smeargle restart-emacs pytest pug-mode persp-mode paradox spinner pandoc-mode ox-pandoc orgit org org-projectile org-pomodoro alert org-plus-contrib org-download open-junk-file neotree move-text markdown-toc markdown-mode magit-gh-pulls macrostep live-py-mode link-hint js2-refactor multiple-cursors info+ indent-guide hydra hungry-delete htmlize hl-todo highlight-indentation hide-comnt help-fns+ helm-projectile helm-make projectile helm-flx helm-company helm-ag google-translate git-timemachine git-messenger git-link gist flyspell-correct-helm flyspell-correct flycheck-pos-tip flycheck eyebrowse expand-region exec-path-from-shell evil-surround evil-nerd-commenter evil-mc evil-matchit evil-magit emmet-mode dumb-jump company-statistics company-auctex column-enforce-mode coffee-mode chruby bookmark+ bind-key auctex aggressive-indent ace-window ace-link auto-complete anaconda-mode tern company anzu iedit smartparens bind-map highlight undo-tree gh pcache ht yasnippet request helm helm-core skewer-mode js2-mode magit magit-popup git-commit with-editor async inf-ruby dash pcre2el haml-mode spacemacs-theme yaml-mode window-numbering volatile-highlights vi-tilde-fringe uuidgen toc-org stickyfunc-enhance slim-mode simple-httpd scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe rbenv rake rainbow-delimiters quelpa pyvenv pyenv-mode py-isort pos-tip popwin popup pkg-info pip-requirements org-present org-bullets mwim mmm-mode minitest marshal magit-gitflow lorem-ipsum logito log4e livid-mode linum-relative let-alist less-css-mode json-mode js-doc ido-vertical-mode hy-mode highlight-parentheses highlight-numbers helm-themes helm-swoop helm-pydoc helm-mode-manager helm-gitignore helm-descbinds helm-css-scss helm-c-yasnippet golden-ratio gnuplot gntp github-search github-clone github-browse-file gitconfig-mode gitattributes-mode gh-md flx-ido fill-column-indicator fancy-battery evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-search-highlight-persist evil-numbers evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu elisp-slime-nav disaster diminish define-word cython-mode company-web company-tern company-c-headers company-anaconda cmake-mode clean-aindent-mode clang-format bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile adaptive-wrap ace-jump-helm-line ac-ispell)))
+    (matlab-mode intero hlint-refactor hindent helm-hoogle haskell-snippets flycheck-haskell company-ghci company-ghc ghc haskell-mode company-cabal cmm-mode clojure-snippets clj-refactor inflections edn paredit peg cider-eval-sexp-fu cider seq queue clojure-mode nginx-mode vagrant-tramp vagrant sphinx-doc phpunit phpcbf php-extras php-auto-yasnippets drupal-mode php-mode docker tablist dockerfile-mode docker-tramp csv-mode vimrc-mode dactyl-mode winum unfill fuzzy vmd-mode yapfify ws-butler which-key web-mode web-beautify use-package tagedit srefactor sql-indent spaceline powerline smeargle restart-emacs pytest pug-mode persp-mode paradox spinner pandoc-mode ox-pandoc orgit org org-projectile org-pomodoro alert org-plus-contrib org-download open-junk-file neotree move-text markdown-toc markdown-mode magit-gh-pulls macrostep live-py-mode link-hint js2-refactor multiple-cursors info+ indent-guide hydra hungry-delete htmlize hl-todo highlight-indentation hide-comnt help-fns+ helm-projectile helm-make projectile helm-flx helm-company helm-ag google-translate git-timemachine git-messenger git-link gist flyspell-correct-helm flyspell-correct flycheck-pos-tip flycheck eyebrowse expand-region exec-path-from-shell evil-surround evil-nerd-commenter evil-mc evil-matchit evil-magit emmet-mode dumb-jump company-statistics company-auctex column-enforce-mode coffee-mode chruby bookmark+ bind-key auctex aggressive-indent ace-window ace-link auto-complete anaconda-mode tern company anzu iedit smartparens bind-map highlight undo-tree gh pcache ht yasnippet request helm helm-core skewer-mode js2-mode magit magit-popup git-commit with-editor async inf-ruby dash pcre2el haml-mode spacemacs-theme yaml-mode window-numbering volatile-highlights vi-tilde-fringe uuidgen toc-org stickyfunc-enhance slim-mode simple-httpd scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe rbenv rake rainbow-delimiters quelpa pyvenv pyenv-mode py-isort pos-tip popwin popup pkg-info pip-requirements org-present org-bullets mwim mmm-mode minitest marshal magit-gitflow lorem-ipsum logito log4e livid-mode linum-relative let-alist less-css-mode json-mode js-doc ido-vertical-mode hy-mode highlight-parentheses highlight-numbers helm-themes helm-swoop helm-pydoc helm-mode-manager helm-gitignore helm-descbinds helm-css-scss helm-c-yasnippet golden-ratio gnuplot gntp github-search github-clone github-browse-file gitconfig-mode gitattributes-mode gh-md flx-ido fill-column-indicator fancy-battery evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-search-highlight-persist evil-numbers evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu elisp-slime-nav disaster diminish define-word cython-mode company-web company-tern company-c-headers company-anaconda cmake-mode clean-aindent-mode clang-format bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile adaptive-wrap ace-jump-helm-line ac-ispell)))
  '(paradox-automatically-star t)
  '(setq-default fill-column t)
  '(split-height-threshold nil)
- '(split-width-threshold 80))
+ '(split-width-threshold 80)
+ '(sql-connection-alist
+   (quote
+    (("dwolf_hm"
+      (sql-product
+       (quote mysql))
+      (sql-user "dwolf")
+      (sql-database "")
+      (sql-server "127.0.0.1"))
+     ("hmysql"
+      (sql-product
+       (quote mysql))
+      (sql-user "root")
+      (sql-database "")
+      (sql-server "127.0.0.1")))))
+ '(tramp-remote-path
+   (quote
+    (tramp-default-remote-path tramp-own-remote-path "/bin" "/usr/bin" "/sbin" "/usr/sbin" "/usr/local/bin" "/usr/local/sbin" "/local/bin" "/local/freeware/bin" "/local/gnu/bin" "/usr/freeware/bin" "/usr/pkg/bin" "/usr/contrib/bin" "/opt/bin" "/opt/sbin" "/opt/local/bin"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
