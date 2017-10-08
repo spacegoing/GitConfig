@@ -9,6 +9,8 @@
 ;;
 ;;; License: GPLv3
 
+;; https://github.com/sweord/.spacemacs.config/tree/master/.spacemacs.private
+
 (defconst sdired-packages '((dired :location local) dired+))
 
 (defun sdired/post-init-dired ()
