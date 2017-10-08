@@ -31,6 +31,7 @@ values."
      github
 
      sdefaults
+     sdired
 
      c-c++
      python
@@ -312,22 +313,6 @@ That is, remove a non kept file from the recent list."
 
   ;; --------------- My Functions --------------------
 
-  ;; Same as `dired-up-directory', except for wrapping with `file-truename'.
-  (defun my-dired-up-directory (&optional other-window)
-    ;; Run Dired on parent directory of current directory.
-    ;; Follows symlinks for current directory. Find the parent
-    ;; directory either in this buffer or another buffer. Creates a
-    ;; buffer if necessary. If OTHER-WINDOW (the optional prefix
-    ;; arg), display the parent directory in another window."
-    (interactive "P")
-    (let* ((dir  (file-truename (dired-current-directory)))
-           (up   (file-name-directory (directory-file-name dir))))
-      (or (dired-goto-file (directory-file-name dir))
-          ;; Only try dired-goto-subdir if buffer has more than one dir.
-          (and (cdr dired-subdir-alist)  (dired-goto-subdir up))
-          (progn (if other-window (dired-other-window up) (dired up))
-                 (dired-goto-file dir)))))
-
   ;; Open file's parent directory
   (defun my-file-up-directory ()
     (interactive)
@@ -436,7 +421,6 @@ layers configuration. You are free to put any user code."
   (define-key evil-insert-state-map (kbd "C-e") 'end-of-line)
 
   ;; go to parent dir ( dired symlink / in evil mode )
-  (define-key dired-mode-map (kbd "P") 'my-dired-up-directory) ;; for symlink
   (define-key evil-motion-state-map (kbd "^") 'my-file-up-directory) ;; for text edit buffer
 
   ;; tuna mirror
@@ -461,11 +445,11 @@ layers configuration. You are free to put any user code."
   ;; my-dired-up-directory, that function will not be defined
   ;; So I moved this code block to the very end of .spacemacs
   ;; Other side effects are unknown
-  (require 'matlab-mode)
-  (setq auto-mode-alist
-        (append
-         '(("\\.m\\'" . matlab-mode))
-         auto-mode-alist))
+  ;; (require 'matlab-mode)
+  ;; (setq auto-mode-alist
+  ;;       (append
+  ;;        '(("\\.m\\'" . matlab-mode))
+  ;;        auto-mode-alist))
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -500,7 +484,7 @@ layers configuration. You are free to put any user code."
    (concat "pandoc --mathjax=https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML -H " markdown-local-header))
  '(package-selected-packages
    (quote
-    (matlab-mode intero hlint-refactor hindent helm-hoogle haskell-snippets flycheck-haskell company-ghci company-ghc ghc haskell-mode company-cabal cmm-mode clojure-snippets clj-refactor inflections edn paredit peg cider-eval-sexp-fu cider seq queue clojure-mode nginx-mode vagrant-tramp vagrant sphinx-doc phpunit phpcbf php-extras php-auto-yasnippets drupal-mode php-mode docker tablist dockerfile-mode docker-tramp csv-mode vimrc-mode dactyl-mode winum unfill fuzzy vmd-mode yapfify ws-butler which-key web-mode web-beautify use-package tagedit srefactor sql-indent spaceline powerline smeargle restart-emacs pytest pug-mode persp-mode paradox spinner pandoc-mode ox-pandoc orgit org org-projectile org-pomodoro alert org-plus-contrib org-download open-junk-file neotree move-text markdown-toc markdown-mode magit-gh-pulls macrostep live-py-mode link-hint js2-refactor multiple-cursors info+ indent-guide hydra hungry-delete htmlize hl-todo highlight-indentation hide-comnt help-fns+ helm-projectile helm-make projectile helm-flx helm-company helm-ag google-translate git-timemachine git-messenger git-link gist flyspell-correct-helm flyspell-correct flycheck-pos-tip flycheck eyebrowse expand-region exec-path-from-shell evil-surround evil-nerd-commenter evil-mc evil-matchit evil-magit emmet-mode dumb-jump company-statistics company-auctex column-enforce-mode coffee-mode chruby bookmark+ bind-key auctex aggressive-indent ace-window ace-link auto-complete anaconda-mode tern company anzu iedit smartparens bind-map highlight undo-tree gh pcache ht yasnippet request helm helm-core skewer-mode js2-mode magit magit-popup git-commit with-editor async inf-ruby dash pcre2el haml-mode spacemacs-theme yaml-mode window-numbering volatile-highlights vi-tilde-fringe uuidgen toc-org stickyfunc-enhance slim-mode simple-httpd scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe rbenv rake rainbow-delimiters quelpa pyvenv pyenv-mode py-isort pos-tip popwin popup pkg-info pip-requirements org-present org-bullets mwim mmm-mode minitest marshal magit-gitflow lorem-ipsum logito log4e livid-mode linum-relative let-alist less-css-mode json-mode js-doc ido-vertical-mode hy-mode highlight-parentheses highlight-numbers helm-themes helm-swoop helm-pydoc helm-mode-manager helm-gitignore helm-descbinds helm-css-scss helm-c-yasnippet golden-ratio gnuplot gntp github-search github-clone github-browse-file gitconfig-mode gitattributes-mode gh-md flx-ido fill-column-indicator fancy-battery evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-search-highlight-persist evil-numbers evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu elisp-slime-nav disaster diminish define-word cython-mode company-web company-tern company-c-headers company-anaconda cmake-mode clean-aindent-mode clang-format bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile adaptive-wrap ace-jump-helm-line ac-ispell)))
+    (dired-single dired+ matlab-mode intero hlint-refactor hindent helm-hoogle haskell-snippets flycheck-haskell company-ghci company-ghc ghc haskell-mode company-cabal cmm-mode clojure-snippets clj-refactor inflections edn paredit peg cider-eval-sexp-fu cider seq queue clojure-mode nginx-mode vagrant-tramp vagrant sphinx-doc phpunit phpcbf php-extras php-auto-yasnippets drupal-mode php-mode docker tablist dockerfile-mode docker-tramp csv-mode vimrc-mode dactyl-mode winum unfill fuzzy vmd-mode yapfify ws-butler which-key web-mode web-beautify use-package tagedit srefactor sql-indent spaceline powerline smeargle restart-emacs pytest pug-mode persp-mode paradox spinner pandoc-mode ox-pandoc orgit org org-projectile org-pomodoro alert org-plus-contrib org-download open-junk-file neotree move-text markdown-toc markdown-mode magit-gh-pulls macrostep live-py-mode link-hint js2-refactor multiple-cursors info+ indent-guide hydra hungry-delete htmlize hl-todo highlight-indentation hide-comnt help-fns+ helm-projectile helm-make projectile helm-flx helm-company helm-ag google-translate git-timemachine git-messenger git-link gist flyspell-correct-helm flyspell-correct flycheck-pos-tip flycheck eyebrowse expand-region exec-path-from-shell evil-surround evil-nerd-commenter evil-mc evil-matchit evil-magit emmet-mode dumb-jump company-statistics company-auctex column-enforce-mode coffee-mode chruby bookmark+ bind-key auctex aggressive-indent ace-window ace-link auto-complete anaconda-mode tern company anzu iedit smartparens bind-map highlight undo-tree gh pcache ht yasnippet request helm helm-core skewer-mode js2-mode magit magit-popup git-commit with-editor async inf-ruby dash pcre2el haml-mode spacemacs-theme yaml-mode window-numbering volatile-highlights vi-tilde-fringe uuidgen toc-org stickyfunc-enhance slim-mode simple-httpd scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe rbenv rake rainbow-delimiters quelpa pyvenv pyenv-mode py-isort pos-tip popwin popup pkg-info pip-requirements org-present org-bullets mwim mmm-mode minitest marshal magit-gitflow lorem-ipsum logito log4e livid-mode linum-relative let-alist less-css-mode json-mode js-doc ido-vertical-mode hy-mode highlight-parentheses highlight-numbers helm-themes helm-swoop helm-pydoc helm-mode-manager helm-gitignore helm-descbinds helm-css-scss helm-c-yasnippet golden-ratio gnuplot gntp github-search github-clone github-browse-file gitconfig-mode gitattributes-mode gh-md flx-ido fill-column-indicator fancy-battery evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-search-highlight-persist evil-numbers evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu elisp-slime-nav disaster diminish define-word cython-mode company-web company-tern company-c-headers company-anaconda cmake-mode clean-aindent-mode clang-format bundler auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile adaptive-wrap ace-jump-helm-line ac-ispell)))
  '(paradox-automatically-star t)
  '(setq-default fill-column t)
  '(split-height-threshold nil)
