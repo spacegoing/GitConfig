@@ -32,6 +32,7 @@ values."
 
      sdefaults
      sdired
+     sorg
 
      c-c++
      python
@@ -318,25 +319,6 @@ in `dotspacemacs/user-config'."
   ;;   (let ((default-directory "/docker:root@odoodocker_web_1:/"))
   ;;     (shell)))
 
-  ;; Matlab mode
-  (autoload 'matlab-mode "matlab" "Matlab Editing Mode" t)
-  (add-to-list
-   'auto-mode-alist
-   '("\\.m$" . matlab-mode))
-  (setq matlab-indent-function t)
-  (setq matlab-shell-command "matlab_emacs_wrapper")
-  (setq matlab-shell-command-switches (list "-nodesktop -nosplash"))
-
-  (with-eval-after-load 'org
-    (setq org-startup-indented t))
-
-  ;; 主动加载 Dired Mode
-  ;; (require 'dired)
-  ;; (defined-key dired-mode-map (kbd "RET") 'dired-find-alternate-file)
-  ;; 延迟加载
-  ;; (put 'dired-find-alternate-file 'disabled nil)
-  ;; (with-eval-after-load 'dired
-  ;;   (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file))
   )
 
 (defun dotspacemacs/user-config ()
@@ -398,21 +380,6 @@ layers configuration. You are free to put any user code."
   ;; -------------- emacs rock ------------------
   (setq initial-frame-alist (quote ((fullscreen . maximized))))
 
-  ;; org mode
-
-  ;; org agenda
-  (setq org-agenda-files '("/Users/spacegoing/macCodeLab-MBP2015/MyPrivate/orgagenda"))
-
-  ;; alter auto-major-mode. overwrite default settings
-  ;; todo: Don't know why if these line before function
-  ;; my-dired-up-directory, that function will not be defined
-  ;; So I moved this code block to the very end of .spacemacs
-  ;; Other side effects are unknown
-  ;; (require 'matlab-mode)
-  ;; (setq auto-mode-alist
-  ;;       (append
-  ;;        '(("\\.m\\'" . matlab-mode))
-  ;;        auto-mode-alist))
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
