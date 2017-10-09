@@ -29,11 +29,13 @@
 
 ;;; Code:
 
-(defconst sdefaults-packages '((recentf :location local) bookmark+
-                               sphinx-doc
+(defconst sdefaults-packages '((recentf :location local)
+                               ;; bookmark+
+                               ;; sphinx-doc
+                               ;; matlab-mode
+                               auto-complete
                                helm
-                               evil
-                               matlab-mode))
+                               evil))
 
 (defun sdefaults/post-init-recentf ()
   (use-package recentf
@@ -58,16 +60,15 @@
                 nil)
               (add-hook 'dired-after-readin-hook 'recentf-track-opened-file))))
 
+(defun sdefaults/post-init-auto-complete()
+  (setq global-auto-complete-mode t)
+)
+
 ;; enable macOS to use `mdfind` instead of `locate`
 (defun sdefaults/post-init-helm ()
   (use-package helm
     :defer t
     :config (setq helm-locate-fuzzy-match nil)))
-
-(defun sdefaults/init-matlab-mode ()
-  :defer t
-  :init (setq auto-mode-alist (append '(("\\.m\\'" . matlab-mode))
-                                      auto-mode-alist)))
 
 (defun sdefaults/post-init-evil ()
   ;; go to parent dir ( dired symlink / in evil mode )
@@ -78,6 +79,32 @@
   (define-key evil-insert-state-map (kbd "C-n") 'next-line)
   (define-key evil-insert-state-map (kbd "C-a") 'beginning-of-line-text)
   (define-key evil-insert-state-map (kbd "C-e") 'end-of-line))
+
+;; ???????????????????????????????????? MATLAB MODE ?????????????
+;; Matlab mode
+;; (autoload 'matlab-mode "matlab" "Matlab Editing Mode" t)
+;; (defun sdefaults/init-matlab-mode ()
+;;   (use-package matlab-mode
+;;     :defer t
+;;     :init (progn
+;;             (setq auto-mode-alist (append '(("\\.m\\'" . matlab-mode))
+;;                                           auto-mode-alist)))
+;;     :config
+;;     (progn
+;;       (setq matlab-indent-function t)
+;;       (setq matlab-shell-command "/Applications/MATLAB_R2016b.app/bin/matlab")
+;;       (setq matlab-shell-command-switches (list "-nodesktop -nosplash")))))
+;; alter auto-major-mode. overwrite default settings
+;; todo: Don't know why if these line before function
+;; my-dired-up-directory, that function will not be defined
+;; So I moved this code block to the very end of .spacemacs
+;; Other side effects are unknown
+;; (require 'matlab-mode)
+;; (setq auto-mode-alist
+;;       (append
+;;        '(("\\.m\\'" . matlab-mode))
+;;        auto-mode-alist))
+
 
 
 ;;; packages.el ends here

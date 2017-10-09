@@ -268,12 +268,12 @@ It is called immediately after `dotspacemacs/init'.  You are free to put almost
 any user code here.  The exception is org related code, which should be placed
 in `dotspacemacs/user-config'."
   ;;
-
   (defconst spacemacs-buffer-name "*spacegoing*"
     "The name of the spacemacs buffer.")
 
   (defconst spacemacs-buffer-logo-title "[S P A C E G O I N G]"
     "The title displayed beneath the logo.")
+
 
   ;; --------------- My Hooks --------------------
 
@@ -284,34 +284,30 @@ in `dotspacemacs/user-config'."
   ;; (setq auto-save-file-name-transforms
   ;;       `((".*" ,temporary-file-directory t)))
 
-  ;; AutoFill Mode
-  (add-hook 'text-mode-hook 'turn-on-auto-fill)
-
-  ;; Dired hide details
-  (add-hook 'dired-mode-hook 'dired-hide-details-mode)
 
 
   ;; --------------- My Functions --------------------
 
+  ;; ???????????????????????????????
   ;; advise tab to use yas-expand for 'indent-for-tab-command
   ;; very useful, provide, alternatives to 1 keybinding
   ;; from http://joaotavora.github.io/yasnippet/faq.html
-  (defun yas-advise-indent-function (function-symbol)
-    (eval `(defadvice ,function-symbol (around yas-try-expand-first activate)
-             ,(format
-               "Try to expand a snippet before point, then call `%s' as usual"
-               function-symbol)
-             (let ((yas-fallback-behavior nil))
-               (unless (and (called-interactively-p 'interactive)
-                            (yas-expand))
-                 ad-do-it)))))
+  ;; (defun yas-advise-indent-function (function-symbol)
+  ;;   (eval `(defadvice ,function-symbol (around yas-try-expand-first activate)
+  ;;            ,(format
+  ;;              "Try to expand a snippet before point, then call `%s' as usual"
+  ;;              function-symbol)
+  ;;            (let ((yas-fallback-behavior nil))
+  ;;              (unless (and (called-interactively-p 'interactive)
+  ;;                           (yas-expand))
+  ;;                ad-do-it)))))
+  ;; (yas-advise-indent-function 'indent-for-tab-command)
 
-  (yas-advise-indent-function 'indent-for-tab-command)
-
+  ;; ?????????????????????????????
   ;; sphinx mode for gen python docstring
-  (add-hook 'python-mode-hook (lambda ()
-                                (require 'sphinx-doc)
-                                (sphinx-doc-mode t)))
+  ;; (add-hook 'python-mode-hook (lambda ()
+  ;;                               (require 'sphinx-doc)
+  ;;                               (sphinx-doc-mode t)))
 
   ;; Open shell under tramp mode
   ;; (defun my-odoo-docker-shell ()
@@ -328,19 +324,7 @@ layers configuration. You are free to put any user code."
 
   (setq ns-use-srgb-colorspace nil)
   (setq powerline-default-separator 'arrow)
-  ;; Add company mode
-  (require 'auto-complete)
-  (global-auto-complete-mode t)
 
-
-  (set-frame-font "nil 22")
-
-  ;; AutoFill Mode
-  (setq-default fill-column 65)
-
-  ;; Magit Configuration
-  (setq magit-visit-ref-behavior '(checkout-any focus-on-ref))
-  (add-to-list 'magit-visit-ref-behavior 'create-branch)
 
 
   ;; Clang Config
@@ -359,26 +343,12 @@ layers configuration. You are free to put any user code."
 
   (add-hook 'doc-view-mode-hook 'auto-revert-mode)
 
-  ;; Pandoc Config
-  ;; markdown mode variables
-  (setq markdown-local-header "/Users/spacegoing/macCodeLab-MBP2015/MarkdownConfig/Pandoc_Header/programming_notes_header")
-
-  ;; paradox config
-  (setq paradox-github-token "9a43680a53cf280d4342761b4d75e311380bbb5f")
-
-  ;; --------------- My Keybindings --------------------
-
   ;; tuna mirror
   (setq configuration-layer--elpa-archives
         '(("melpa-cn" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")
           ("org-cn"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/org/")
           ("gnu-cn"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")))
 
-  (require 'tramp)
-  (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
-
-  ;; -------------- emacs rock ------------------
-  (setq initial-frame-alist (quote ((fullscreen . maximized))))
 
   )
 
