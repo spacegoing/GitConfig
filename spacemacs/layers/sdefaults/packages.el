@@ -65,10 +65,15 @@
 )
 
 ;; enable macOS to use `mdfind` instead of `locate`
-(defun sdefaults/post-init-helm ()
-  (use-package helm
-    :defer t
-    :config (setq helm-locate-fuzzy-match nil)))
+(defun sdefaults/pre-init-helm ()
+  (spacemacs|use-package-add-hook helm
+    :post-config
+    ;; Disable fuzzy matchting to make mdfind work with helm-locate
+    ;; https://github.com/hjjekwk/.spacemacs.d/blob/master/layers/my-osx/packages.el
+    ;; https://github.com/emacs-helm/helm/issues/799
+    (setq helm-locate-fuzzy-match nil)
+    (setq helm-locate-command "mdfind -name %s %s")))
+
 
 (defun sdefaults/post-init-evil ()
   ;; go to parent dir ( dired symlink / in evil mode )
