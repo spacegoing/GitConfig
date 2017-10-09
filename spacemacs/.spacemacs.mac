@@ -292,13 +292,6 @@ in `dotspacemacs/user-config'."
 
   ;; --------------- My Functions --------------------
 
-  ;; Open file's parent directory
-  (defun my-file-up-directory ()
-    (interactive)
-    (if default-directory
-        (dired (expand-file-name default-directory))
-      (error "No `default-directory' to open")))
-
   ;; advise tab to use yas-expand for 'indent-for-tab-command
   ;; very useful, provide, alternatives to 1 keybinding
   ;; from http://joaotavora.github.io/yasnippet/faq.html
@@ -392,15 +385,6 @@ layers configuration. You are free to put any user code."
   (setq paradox-github-token "9a43680a53cf280d4342761b4d75e311380bbb5f")
 
   ;; --------------- My Keybindings --------------------
-
-  ;; Enable emacs keybindings in evil
-  (define-key evil-insert-state-map (kbd "C-p") 'previous-line)
-  (define-key evil-insert-state-map (kbd "C-n") 'next-line)
-  (define-key evil-insert-state-map (kbd "C-a") 'beginning-of-line-text)
-  (define-key evil-insert-state-map (kbd "C-e") 'end-of-line)
-
-  ;; go to parent dir ( dired symlink / in evil mode )
-  (define-key evil-motion-state-map (kbd "^") 'my-file-up-directory) ;; for text edit buffer
 
   ;; tuna mirror
   (setq configuration-layer--elpa-archives

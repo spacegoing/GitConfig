@@ -31,40 +31,53 @@
 
 (defconst sdefaults-packages '((recentf :location local) bookmark+
                                sphinx-doc
-                               matlab-mode
-                               powerline))
+                               helm
+                               evil
+                               matlab-mode))
 
 (defun sdefaults/post-init-recentf ()
   (use-package recentf
     :defer t
-    :config
-    (progn
-      (setq recentf-exclude '("COMMIT_MSG" "COMMIT_EDITMSG" "github.*txt$"
-                              "*tramp/" "/docker:" "/tmp/" "/sshx:" "/ssh:"
-                              "/sudo:" "/TAGS$" "/GTAGS$" "/GRAGS$" "/GPATH$"
-                              "\\.mkv$" "\\.mp[34]$" "\\.avi$" "\\.pdf$"
-                              "\\.sub$" "\\.srt$" "\\.ass$" ".*png$"))
-      (setq recentf-max-saved-items 2048)
+    :config (progn
+              (setq recentf-exclude '("COMMIT_MSG" "COMMIT_EDITMSG" "github.*txt$"
+                                      "*tramp/" "/docker:" "/tmp/" "/sshx:" "/ssh:"
+                                      "/sudo:" "/TAGS$" "/GTAGS$" "/GRAGS$" "/GPATH$"
+                                      "\\.mkv$" "\\.mp[34]$" "\\.avi$" "\\.pdf$"
+                                      "\\.sub$" "\\.srt$" "\\.ass$" ".*png$"))
+              (setq recentf-max-saved-items 2048)
+              ;; Recentf record buffers
+              ;; todo: create banners in helm mini-buffer
+              (defun recentf-track-opened-file ()
+                "Insert the name of the dired or file just opened or written into the recent list."
+                (let ((buff-name (or buffer-file-name
+                                     (and (derived-mode-p 'dired-mode)
+                                          default-directory))))
+                  (and buff-name
+                       (recentf-add-file buff-name)))
+                ;; Must return nil because it is run from `write-file-functions'.
+                nil)
+              (add-hook 'dired-after-readin-hook 'recentf-track-opened-file))))
 
-      ;; Recentf record buffers
-      ;; todo: create banners in helm mini-buffer
-      (defun recentf-track-opened-file ()
-        "Insert the name of the dired or file just opened or written into the recent list."
-        (let ((buff-name (or buffer-file-name
-                             (and (derived-mode-p 'dired-mode)
-                                  default-directory))))
-          (and buff-name
-               (recentf-add-file buff-name)))
-        ;; Must return nil because it is run from `write-file-functions'.
-        nil)
-      (add-hook 'dired-after-readin-hook 'recentf-track-opened-file))))
+;; enable macOS to use `mdfind` instead of `locate`
+(defun sdefaults/post-init-helm ()
+  (use-package helm
+    :defer t
+    :config (setq helm-locate-fuzzy-match nil)))
 
 (defun sdefaults/init-matlab-mode ()
   :defer t
   :init (setq auto-mode-alist (append '(("\\.m\\'" . matlab-mode))
                                       auto-mode-alist)))
 
-(defun sdefaults/pre-init-powerline ()
-  (progn))
+(defun sdefaults/post-init-evil ()
+  ;; go to parent dir ( dired symlink / in evil mode )
+  (define-key evil-motion-state-map (kbd "^") 'my-file-up-directory) ;; for text edit buffer
+
+  ;; Enable emacs keybindings in evil
+  (define-key evil-insert-state-map (kbd "C-p") 'previous-line)
+  (define-key evil-insert-state-map (kbd "C-n") 'next-line)
+  (define-key evil-insert-state-map (kbd "C-a") 'beginning-of-line-text)
+  (define-key evil-insert-state-map (kbd "C-e") 'end-of-line))
+
 
 ;;; packages.el ends here

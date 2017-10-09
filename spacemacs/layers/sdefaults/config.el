@@ -4,3 +4,4 @@
 ;; Dired hide details
 (add-hook 'dired-mode-hook 'dired-hide-details-mode)
 
+
