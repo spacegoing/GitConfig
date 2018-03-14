@@ -18,5 +18,8 @@
             (setq org-startup-indented t)
             (setq org-agenda-files '("/Users/spacegoing/macCodeLab-MBP2015/MyPrivate/orgagenda")))))
 
+(defun sdefaults/post-init-company ()
+  (spacemacs|add-company-hook org-mode)
+  (push 'company-yasnippet company-backends-org-mode))
 
 ;;; packages.el ends here
