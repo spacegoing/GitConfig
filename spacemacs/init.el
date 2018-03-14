@@ -1,1 +1,1 @@
-/Users/spacegoing/macCodeLab-MBP2015/GitConfig/spacemacs/.spacemacs.mac
+/Users/spacegoing/macCodeLab-MBP2015/GitConfig/spacemacs/.spacemacs.clean
