@@ -22,4 +22,11 @@
 (set-frame-font "nil 22")
 (setq initial-frame-alist (quote ((fullscreen . maximized))))
 
+;; line number
+(setq global-linum-mode t)
 
+(setq ns-use-srgb-colorspace nil)
+(setq powerline-default-separator 'arrow)
+
+;; vertical split window
+;; (setq split-height-threshold 300)
