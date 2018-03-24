@@ -23,10 +23,11 @@
 (setq initial-frame-alist (quote ((fullscreen . maximized))))
 
 ;; line number
-(setq global-linum-mode t)
+(setq-default dotspacemacs-line-numbers t)
 
 (setq ns-use-srgb-colorspace nil)
 (setq powerline-default-separator 'arrow)
 
 ;; vertical split window
-;; (setq split-height-threshold 300)
+(setq split-height-threshold 200)
+(setq split-width-threshold 80)
