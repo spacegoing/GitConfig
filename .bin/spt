@@ -1,0 +1,5 @@
+#!/bin/bash
+
+module load anaconda
+module load cuda/9.1.85 openmpi-gcc/3.0.0-cuda
+source activate pytorch

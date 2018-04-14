@@ -1,0 +1,22 @@
+# .bash_profile
+
+# Get the aliases and functions
+if [ -f ~/.bashrc ]; then
+	. ~/.bashrc
+fi
+
+# User specific environment and startup programs
+PATH=$PATH:$HOME/bin
+PATH=$PATH:$HOME/.bin
+
+export PATH
+
+# Otherwise Emacs uses terminal theme
+export TERM=xterm-256color
+REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-bundle.crt
+export REQUESTS_CA_BUNDLE
+
+module load emacs
+module load git
+module load ag
+

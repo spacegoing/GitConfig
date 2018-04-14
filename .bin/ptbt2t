@@ -1,0 +1,56 @@
+#!/bin/bash
+PROBLEM=languagemodel_ptb10k
+MODEL=transformer
+HPARAMS=transformer_small
+# MODEL=lstm_seq2seq_attention
+# HPARAMS=lstm_attention
+# MODEL=custom_model
+
+USER_DIR=$HOME/ptb/t2t_user/
+DATA_DIR=$HOME/ptb/t2t_data
+TRAIN_DIR=$HOME/ptb/t2t_train/$PROBLEM_$MODEL_$HPARAMS
+TMP_DIR=/tmp/t2t_datagen
+
+# rm -rf $TRAIN_DIR
+# mkdir -p $DATA_DIR $TMP_DIR $TRAIN_DIR
+
+# Generate data
+t2t-datagen \
+  --data_dir=$DATA_DIR \
+  --t2t_usr_dir=$USER_DIR \
+  --tmp_dir=$TMP_DIR \
+  --problem=$PROBLEM
+
+# Train
+# *  If you run out of memory, add --hparams='batch_size=1024'.
+t2t-trainer \
+  --data_dir=$DATA_DIR \
+  --output_dir=$TRAIN_DIR \
+  --t2t_usr_dir=$USER_DIR \
+  --problems=$PROBLEM \
+  --model=$MODEL \
+  --hparams_set=$HPARAMS
+
+# Decode
+DECODE_FILE=$DATA_DIR/decode_this.txt
+echo "Hello world" >> $DECODE_FILE
+echo "Goodbye world" >> $DECODE_FILE
+echo -e 'Hallo Welt\nAuf Wiedersehen Welt' > ref-translation.de
+
+BEAM_SIZE=4
+ALPHA=0.6
+
+t2t-decoder \
+  --data_dir=$DATA_DIR \
+  --output_dir=$TRAIN_DIR \
+  --t2t_usr_dir=$USER_DIR \
+  --problems=$PROBLEM \
+  --model=$MODEL \
+  --hparams_set=$HPARAMS \
+  --decode_hparams="beam_size=$BEAM_SIZE,alpha=$ALPHA" \
+  --decode_from_file=$DECODE_FILE \
+  --decode_to_file=ptb.out
+
+# See the translations
+cat ptb.out
+

@@ -1,0 +1,12 @@
+#!/bin/bash
+cd ~/caps_official/
+if [ $1 == "t" ]
+then
+  python experiment.py --data_dir=mnist_data/ --summary_dir=./tmp --save_step=1000 --debug=False
+elif [ $1 == "d" ]
+then
+  python experiment.py --data_dir=mnist_data/ --summary_dir=./tmp --save_step=1000
+elif [ $1 == "e" ]
+then
+  python experiment.py --data_dir=mnist_data/ --summary_dir=./tmp --train=False
+fi
