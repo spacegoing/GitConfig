@@ -1,7 +1,6 @@
 # -*- mode: snippet; require-final-newline: nil -*-
-# name: t2t ipdb trace
+# name: t2t ipdb debug
 # key: ttd
 # group: debug
 # --
-if t2tdbg:
-   import ipdb; ipdb.set_trace()
+import os, ipdb;ipdb.set_trace() if os.environ['t2tdbg'] else 0
