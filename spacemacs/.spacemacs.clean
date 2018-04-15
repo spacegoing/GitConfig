@@ -61,7 +61,7 @@ values."
      csv
      docker
 
-     pandoc
+     ;; pandoc
 
      (latex :variables
             latex-enable-auto-fill t
