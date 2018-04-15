@@ -1,0 +1,7 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: t2t ipdb trace
+# key: ttd
+# group: debug
+# --
+if t2tdbg:
+   import ipdb; ipdb.set_trace()
