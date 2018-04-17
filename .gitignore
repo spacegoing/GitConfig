@@ -1,4 +1,5 @@
 .emacs.desktop
 *.lock
-/.DS_Store
-/Git/.DS_Store
+.DS_Store
+id_rsa*
+known_hosts
