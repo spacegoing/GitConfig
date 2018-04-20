@@ -19,4 +19,5 @@ export REQUESTS_CA_BUNDLE
 module load emacs
 module load git
 module load ag
+module load tmux
 
