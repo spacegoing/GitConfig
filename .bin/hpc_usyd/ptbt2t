@@ -23,11 +23,12 @@ else
     GENDATA="False"
 fi
 
+PROJECT=/project/chli
 # t2t dirs
 # MODEL-HPARAMS format is mandatory
-TRAIN_DIR=$HOME/ptb/t2t_train/$PROBLEM/$MODEL-$HPARAMS
+TRAIN_DIR=$PROJECT/ptb/t2t_train/$PROBLEM/$MODEL-$HPARAMS
 TMP_DIR=/tmp/t2t_datagen
-DATA_DIR=$HOME/ptb/t2t_data
+DATA_DIR=$PROJECT/ptb/t2t_data
 # USER_DIR=$HOME/ptb/t2t_usr # for usr defined problems / models
 
 # t2t hparams

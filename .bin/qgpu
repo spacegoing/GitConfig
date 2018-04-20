@@ -1,2 +1,0 @@
-#!/bin/bash
-qsub -IP chli -q alloc-dt -l select=1:ncpus=16:ngpus=4:mpiprocs=16:mem=128GB,walltime=300:00:00
