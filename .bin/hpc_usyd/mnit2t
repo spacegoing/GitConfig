@@ -1,5 +1,4 @@
 #!/bin/bash
-# r as a placeholder for $1, to enable $2
 # d for using tfdbg
 # p for using all ipdb breakpoints in python file
 # g for generating data using t2t-trainer
@@ -24,24 +23,17 @@ else
     GENDATA="False"
 fi
 
-if [[ $2 -ne 0 ]]
-then
-    VISIBLEGPUS=$2
-else
-    VISIBLEGPUS=""
-fi
-
 # t2t hparams
-PROBLEM=languagemodel_ptb10k
-MODEL=transformer
-HPARAMS=transformer_small
+PROBLEM=image_mnist
+MODEL=shake_shake
+HPARAMS=shake_shake_quick
 
 # t2t dirs
 # MODEL-HPARAMS format is mandatory
 PROJECT=/project/chli
-TRAIN_DIR=$PROJECT/t2t_train/$PROBLEM/$MODEL-$HPARAMS
+TRAIN_DIR=$PROJECT/mni/t2t_train/$PROBLEM/$MODEL-$HPARAMS
 TMP_DIR=/tmp/t2t_datagen
-DATA_DIR=$PROJECT/t2t_data
+DATA_DIR=$PROJECT/mni/t2t_data
 # USER_DIR=$HOME/ptb/t2t_usr # for usr defined problems / models
 
 # helpers for using t2t-datagen. with t2t-trainer no need
@@ -66,8 +58,9 @@ t2t-trainer \
   --problems=$PROBLEM \
   --model=$MODEL \
   --hparams_set=$HPARAMS \
+  --train_steps=1000 \
+  --eval_steps=100 \
   --generate_data=$GENDATA \
-  --visible_gpus=$VISIBLEGPUS \
   ${DEBUG}
 
 # # Decode
