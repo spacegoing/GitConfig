@@ -36,3 +36,7 @@
 (add-hook 'prog-mode-hook (lambda ()
                             (flyspell-mode -1)
                             (flycheck-mode -1)))
+
+;; evil sequence
+(setq-default evil-escape-key-sequence "jk")
+(setq-default evil-escape-delay 0.2)
