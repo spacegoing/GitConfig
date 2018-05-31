@@ -63,7 +63,7 @@ t2t-trainer \
   --tmp_dir=$TMP_DIR \
   --output_dir=$TRAIN_DIR \
   --t2t_usr_dir=$USER_DIR \
-  --problems=$PROBLEM \
+  --problem=$PROBLEM \
   --model=$MODEL \
   --hparams_set=$HPARAMS \
   --generate_data=$GENDATA \
