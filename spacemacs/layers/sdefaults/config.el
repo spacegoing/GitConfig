@@ -33,9 +33,9 @@
 (setq split-width-threshold 80)
 
 ;; Disable spell-checking & sytax-checking for prog mode
-(add-hook 'prog-mode-hook (lambda ()
-                            (flyspell-mode -1)
-                            (flycheck-mode -1)))
+;; (add-hook 'prog-mode-hook (lambda ()
+;;                             (flyspell-mode -1)
+;;                             (flycheck-mode -1)))
 
 ;; evil sequence
 (setq-default evil-escape-key-sequence "jk")
