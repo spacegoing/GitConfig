@@ -34,6 +34,7 @@
                                ;; sphinx-doc
                                ;; matlab-mode
                                auto-complete
+                               spaceline
                                helm
                                evil))
 
@@ -84,6 +85,12 @@
   (define-key evil-insert-state-map (kbd "C-n") 'next-line)
   (define-key evil-insert-state-map (kbd "C-a") 'beginning-of-line-text)
   (define-key evil-insert-state-map (kbd "C-e") 'end-of-line))
+
+
+(defun sdefaults/post-init-spaceline ()
+  (spaceline-toggle-minor-modes-off)
+  (spaceline-toggle-major-mode-off))
+
 
 ;; ???????????????????????????????????? MATLAB MODE ?????????????
 ;; Matlab mode
