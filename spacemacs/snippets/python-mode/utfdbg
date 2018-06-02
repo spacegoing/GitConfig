@@ -1,0 +1,6 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: t2t updb debug
+# key: uttd
+# group: debug
+# --
+import os, pudb;pu.db if os.environ['t2tdbg'] else 0

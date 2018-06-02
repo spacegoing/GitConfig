@@ -3,4 +3,4 @@
 # key: ttd
 # group: debug
 # --
-import os, ipdb;ipdb.set_trace() if os.environ['t2tdbg'] else 0
+import os, ipdb;ipdb.set_trace(context=7) if os.environ['t2tdbg'] else 0
