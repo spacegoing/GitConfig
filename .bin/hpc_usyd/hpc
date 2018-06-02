@@ -1,2 +1,11 @@
 #!/bin/bash
-ssh chli4934@hpc.sydney.edu.au
+
+if [[ $1 -ne 0 ]]
+then
+    server="ssh hpc$1"
+    ssh chli4934@hpc.sydney.edu.au -t $server
+else
+    ssh chli4934@hpc.sydney.edu.au
+fi
+
+
