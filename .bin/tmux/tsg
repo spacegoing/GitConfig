@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Get current window size
+X="$(tput cols)"
+Y="$(tput lines)"
+Y="$(( $Y-1 ))"
+
+# For HPC usage
+# create sessions: e d p dev mac
+tmux new -s d -x $X -y $Y -d
+tmux send -t d 'source stf' C-m
+
+tmux new -s p -x $X -y $Y -d
+tmux send -t p 'source stf' C-m
+
+tmux new -s e -x $X -y $Y -d
+# tmux send -t e "tmux display -p -t e:0 '#{pane_width}x#{pane_height}'" C-m
+tmux send -t e 'source stf' C-m
+tmux send -t e 'emacs' C-m
+
+tmux new -s dev -x $X -y $Y -d
+tmux send -t dev 'source stf' C-m
+tmux send -t dev 'emacs' C-m
+
+tmux new -s mac -x $X -y $Y -d
+tmux send -t mac 'source stf' C-m
+tmux send -t mac 'emacs' C-m
