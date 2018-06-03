@@ -32,10 +32,10 @@
 (setq split-height-threshold 200)
 (setq split-width-threshold 80)
 
-;; Disable spell-checking & sytax-checking for prog mode
-;; (add-hook 'prog-mode-hook (lambda ()
-;;                             (flyspell-mode -1)
-;;                             (flycheck-mode -1)))
+;; Disable spell-checking for prog mode
+(add-hook 'prog-mode-hook (lambda ()
+                            ;; (flycheck-mode -1)
+                            (flyspell-mode -1)))
 
 ;; evil sequence
 (setq-default evil-escape-key-sequence "jk")
