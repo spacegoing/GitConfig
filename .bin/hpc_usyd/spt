@@ -1,6 +1,12 @@
 #!/bin/bash
 
-module load anaconda
+# using self installed anaconda rather than module load
+export PATH="/project/chli/anaconda3/bin:$PATH"
+
 module load cuda/9.1.85 openmpi-gcc/3.0.0-cuda
-module load glibc/2.14
+# conda create -p /project/chli/anaconda/envs/pytorch python=3.6
+module load binutils/2.30
+export CMAKE_PREFIX_PATH="/project/chli/anaconda3/envs/pytorch"
+export NCCL_LIB_DIR=/usr/local/cuda/9.1.85/lib64
+export NCCL_INCLUDE_DIR=/usr/local/cuda/9.1.85/include
 source activate pytorch
