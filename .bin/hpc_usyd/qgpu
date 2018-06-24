@@ -1,4 +1,6 @@
 #!/bin/bash
+# qsub -IP chli -q alloc-dt -l select=1:ncpus=8:mem=45GB,walltime=480:00:00
 # qsub -IP chli -q alloc-dt -l select=1:ncpus=8:ngpus=1:mpiprocs=8:mem=45GB,walltime=480:00:00
 # qsub -IP chli -q alloc-dt -l select=1:ncpus=16:ngpus=2:mpiprocs=16:mem=90GB,walltime=480:00:00
-qsub -IP chli -q alloc-dt -l select=1:ncpus=32:ngpus=4:mpiprocs=32:mem=180GB,walltime=480:00:00
+# qsub -IP chli -q alloc-dt -l select=1:ncpus=24:ngpus=3:mpiprocs=24:mem=135GB,walltime=480:00:00
+qsub -IP chli -q alloc-dt -l select=1:ncpus=36:ngpus=4:mpiprocs=32:mem=180GB,walltime=480:00:00
