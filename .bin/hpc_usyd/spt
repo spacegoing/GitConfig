@@ -10,3 +10,8 @@ export CMAKE_PREFIX_PATH="/project/chli/anaconda3/envs/pytorch"
 export NCCL_LIB_DIR=/usr/local/cuda/9.1.85/lib64
 export NCCL_INCLUDE_DIR=/usr/local/cuda/9.1.85/include
 source activate pytorch
+
+# pt41 failed
+# module load glibc/2.14
+# export CMAKE_PREFIX_PATH="/project/chli/anaconda3/envs/pt41"
+# source activate pt41
