@@ -30,7 +30,7 @@
 
 ;; vertical split window
 (setq split-height-threshold 200)
-(setq split-width-threshold 80)
+(setq split-width-threshold 120)
 
 ;; Disable spell-checking for prog mode
 (add-hook 'prog-mode-hook (lambda ()
