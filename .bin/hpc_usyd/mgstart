@@ -1,0 +1,4 @@
+#!/bin/bash
+
+module load mongodb
+mongod --dbpath=/project/chli/data/db &
