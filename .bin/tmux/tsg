@@ -5,35 +5,35 @@ X="$(tput cols)"
 Y="$(tput lines)"
 Y="$(( $Y-1 ))"
 
-# create tensorflow sessions: etf dtf ptf
-tmux new -s dtf -x $X -y $Y -d
-tmux send -t dtf 'source stf' C-m
-
-tmux new -s ptf -x $X -y $Y -d
-tmux send -t ptf 'source stf' C-m
-
-tmux new -s etf -x $X -y $Y -d
-# print pane width height
-# tmux send -t e "tmux display -p -t e:0 '#{pane_width}x#{pane_height}'" C-m
-tmux send -t etf 'source stf' C-m
-tmux send -t etf 'emacs' C-m
-
-
 # create pytorch sessions
-tmux new -s dpt -x $X -y $Y -d
-tmux send -t dpt 'source spt' C-m
-
-tmux new -s ppt -x $X -y $Y -d
-tmux send -t ppt 'source spt' C-m
-
-tmux new -s ept -x $X -y $Y -d
-tmux send -t ept 'source spt' C-m
-tmux send -t ept 'emacs' C-m
-
+tmux new -s pt -n ept -x $X -y $Y -d
+tmux send -t pt:ept 'source spt' C-m
+tmux send -t pt:ept 'emacs' C-m
+tmux new-window -n dpt -d
+tmux send -t pt:dpt 'source spt' C-m
+tmux send -t pt:dpt 'emacs' C-m
+tmux new-window -n ppt -d
+tmux send -t pt:ppt 'source spt' C-m
+tmux send -t pt:ppt 'emacs' C-m
 
 # create misc sessions: dev, doc
 tmux new -s dev -x $X -y $Y -d
+tmux send -t stat 'source spt' C-m
 tmux send -t dev 'emacs' C-m
 
-tmux new -s doc -x $X -y $Y -d
-tmux send -t doc 'emacs' C-m
+tmux new -s stat -x $X -y $Y -d
+tmux send -t stat 'source spt' C-m
+
+# # create tensorflow sessions: etf dtf ptf
+# tmux new -s dtf -x $X -y $Y -d
+# tmux send -t dtf 'source stf' C-m
+
+# tmux new -s ptf -x $X -y $Y -d
+# tmux send -t ptf 'source stf' C-m
+
+# tmux new -s etf -x $X -y $Y -d
+# # print pane width height
+# # tmux send -t e "tmux display -p -t e:0 '#{pane_width}x#{pane_height}'" C-m
+# tmux send -t etf 'source stf' C-m
+# tmux send -t etf 'emacs' C-m
+
