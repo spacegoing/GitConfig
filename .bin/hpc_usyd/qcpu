@@ -1,1 +1,3 @@
-qsub -IP chli -q alloc-dt -l select=1:ncpus=8:mem=45GB,walltime=24:00:00
+# qsub -IP chli -q alloc-dt -l select=1:ncpus=8:mem=45GB,walltime=24:00:00
+# qsub -IP chli -q alloc-dt -l select=1:ncpus=2:mem=10GB,walltime=24:00:00
+qsub -IP chli -q alloc-dt -l select=1:ncpus=8:mem=10GB,walltime=24:00:00
