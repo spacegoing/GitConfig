@@ -1,0 +1,3 @@
+#!/bin/bash
+# qstat -G alloc-dt
+python /home/chli4934/UsydCodeLab/GitConfig/.bin/hpc_usyd/hpc_script/hpc_check_py36_withQuotaWarning_pbs.py
