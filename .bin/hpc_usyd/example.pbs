@@ -1,0 +1,9 @@
+#!/bin/bash
+#PBS -q alloc-dt
+#PBS -P chli
+#PBS -l select=1:ncpus=8:ngpus=1:mpiprocs=8:mem=45GB,walltime=480:00:00
+# # PBS -l select=1:ncpus=36:ngpus=4:mpiprocs=32:mem=180GB,walltime=960:00:00
+
+source spt
+cd ~/oc
+python run_ppoc_debug.py
