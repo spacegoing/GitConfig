@@ -1,0 +1,60 @@
+* New Machine
+** Manually
+*** SSH
+1. ~ssh-keygen -t rsa -b 4096 -C spacegoing@gmail.com~
+2. ~eval "$(ssh-agent -s)"~
+3. AddKeysToAgent
+    #+BEGIN_SRC ssh
+    Host *
+    AddKeysToAgent yes
+    UseKeychain yes # (macos)
+    IdentityFile ~/.ssh/id_rsa
+    #+END_SRC
+4. ~ssh-add -K ~/.ssh/id_rsa~ (macos); ~ssh-add ~/.ssh/id_rsa~ (linux)
+5. add local to server ~ssh-copy-id <server>~
+*** Git
+1. Add Name Email
+  #+BEGIN_SRC bash
+  git config --global user.name spacegoing
+  git config --global user.email "spacegoing@gmail.com"
+  #+END_SRC
+2. Add public key to github
+*** Git clone GitConfig
+*** Install emacs
+sudo add-apt-repository ppa:kelleyk/emacs
+sudo apt-get update
+sudo apt install emacs26
+*** Spacemacs
+1. install emacs
+2. clone spacemacs repo
+3. ln -s .spacemacs.clean to init.el
+4. ln -s spacemacs to ~/.spacemacs.d
+5. install ag
+6. emacs in terminal
+**** python mode completion navigation ... stop working
+1. ~*anaconda mode*~ buffer has log info
+2. ~conda update json-rpc~
+3. ~conda update jedi~
+4. check Ipython version, might be version issue. check using
+   python works.
+*** .bin
+1. check if ~/bin in path
+2. ln -s .bin/files to ~/bin
+*** docker   
+add user to sudo group
+*** tmux
+1. install tmux
+2. ln -s tmux.conf to ~/
+3. fix tmux emacs theme: ~export TERM=xterm-256color~ to .profile
+*** python
+1. - wget https://www.anaconda.com/download/****
+   - bash **.sh
+2. ln -s GitConfig/python/.config to ~/
+3. pylint (pip install pylint and export
+   PATH=/home/chli4934/.local/bin:$PATH )
+4. yapf (pip)
+** New Machine
+- map caps to control: change the file ~sudo vi
+  /etc/default/keyboard~ and change ~XKBOPTIONS="ctrl:nocaps"~.
+  Run Jorge's command after that but as ~setxkbmap -option
+  ctrl:nocaps~
