@@ -13,6 +13,12 @@
 4. ~ssh-add -K ~/.ssh/id_rsa~ (macos); ~ssh-add ~/.ssh/id_rsa~ (linux)
 5. add local to server ~ssh-copy-id <server>~
 *** Git
+0. Install
+  #+BEGIN_SRC bash
+  sudo apt-add-repository ppa:git-core/ppa
+  sudo apt-get update
+  sudo apt-get install git
+  #+END_SRC
 1. Add Name Email
   #+BEGIN_SRC bash
   git config --global user.name spacegoing
