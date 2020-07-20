@@ -27,9 +27,11 @@
 2. Add public key to github
 *** Git clone GitConfig
 *** Install emacs
-sudo add-apt-repository ppa:kelleyk/emacs
-sudo apt-get update
-sudo apt install emacs26
+  #+BEGIN_SRC bash
+  sudo add-apt-repository ppa:kelleyk/emacs
+  sudo apt-get update
+  sudo apt install emacs26
+  #+END_SRC
 *** Spacemacs
 1. install emacs
 2. clone spacemacs repo
@@ -49,7 +51,8 @@ sudo apt install emacs26
 1. check if ~/bin in path
 2. ln -s .bin/files to ~/bin
 *** docker   
-add user to sudo group
+add user to sudo group: https://docs.docker.com/engine/install/linux-postinstall/
+sometimes have to restart rather than log out
 *** tmux
 1. install tmux
 2. ln -s tmux.conf to ~/
