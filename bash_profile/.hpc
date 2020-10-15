@@ -21,3 +21,24 @@ module load git
 module load ag
 module load tmux
 
+# set PATH so it includes user's private bin if it exists
+if [ -d "$HOME/bin" ] ; then
+    PATH="$HOME/bin:$PATH"
+fi
+export TERM=xterm-256color
+
+export PATH="/usr/local/cuda-10.2/bin:$PATH"
+export LD_LIBRARY_PATH="/usr/local/cuda-10.2/bin:$LD_LIBRARY_PATH"
+
+# setup Mujoco
+# https://github.com/deepmind/dm_control/issues/97
+export LD_LIBRARY_PATH="/home/chli4934/.mujoco/bin:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
+export MJLIB_PATH=$HOME/.mujoco/mujoco200/bin/libmujoco200.so
+export MJKEY_PATH=$HOME/.mujoco/mujoco200/mjkey.txt
+export MUJOCO_PY_MJPRO_PATH=$HOME/.mujoco/mujoco200/
+export MUJOCO_PY_MJKEY_PATH=$HOME/.mujoco/mujoco200/mjkey.txt
+export MUJOCO_PY_FORCE_CPU=1
+export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libGLEW.so:/usr/lib/x86_64-linux-gnu/libEGL.so.1:/usr/lib/x86_64-linux-gnu/libGL.so.1
+
+
