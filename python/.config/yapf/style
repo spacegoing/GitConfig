@@ -1,4 +1,4 @@
 [style]
-based_on_style: chromium
+based_on_style: yapf
 split_arguments_when_comma_terminated: true
 split_before_logical_operator = true
