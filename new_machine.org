@@ -26,7 +26,19 @@
   #+END_SRC
 2. Add public key to github
 *** Git clone GitConfig
+*** python
+1. - wget https://www.anaconda.com/download/****
+   - bash **.sh
+2. ln -s GitConfig/python/.config to ~/
+3. pylint (pip install pylint and export
+   PATH=/home/chli4934/.local/bin:$PATH )
+4. yapf (pip)
 *** Install emacs
+
+  #+BEGIN_SRC bash
+  conda install -c conda-forge emacs
+  #+END_SRC
+
   #+BEGIN_SRC bash
   sudo add-apt-repository ppa:kelleyk/emacs
   sudo apt-get update
@@ -57,13 +69,6 @@ sometimes have to restart rather than log out
 1. install tmux
 2. ln -s tmux.conf to ~/
 3. fix tmux emacs theme: ~export TERM=xterm-256color~ to .profile
-*** python
-1. - wget https://www.anaconda.com/download/****
-   - bash **.sh
-2. ln -s GitConfig/python/.config to ~/
-3. pylint (pip install pylint and export
-   PATH=/home/chli4934/.local/bin:$PATH )
-4. yapf (pip)
 ** New Machine
 - map caps to control: change the file ~sudo vi
   /etc/default/keyboard~ and change ~XKBOPTIONS="ctrl:nocaps"~.
