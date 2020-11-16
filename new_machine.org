@@ -50,6 +50,7 @@
 3. ln -s .spacemacs.clean to init.el
 4. ln -s spacemacs to ~/.spacemacs.d
 5. install ag
+  - ~conda install -c conda-forge the_silver_searcher~
 6. emacs in terminal
 7. install source code pro font using install_source.sh in
    spacemacs dir
