@@ -404,7 +404,7 @@ you should place your code here."
   ;;   (define-key c++-mode-map [tab] 'clang-format-buffer))
 
   (add-hook 'doc-view-mode-hook 'auto-revert-mode)
-
+  (add-to-list 'evil-evilified-state-modes 'dired-mode)
 
   )
 
