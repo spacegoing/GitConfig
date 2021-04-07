@@ -3,4 +3,4 @@
 # key: itr
 # group: debug
 # --
-import ipdb; ipdb.set_trace(context=7)
+if debug_flag == True: import ipdb; ipdb.set_trace(context=7)
