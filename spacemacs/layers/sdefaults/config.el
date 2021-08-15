@@ -44,5 +44,3 @@
 ;; python indent 2 spaces
 (setq-default python-indent-offset 2)
 
-;; dired humanreadable format
-(setq dired-listing-switches "-alFh")
