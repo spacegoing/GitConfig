@@ -404,9 +404,10 @@ you should place your code here."
   ;;   (define-key c++-mode-map [tab] 'clang-format-buffer))
 
   (add-hook 'doc-view-mode-hook 'auto-revert-mode)
-  (when (equal system-type 'darwin)
-    (setq insert-directory-program "/opt/homebrew/opt/coreutils/libexec/gnubin/ls"))
+  ;; (when (equal system-type 'darwin)
+  ;;   (setq insert-directory-program "/opt/homebrew/opt/coreutils/libexec/gnubin/ls"))
   ;; (add-to-list 'evil-evilified-state-modes 'dired-mode)
+  ;; Pre-requisite: conda install ls
   (setq dired-listing-switches "-laGh1v --group-directories-first")
 
   )

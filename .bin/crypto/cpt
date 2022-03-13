@@ -1,0 +1,5 @@
+#!/bin/bash
+# set -euo pipefail
+# IFS=$'\n\t'
+cd /Users/changli/sg21CodeLab/Quant/Crypto
+conda activate cpt

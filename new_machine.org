@@ -33,6 +33,7 @@
 3. pylint (pip install pylint and export
    PATH=/home/chli4934/.local/bin:$PATH )
 4. yapf (pip)
+5. install ~mamba~ instead of ~conda~: ~conda install mamba -n base -c conda-forge~
 *** Install emacs
 
   #+BEGIN_SRC bash
