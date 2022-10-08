@@ -1,0 +1,2 @@
+#!/bin/bash
+ssh -L "4411:localhost:4411" -L "6006:localhost:6006" -L "8265:localhost:8265" -i "aws_ray_pt_head.pem" $1
