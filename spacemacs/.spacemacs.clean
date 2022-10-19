@@ -49,7 +49,11 @@ values."
      sorg
 
      c-c++
-     python
+     (python :variables
+               python-backend 'lsp
+               python-lsp-server 'pyright
+               python-formatter 'yapf
+               )
 
      ;; web
      html
@@ -68,6 +72,7 @@ values."
             latex-enable-folding t)
 
      semantic
+     lsp
      ;; (shell :variables
      ;;        shell-default-height 30
      ;;        shell-default-position 'bottom)
