@@ -49,7 +49,11 @@ values."
      sorg
 
      c-c++
-     python
+     (python :variables
+             python-backend 'lsp
+             python-lsp-server 'pyright
+             python-formatter 'yapf
+             )
 
      ;; web
      html
@@ -68,6 +72,7 @@ values."
             latex-enable-folding t)
 
      semantic
+     lsp
      ;; (shell :variables
      ;;        shell-default-height 30
      ;;        shell-default-position 'bottom)
@@ -409,6 +414,9 @@ you should place your code here."
   ;; (add-to-list 'evil-evilified-state-modes 'dired-mode)
   ;; Pre-requisite: conda install ls
   (setq dired-listing-switches "-laGh1v --group-directories-first")
+  ;; Homebres configurations
+  (setenv "PATH" "/opt/homebrew/bin:$PATH" t)
+  (setq exec-path (append exec-path '("/opt/homebrew/bin")))
 
   )
 
