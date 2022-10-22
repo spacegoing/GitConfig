@@ -6,45 +6,16 @@ Y="$(tput lines)"
 Y="$(( $Y-1 ))"
 
 # create pytorch sessions
-tmux new -s pt -n ept -x $X -y $Y -d
-tmux send -t pt:ept 'source spt' C-m
-tmux send -t pt:ept 'emacs' C-m
-tmux new-window -n dpt -d
-tmux send -t pt:dpt 'source spt' C-m
-tmux new-window -n ppt -d
-tmux send -t pt:ppt 'source spt' C-m
+tmux new -s e -n e -x $X -y $Y -d
+tmux send -t e:e 'emacs' C-m
+tmux new-window -n run -d
 
 # create run sessions
-tmux new -s read -n ept -x $X -y $Y -d
-tmux send -t read:ept 'source spt' C-m
-tmux send -t read:ept 'emacs' C-m
-tmux new-window -n dpt -d
-tmux send -t read:dpt 'source spt' C-m
-tmux new-window -n ppt -d
-tmux send -t read:ppt 'source spt' C-m
+tmux new -s r -n r -x $X -y $Y -d
 
-# create misc sessions: dev, doc
-tmux new -s dev -n emacs -x $X -y $Y -d
-tmux send -t dev 'source spt' C-m
-tmux send -t dev 'emacs' C-m
-tmux new-window -n run -d
-tmux send -t dev:run 'source spt' C-m
-tmux new-window -n copy -d
-tmux send -t dev:copy 'source spt' C-m
+# create dev sessions
+tmux new -s d -n d -x $X -y $Y -d
 
-tmux new -s stat -x $X -y $Y -d
-tmux send -t stat 'source spt' C-m
-
-# # create tensorflow sessions: etf dtf ptf
-# tmux new -s dtf -x $X -y $Y -d
-# tmux send -t dtf 'source stf' C-m
-
-# tmux new -s ptf -x $X -y $Y -d
-# tmux send -t ptf 'source stf' C-m
-
-# tmux new -s etf -x $X -y $Y -d
-# # print pane width height
-# # tmux send -t e "tmux display -p -t e:0 '#{pane_width}x#{pane_height}'" C-m
-# tmux send -t etf 'source stf' C-m
-# tmux send -t etf 'emacs' C-m
+# create tensorboard/visualize sessions
+tmux new -s b -x $X -y $Y -d
 
