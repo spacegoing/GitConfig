@@ -21,3 +21,6 @@ tmux new -s d -n d -x $X -y $Y -d
 # create tensorboard/visualize sessions
 tmux new -s b -x $X -y $Y -d
 
+# create system stat sessions
+tmux new -s stat -n htop -x $X -y $Y -d
+tmux send -t stat:htop 'htop' C-m
