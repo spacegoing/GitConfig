@@ -8,3 +8,15 @@ ln -s ${PWD}/python/.config/flake8 ${HOME}/.config/flake8
 ln -s ${PWD}/python/.config/yapf ${HOME}/.config/yapf
 ln -s ${PWD}/python/.config/pylintrc ${HOME}/.config/pylintrc
 
+# .bin setup
+ln -s ${PWD}/.bin/tmux/tat ${HOME}/bin/tmux/tat
+ln -s ${PWD}/.bin/tmux/tkl ${HOME}/bin/tmux/tkl
+ln -s ${PWD}/.bin/tmux/tnew ${HOME}/bin/tmux/tnew
+
+ln -s ${PWD}/.bin/dev/pyservesg ${HOME}/bin/dev/pyservesg
+
+ln -s ${PWD}/.bin/docker/dbash ${HOME}/bin/docker/dbash
+ln -s ${PWD}/.bin/docker/drmrf ${HOME}/bin/docker/drmrf
+
+# manual setup
+ln -s ${PWD}/.bin/tmux/tsgs/tsg ${HOME}/bin/tmux/tsgs/tsg
