@@ -73,7 +73,14 @@
 *** .bin
 1. check if ~/bin in path
 2. ln -s .bin/files to ~/bin
-*** docker   
+
+**** pyservesg
+- pyservesg depends on =pip install uploadserver=
+- use together with aray (ssh forward port -L option)
+- http://localhost:4411/upload for uploading
+- http://localhost:4411 for visiting files
+
+*** docker
 add user to sudo group: https://docs.docker.com/engine/install/linux-postinstall/
 sometimes have to restart rather than log out
 *** tmux

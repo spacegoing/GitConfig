@@ -4,3 +4,4 @@ epc
 pyright
 python-lsp-server
 ipdb
+uploadserver

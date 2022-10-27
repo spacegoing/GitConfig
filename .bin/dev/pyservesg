@@ -1,2 +1,2 @@
 #!/bin/bash
-python -m http.server 4411 --bind 127.0.0.1
+python -m uploadserver 4411 --bind 127.0.0.1

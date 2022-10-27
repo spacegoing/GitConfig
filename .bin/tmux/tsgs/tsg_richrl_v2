@@ -18,7 +18,7 @@ tmux send -t r:background_processes 'cd ~/current_dev/rich_rl && docker compose 
 # create dev sessions
 tmux new -s d -n d -x $X -y $Y -d
 tmux new-window -n services -d
-tmux send -t d:services 'cd ~/current_dev/rich_rl && pyservesg' C-m
+tmux send -t d:services 'cd ~/current_dev/rich_rl && pyservesg &' C-m
 
 # create tensorboard/visualize sessions
 tmux new -s b -x $X -y $Y -d
