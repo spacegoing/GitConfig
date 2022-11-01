@@ -12,13 +12,13 @@ tmux new-window -n run -d
 
 # create run sessions
 tmux new -s r -n r -x $X -y $Y -d
-tmux new-window -n background_processes -d
-tmux send -t r:background_processes 'cd ~/current_dev/rich_rl && docker compose up -d' C-m
 
 # create dev sessions
 tmux new -s d -n d -x $X -y $Y -d
 tmux new-window -n services -d
 tmux send -t d:services 'cd ~/current_dev/rich_rl && pyservesg &' C-m
+tmux new-window -n background_processes -d
+tmux send -t d:background_processes 'cd ~/current_dev/rich_rl && docker compose up -d' C-m
 
 # create tensorboard/visualize sessions
 tmux new -s b -x $X -y $Y -d
