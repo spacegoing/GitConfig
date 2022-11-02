@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: spacegoing_comments
+# key: sg
+# --
+`comment-start`SG: $0`comment-end`

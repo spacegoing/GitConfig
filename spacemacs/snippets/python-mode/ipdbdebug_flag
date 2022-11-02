@@ -1,0 +1,6 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: ipdb trace flag
+# key: itrf
+# group: debug
+# --
+if debug_flag == True: import ipdb; ipdb.set_trace(context=7)
