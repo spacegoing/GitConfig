@@ -1,0 +1,3 @@
+#!/bin/bash
+ssh -L "4411:localhost:4411" -L "6006:localhost:6006" -L "8265:localhost:8265" -i "aws_ray_pt_head.pem" ubuntu$1
+# arayu @ec2-35-90-179-12.us-west-2.compute.amazonaws.com
