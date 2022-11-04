@@ -7,6 +7,7 @@ mkdir ${HOME}/.config
 ln -s ${PWD}/python/.config/flake8 ${HOME}/.config/flake8
 ln -s ${PWD}/python/.config/yapf ${HOME}/.config/yapf
 ln -s ${PWD}/python/.config/pylintrc ${HOME}/.config/pylintrc
+ln -s ${PWD}/python/.config/htop ${HOME}/.config/htop
 
 # .bin setup
 ln -s ${PWD}/.bin/tmux/tat ${HOME}/bin/tmux/tat
