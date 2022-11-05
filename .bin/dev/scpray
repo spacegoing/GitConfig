@@ -1,0 +1,2 @@
+#!/bin/bash
+scp -r -i ~/aws_ray_pt_head.pem ~/ray_results/ $1:~/ray_results/
