@@ -17,6 +17,7 @@ ln -s ${PWD}/.bin/tmux/tnew ${HOME}/bin/tmux/tnew
 
 ln -s ${PWD}/.bin/dev/pyservesg ${HOME}/bin/dev/pyservesg
 ln -s ${PWD}/.bin/dev/scpray ${HOME}/bin/dev/scpray
+ln -s ${PWD}/.bin/dev/sgpdb ${HOME}/bin/dev/sgpdb
 
 ln -s ${PWD}/.bin/docker/dbash ${HOME}/bin/docker/dbash
 ln -s ${PWD}/.bin/docker/drmrf ${HOME}/bin/docker/drmrf
