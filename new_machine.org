@@ -96,6 +96,12 @@ sometimes have to restart rather than log out
 1. install tmux
 2. ln -s tmux.conf to ~/
 3. fix tmux emacs theme: ~export TERM=xterm-256color~ to .profile
+*** Mosh
+1. on server sudo apt-get install mosh
+2. mac brew install mosh
+3. mac terminal ~export LC_CTYPE="en_US.UTF-8"~
+4. aws needs to add udp rules to security group
+
 ** New Machine
 - map caps to control: change the file ~sudo vi
   /etc/default/keyboard~ and change ~XKBOPTIONS="ctrl:nocaps"~.

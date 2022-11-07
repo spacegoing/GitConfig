@@ -1,0 +1,3 @@
+#!/bin/bash
+mosh --ssh="/usr/bin/ssh -L "4411:localhost:4411" -L "6006:localhost:6006" -L "8265:localhost:8265" -i "aws_ray_pt_head.pem"" ubuntu$1
+# 4411 for pyservesg; 6006 for tensorboard; 8265 for ray server
