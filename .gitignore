@@ -1,3 +1,4 @@
+./spacemacs/init.el
 .emacs.desktop
 *.lock
 .DS_Store

@@ -33,7 +33,16 @@
 3. pylint (pip install pylint and export
    PATH=/home/chli4934/.local/bin:$PATH )
 4. yapf (pip)
-5. install ~mamba~ instead of ~conda~: ~conda install mamba -n base -c conda-forge~
+5. install ~mamba~ instead of ~conda~: ~conda install mamba -n
+   base -c conda-forge~
+
+**** China Mirrors
+#+begin_src bash
+  conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/ && \
+  conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/ && \
+  conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/ && \
+  conda config --set show_channel_urls yes
+#+end_src
 *** Install emacs
 
   #+BEGIN_SRC bash
