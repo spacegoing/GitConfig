@@ -1,3 +1,0 @@
-#!/bin/bash
-mosh --ssh="/usr/bin/ssh -i "aws_ray_pt_head.pem"" $1
-# 4411 for pyservesg; 6006 for tensorboard; 8265 for ray server
