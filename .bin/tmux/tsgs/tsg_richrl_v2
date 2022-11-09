@@ -9,16 +9,18 @@ Y="$(( $Y-1 ))"
 tmux new -s e -n e -x $X -y $Y -d
 tmux send -t e:e 'emacs' C-m
 tmux new-window -n run -d
+tmux send -t e:run 'cd ~/current_dev' C-m
 
 # create run sessions
 tmux new -s r -n r -x $X -y $Y -d
+tmux send -t r:r 'cd ~/current_dev' C-m
 
 # create dev sessions
 tmux new -s d -n d -x $X -y $Y -d
 tmux new-window -n services -d
-tmux send -t d:services 'cd ~/current_dev/rich_rl && pyservesg &' C-m
+tmux send -t d:services 'cd ~/current_dev; pyservesg &' C-m
 tmux new-window -n background_processes -d
-tmux send -t d:background_processes 'cd ~/current_dev/rich_rl && docker compose up -d' C-m
+tmux send -t d:background_processes 'cd /home/ubuntu/richCodeLab/ray_test/rich_rl && docker compose up -d' C-m
 
 # create tensorboard/visualize sessions
 tmux new -s b -x $X -y $Y -d
