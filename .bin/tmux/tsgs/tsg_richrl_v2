@@ -13,7 +13,8 @@ tmux send -t e:run 'cd ~/current_dev' C-m
 
 # create run sessions
 tmux new -s r -n r -x $X -y $Y -d
-tmux send -t r:r 'cd ~/current_dev' C-m
+# cd to current dev folder and update all git repos to latest
+tmux send -t r:r 'cd ~/current_dev; gitpullall' C-m
 
 # create dev sessions
 tmux new -s d -n d -x $X -y $Y -d
