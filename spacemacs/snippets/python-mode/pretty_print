@@ -1,0 +1,7 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: ipython pretty print
+# key: p
+# group: debug
+# --
+from IPython.lib.pretty import pprint as p
+
