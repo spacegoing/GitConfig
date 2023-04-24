@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Get current window size
+X="$(tput cols)"
+Y="$(tput lines)"
+Y="$(( $Y-1 ))"
+
+# create pytorch sessions
+tmux new -s e -n e -x $X -y $Y -d
+tmux send -t e:e 'conda activate hummingbot' C-m
+tmux send -t e:e 'emacs' C-m
+tmux new-window -n run -d
+tmux send -t e:run 'conda activate hummingbot' C-m
+tmux send -t e:run 'cd /home/ubuntu/richCodeLab/hmbot/hummingbot' C-m
+
+# create run sessions
+tmux new -s r -n r -x $X -y $Y -d
+tmux send -t r:r 'conda activate hummingbot' C-m
+tmux send -t r:r 'cd /home/ubuntu/richCodeLab/hmbot/hummingbot' C-m
+
+# create dev sessions
+tmux new -s d -n d -x $X -y $Y -d
+tmux send -t d:d 'conda activate hummingbot' C-m
+tmux send -t d:d 'cd /home/ubuntu/richCodeLab/hmbot/hummingbot' C-m
+
+# create tensorboard/visualize sessions
+tmux new -s b -n b -x $X -y $Y -d
+tmux send -t b:b 'conda activate hummingbot' C-m
+tmux send -t b:b 'cd /home/ubuntu/richCodeLab/hmbot/hummingbot' C-m
+

@@ -1,0 +1,3 @@
+#!/bin/bash
+cd /home/ubuntu/richCodeLab/hmbot/hummingbot
+conda activate hummingbot
