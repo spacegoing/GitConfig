@@ -422,7 +422,7 @@ you should place your code here."
   (setq org-mobile-directory "~/Library/Mobile Documents/iCloud~com~mobileorg~mobileorg/Documents")
   (add-to-list 'image-types 'svg)
   (when (executable-find "ipython")
-    (setq python-shell-interpreter "ipython"))
+    (setq python-shell-interpreter "ipython" python-shell-interpreter-args "-i --simple-prompt"))
   (setq python-shell-completion-native-enable nil)
 
   )
