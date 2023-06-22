@@ -348,8 +348,6 @@ before packages are loaded. If you are unsure, you should try in setting them in
   ;; (setq auto-save-file-name-transforms
   ;;       `((".*" ,temporary-file-directory t)))
 
-
-
   ;; --------------- My Functions --------------------
 
   ;; ???????????????????????????????
@@ -384,7 +382,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
   ;;       '(("melpa-cn" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")
   ;;         ("org-cn"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/org/")
   ;;         ("gnu-cn"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")))
-(setq configuration-layer-elpa-archives
+  (setq configuration-layer-elpa-archives
     '(("gnu-elpa-cn" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
       ("nongnu-elpa-cn" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/nongnu/")
       ("gnu-elpa-devel-cn" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu-devel/")
@@ -422,7 +420,6 @@ you should place your code here."
   ;; (add-to-list 'evil-evilified-state-modes 'dired-mode)
   ;; Pre-requisite: conda install ls
   (setq dired-listing-switches "-laGh1v --group-directories-first")
-  (add-hook 'python-mode-hook 'code-cells-mode)
   ;; Homebres configurations
   (setenv "PATH" "/opt/homebrew/bin:$PATH" t)
   (setq exec-path (append exec-path '("/opt/homebrew/bin")))
@@ -431,6 +428,16 @@ you should place your code here."
   (when (executable-find "ipython")
     (setq python-shell-interpreter "ipython" python-shell-interpreter-args "-i --simple-prompt"))
   (setq python-shell-completion-native-enable nil)
+
+  ;; allow leading spaces (indented comment line) for code-cells mode
+  (with-eval-after-load 'code-cells
+    (setq code-cells-boundary-regexp
+          (rx (* (syntax whitespace))
+              (+ (syntax comment-start))
+              (or (seq (* (syntax whitespace)) "%" (group-n 1 (+ "%")))
+                  (group-n 1 (+ "*"))
+                  (seq " In[" (* (any space digit)) "]:")))))
+  (add-hook 'python-mode-hook 'code-cells-mode)
 
   )
 

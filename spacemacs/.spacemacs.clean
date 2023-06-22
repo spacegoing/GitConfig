@@ -414,6 +414,15 @@ you should place your code here."
     (setq insert-directory-program "/opt/homebrew/opt/coreutils/libexec/gnubin/ls"))
   ;; (add-to-list 'evil-evilified-state-modes 'dired-mode)
   (setq dired-listing-switches "-laGh1v --group-directories-first")
+
+  ;; allow leading spaces (indented comment line) for code-cells mode
+  (with-eval-after-load 'code-cells
+    (setq code-cells-boundary-regexp
+          (rx (* (syntax whitespace))
+              (+ (syntax comment-start))
+              (or (seq (* (syntax whitespace)) "%" (group-n 1 (+ "%")))
+                  (group-n 1 (+ "*"))
+                  (seq " In[" (* (any space digit)) "]:")))))
   (add-hook 'python-mode-hook 'code-cells-mode)
 
   )
