@@ -443,6 +443,21 @@ you should place your code here."
   (spacemacs/set-leader-keys-for-major-mode 'python-mode "hs" 'lsp-signature-activate)
   (spacemacs/set-leader-keys-for-major-mode 'python-mode "js" 'helm-semantic)
 
+  (setq hi-lock-face-defaults
+        '("hi-blue"
+          "hi-aquamarine"
+          "hi-pink"
+          "hi-salmon"
+          "hi-red-b"
+          "hi-green-b"
+          "hi-red-b"
+          "hi-black-hb"
+          "hi-green"
+          "hi-yellow"))
+  ;; Set new keybindings in global keymap
+  (spacemacs/set-leader-keys "hhh" 'highlight-symbol-at-point)
+  (spacemacs/set-leader-keys "hhu" 'unhighlight-regexp)
+
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
