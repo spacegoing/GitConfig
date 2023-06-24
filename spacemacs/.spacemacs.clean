@@ -415,6 +415,28 @@ you should place your code here."
   ;; (add-to-list 'evil-evilified-state-modes 'dired-mode)
   (setq dired-listing-switches "-laGh1v --group-directories-first")
 
+
+  ;; my keys
+  (setq hi-lock-face-defaults
+        '("hi-blue"
+          "hi-aquamarine"
+          "hi-pink"
+          "hi-salmon"
+          "hi-red-b"
+          "hi-green-b"
+          "hi-red-b"
+          "hi-black-hb"
+          "hi-green"
+          "hi-yellow"))
+  ;; Set new keybindings in global keymap
+  (spacemacs/set-leader-keys "hhh" 'highlight-symbol-at-point)
+  (spacemacs/set-leader-keys "hhu" 'unhighlight-regexp)
+
+  (spacemacs/set-leader-keys "jm" 'helm-semantic)
+
+  ;; python lsp config
+  (spacemacs/set-leader-keys-for-major-mode 'python-mode "hs" 'lsp-signature-activate)
+
   ;; allow leading spaces (indented comment line) for code-cells mode
   (with-eval-after-load 'code-cells
     (setq code-cells-boundary-regexp
@@ -424,9 +446,6 @@ you should place your code here."
                   (group-n 1 (+ "*"))
                   (seq " In[" (* (any space digit)) "]:")))))
   (add-hook 'python-mode-hook 'code-cells-mode)
-
-  ;; python lsp config
-  (spacemacs/set-leader-keys-for-major-mode 'python-mode "hs" 'lsp-signature-activate)
 
   )
 
