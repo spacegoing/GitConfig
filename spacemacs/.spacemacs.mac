@@ -450,6 +450,7 @@ you should place your code here."
 
   ;; python lsp show function signature
   (spacemacs/set-leader-keys-for-major-mode 'python-mode "hs" 'lsp-signature-activate)
+  (spacemacs/set-leader-keys-for-major-mode 'python-mode "p" 'my-toggle-headerline-modes)
 
   ;; python lsp config
   ;; code-cells mode: allow leading spaces (indented comment line)
@@ -462,6 +463,20 @@ you should place your code here."
                   (seq " In[" (* (any space digit)) "]:")))))
   (add-hook 'python-mode-hook 'code-cells-mode)
 
+  ;; toggle between stickyfunc and lsp-headerline-breadcrumb-mode
+  (defvar my-headerline-toggle-state nil)
+  (defun my-toggle-headerline-modes ()
+    "Toggle between lsp-headerline-breadcrumb-mode and semantic-stickyfunc-mode."
+    (interactive)
+    (if my-headerline-toggle-state
+        (progn
+          (lsp-headerline-breadcrumb-mode -1)
+          (semantic-stickyfunc-mode 1)
+          (setq my-headerline-toggle-state nil))
+      (progn
+        (lsp-headerline-breadcrumb-mode 1)
+        (semantic-stickyfunc-mode -1)
+        (setq my-headerline-toggle-state t))))
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
