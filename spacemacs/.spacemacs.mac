@@ -442,15 +442,17 @@ you should place your code here."
           "hi-green"
           "hi-yellow"))
   ;; Set new keybindings in global keymap
+  (spacemacs/declare-prefix "hh" "highlight")
   (spacemacs/set-leader-keys "hhh" 'highlight-symbol-at-point)
   (spacemacs/set-leader-keys "hhu" 'unhighlight-regexp)
 
   (spacemacs/set-leader-keys "jm" 'helm-semantic)
 
-  ;; python lsp config
+  ;; python lsp show function signature
   (spacemacs/set-leader-keys-for-major-mode 'python-mode "hs" 'lsp-signature-activate)
 
-  ;; allow leading spaces (indented comment line) for code-cells mode
+  ;; python lsp config
+  ;; code-cells mode: allow leading spaces (indented comment line)
   (with-eval-after-load 'code-cells
     (setq code-cells-boundary-regexp
           (rx (* (syntax whitespace))

@@ -35,7 +35,8 @@
 4. yapf (pip)
 5. install ~mamba~ instead of ~conda~: ~conda install mamba -n
    base -c conda-forge~
-
+6. config ipython pdb to auto start: ~ipython profile create~;
+   then set ~c.InteractiveShell.pdb = True~
 **** China Mirrors
 #+begin_src bash
   conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/ && \
@@ -72,6 +73,9 @@
     pip install python-lsp-server
     pip install importmagic epc
    #+end_src
+
+**** font bugs
+execute ~all-the-icons-install-fonts~
 
 **** python mode completion navigation ... stop working
 1. ~*anaconda mode*~ buffer has log info
