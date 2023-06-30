@@ -27,15 +27,17 @@
 2. Add public key to github
 *** Git clone GitConfig
 *** python
-1. - wget https://www.anaconda.com/download/****
-   - bash **.sh
-2. ln -s GitConfig/python/.config to ~/
-3. pylint (pip install pylint and export
-   PATH=/home/chli4934/.local/bin:$PATH )
-4. yapf (pip)
-5. install ~mamba~ instead of ~conda~: ~conda install mamba -n
-   base -c conda-forge~
-6. config ipython pdb to auto start: ~ipython profile create~;
+1. Use Mamba with Python LSP Instead
+   1. For Conda + Non-LSP Linter / Formater
+   2. - wget https://www.anaconda.com/download/****
+      - bash **.sh
+   3. ln -s GitConfig/python/.config to ~/
+   4. pylint (pip install pylint and export
+      PATH=/home/chli4934/.local/bin:$PATH )
+   5. yapf (pip)
+   6. install ~mamba~ instead of ~conda~: ~conda install mamba -n
+      base -c conda-forge~
+2. config ipython pdb to auto start: ~ipython profile create~;
    then set ~c.InteractiveShell.pdb = True~
 **** China Mirrors
 #+begin_src bash
@@ -53,7 +55,7 @@
   #+BEGIN_SRC bash
   sudo add-apt-repository ppa:kelleyk/emacs
   sudo apt-get update
-  sudo apt install emacs26
+  sudo apt install emacs28
   #+END_SRC
 *** Spacemacs
 1. install emacs
@@ -74,6 +76,8 @@
     pip install importmagic epc
    #+end_src
 
+
+*** (Space)emacs bugs
 **** font bugs
 execute ~all-the-icons-install-fonts~
 
@@ -83,9 +87,15 @@ execute ~all-the-icons-install-fonts~
 3. ~conda update jedi~
 4. check Ipython version, might be version issue. check using
    python works.
+
+**** orgmode bugs emacs 28.2
+- https://github.com/syl20bnr/spacemacs/issues/15896
+  - reinstall orgmode with: ~cd ~/.emacs.d; rm -rf elpa/28.2/develop/org-9*~
+
 *** .bin
-1. check if ~/bin in path
-2. ln -s .bin/files to ~/bin
+1. See ~setup_bin_spacemacs_tmux.sh~
+   1. check if ~/bin in path
+   2. ln -s .bin/files to ~/bin
 
 **** pyservesg
 - pyservesg depends on =pip install uploadserver=
@@ -94,12 +104,31 @@ execute ~all-the-icons-install-fonts~
 - http://localhost:4411 for visiting files
 
 *** docker
-add user to sudo group: https://docs.docker.com/engine/install/linux-postinstall/
-sometimes have to restart rather than log out
+- PostInstall: add user to sudo group:
+  https://docs.docker.com/engine/install/linux-postinstall/
+  sometimes have to restart rather than log out
+- docker compose: ~docker compose version~ making sure its installed
+
+*** Nvidia Container Tools
+- NV Driver:
+  https://docs.nvidia.com/datacenter/tesla/tesla-installation-notes/index.html
+  - Run File seems to be easier than package manager
+- Install Container Toolkit
+  - https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
+
+**** Unable to locate package nvidia-container-toolkit
+- https://github.com/NVIDIA/nvidia-docker/issues/1238
+- https://zhuanlan.zhihu.com/p/37519492
+
+**** apt-get update conflicts
+- Conflicting values set for option Signed-By error when running apt update
+- https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/troubleshooting.html
 *** tmux
 1. install tmux
 2. ln -s tmux.conf to ~/
 3. fix tmux emacs theme: ~export TERM=xterm-256color~ to .profile
+
+** SSH Clients
 *** EternalTerminal
 1. install et on server https://github.com/MisterTea/EternalTerminal
 2. install et on macos
@@ -138,8 +167,9 @@ sometimes have to restart rather than log out
          IdentityFile ~/aws_ray_pt_head.pem
      #+end_src
 5. usage: ~mosh tunhead~
-** New Machine
-- map caps to control: change the file ~sudo vi
+** MISC
+*** CapsLock -> CTRL
+- Linux: map caps to control: change the file ~sudo vi
   /etc/default/keyboard~ and change ~XKBOPTIONS="ctrl:nocaps"~.
   Run Jorge's command after that but as ~setxkbmap -option
   ctrl:nocaps~
