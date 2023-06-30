@@ -425,9 +425,6 @@ you should place your code here."
   (setq exec-path (append exec-path '("/opt/homebrew/bin")))
   (setq org-mobile-directory "~/Library/Mobile Documents/iCloud~com~mobileorg~mobileorg/Documents")
   (add-to-list 'image-types 'svg)
-  (when (executable-find "ipython")
-    (setq python-shell-interpreter "ipython" python-shell-interpreter-args "-i --simple-prompt"))
-  (setq python-shell-completion-native-enable nil)
 
   ;; my keys
   (setq hi-lock-face-defaults
@@ -443,6 +440,11 @@ you should place your code here."
   (spacemacs/set-leader-keys "hhu" 'unhighlight-regexp)
 
   (spacemacs/set-leader-keys "jm" 'helm-semantic)
+
+  ;; python config
+  (when (executable-find "ipython")
+    (setq python-shell-interpreter "ipython" python-shell-interpreter-args "-i --simple-prompt"))
+  (setq python-shell-completion-native-enable nil)
 
   ;; python lsp show function signature
   (spacemacs/set-leader-keys-for-major-mode 'python-mode "hs" 'lsp-signature-activate)

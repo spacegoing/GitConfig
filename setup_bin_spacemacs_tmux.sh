@@ -11,19 +11,19 @@ ln -s ${PWD}/python/.config/pylintrc ${HOME}/.config/pylintrc
 ln -s ${PWD}/python/.config/htop ${HOME}/.config/htop
 
 # .bin setup
-ln -s ${PWD}/.bin/tmux/tat ${HOME}/bin/tmux/tat
-ln -s ${PWD}/.bin/tmux/tkl ${HOME}/bin/tmux/tkl
-ln -s ${PWD}/.bin/tmux/tnew ${HOME}/bin/tmux/tnew
+ln -s ${PWD}/.bin/tmux/tat ${HOME}/bin/tat
+ln -s ${PWD}/.bin/tmux/tkl ${HOME}/bin/tkl
+ln -s ${PWD}/.bin/tmux/tnew ${HOME}/bin/tnew
 
-ln -s ${PWD}/.bin/dev/pyservesg ${HOME}/bin/dev/pyservesg
-ln -s ${PWD}/.bin/dev/scpray ${HOME}/bin/dev/scpray
-ln -s ${PWD}/.bin/dev/sgpdb ${HOME}/bin/dev/sgpdb
+ln -s ${PWD}/.bin/dev/pyservesg ${HOME}/bin/pyservesg
+ln -s ${PWD}/.bin/dev/scpray ${HOME}/bin/scpray
+ln -s ${PWD}/.bin/dev/sgpdb ${HOME}/bin/sgpdb
 
-ln -s ${PWD}/.bin/docker/dbash ${HOME}/bin/docker/dbash
-ln -s ${PWD}/.bin/docker/drmrf ${HOME}/bin/docker/drmrf
+ln -s ${PWD}/.bin/docker/dbash ${HOME}/bin/dbash
+ln -s ${PWD}/.bin/docker/drmrf ${HOME}/bin/drmrf
 
 # manual setup
-ln -s ${PWD}/.bin/tmux/tsgs/tsg ${HOME}/bin/tmux/tsgs/tsg
+ln -s ${PWD}/.bin/tmux/tsgs/tsg ${HOME}/bin/tsg
 
 # python setup
 conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/ && \
