@@ -68,11 +68,11 @@
 7. install source code pro font using install_source.sh in
    spacemacs dir
 **** language-server setup
-1. install nvm -> node/npm
+1. [no need for linux docker]install nvm -> node/npm
 2. install python server
    #+begin_src bash
-    pip install pyright
     pip install python-lsp-server
+    # pip install pyright
     pip install importmagic epc
    #+end_src
 
