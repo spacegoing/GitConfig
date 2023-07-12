@@ -123,12 +123,19 @@ DGX CUDA needs installing two plugins:
 
 - Setting up NVIDIA Repo
 
-   NVIDIA Driver Installation Quickstart Guide :: NVIDIA Tesla Documentation
+ - NVIDIA Driver Installation Quickstart Guide :: NVIDIA Tesla Documentation
    https://docs.nvidia.com/datacenter/tesla/tesla-installation-notes/index.html#ubuntu-lts
 
-   Updating the CUDA Linux GPG Repository Key | NVIDIA Technical Blog
+ - Updating the CUDA Linux GPG Repository Key | NVIDIA Technical Blog
    https://developer.nvidia.com/blog/updating-the-cuda-linux-gpg-repository-key/
 
+ - NVIDIA Repo:
+   http://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/
+
+  - In case of conflicts:
+    - ~grep "nvidia.github.io" /etc/apt/sources.list.d/*~
+    - ~grep -l "nvidia.github.io" /etc/apt/sources.list.d/* | grep
+      -vE "/nvidia-container-toolkit.list\$" | sudo xargs rm -rf~
 
 - Install DGX Data Center Maneger DCMG
 
