@@ -59,7 +59,7 @@ values."
      ;; web
      html
      yaml
-     ;; javascript
+     javascript
      ;; php
 
      sql
