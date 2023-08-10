@@ -52,7 +52,7 @@ values."
      c-c++
      (python :variables
                python-backend 'lsp
-               python-lsp-server 'pyright
+               python-lsp-server 'pylsp
                python-formatter 'yapf
                )
 
@@ -432,7 +432,8 @@ you should place your code here."
   (spacemacs/set-leader-keys "hhh" 'highlight-symbol-at-point)
   (spacemacs/set-leader-keys "hhu" 'unhighlight-regexp)
 
-  (spacemacs/set-leader-keys "jm" 'helm-semantic)
+  (spacemacs/set-leader-keys "jm" 'lsp-ui-imenu)
+  (spacemacs/set-leader-keys "jM" 'helm-semantic)
 
   ;; python config
   (when (executable-find "ipython")
