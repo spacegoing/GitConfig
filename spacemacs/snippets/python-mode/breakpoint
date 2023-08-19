@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: breakpoint
+# key: br
+# group: debug
+# --
+breakpoint()
