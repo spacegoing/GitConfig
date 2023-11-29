@@ -148,6 +148,28 @@ DGX CUDA needs installing two plugins:
    A100 GPUs visible on nvidia-smi not visible for Pytorch or on cuda-samples - Graphics / Linux / Linux - NVIDIA Developer Forums
    https://forums.developer.nvidia.com/t/a100-gpus-visible-on-nvidia-smi-not-visible-for-pytorch-or-on-cuda-samples/169805/3
 
+**** sources.list not correctly setup bug
+
+echo "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /" | sudo tee /etc/apt/sources.list.d/cuda.list
+
+sudo apt-get update returns no public key:
+jddesk@jdDesktop:~$ sudo apt-get update
+Hit:1 https://mirrors.tuna.tsinghua.edu.cn/ubuntu focal InRelease
+Hit:2 https://mirrors.tuna.tsinghua.edu.cn/ubuntu focal-updates InRelease                         
+Hit:3 https://mirrors.tuna.tsinghua.edu.cn/ubuntu focal-backports InRelease                       
+Hit:4 http://security.ubuntu.com/ubuntu focal-security InRelease                                  
+Get:5 https://developer.download.nvidia.cn/compute/cuda/repos/ubuntu2004/x86_64  InRelease [1,581 B]
+Err:5 https://developer.download.nvidia.cn/compute/cuda/repos/ubuntu2004/x86_64  InRelease
+  The following signatures couldn't be verified because the public key is not available: NO_PUBKEY A4B469963BF863CC
+Reading package lists... Done
+W: GPG error: https://developer.download.nvidia.cn/compute/cuda/repos/ubuntu2004/x86_64  InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY A4B469963BF863CC
+E: The repository 'https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64  InRelease' is not signed.
+N: Updating from such a repository can't be done securely, and is therefore disabled by default.
+N: See apt-secure(8) manpage for repository creation and user configuration details.
+
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A4B469963BF863CC
+sudo apt-get update
+sudo apt-get install cuda-drivers
 
 **** Unable to locate package nvidia-container-toolkit
 - https://github.com/NVIDIA/nvidia-docker/issues/1238
