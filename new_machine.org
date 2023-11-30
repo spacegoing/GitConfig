@@ -6,9 +6,9 @@
 3. AddKeysToAgent
     #+BEGIN_SRC ssh
     Host *
-    AddKeysToAgent yes
-    UseKeychain yes # (macos)
-    IdentityFile ~/.ssh/id_rsa
+      AddKeysToAgent yes
+      UseKeychain yes # (macos)
+      IdentityFile ~/.ssh/id_rsa
     #+END_SRC
 4. ~ssh-add -K ~/.ssh/id_rsa~ (macos); ~ssh-add ~/.ssh/id_rsa~ (linux)
 5. add local to server ~ssh-copy-id <server>~
@@ -224,7 +224,5 @@ sudo apt-get install cuda-drivers
 5. usage: ~mosh tunhead~
 ** MISC
 *** CapsLock -> CTRL
-- Linux: map caps to control: change the file ~sudo vi
-  /etc/default/keyboard~ and change ~XKBOPTIONS="ctrl:nocaps"~.
-  Run Jorge's command after that but as ~setxkbmap -option
-  ctrl:nocaps~
+- Linux: map caps to control: change the file ~sudo vi /etc/default/keyboard~ and change ~XKBOPTIONS="ctrl:nocaps"~.
+  Run Jorge's command after that but as ~setxkbmap -option ctrl:nocaps~
