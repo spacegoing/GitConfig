@@ -2,7 +2,7 @@
 ** Manually
 *** SSH
 1. ~ssh-keygen -t rsa -b 4096 -C spacegoing@gmail.com~
-2. ~eval "$(ssh-agent -s)"~
+2. run ~eval "$(ssh-agent -s)"~
 3. AddKeysToAgent
     #+BEGIN_SRC ssh
     Host *
