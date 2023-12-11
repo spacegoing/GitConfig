@@ -226,3 +226,16 @@ sudo apt-get install cuda-drivers
 *** CapsLock -> CTRL
 - Linux: map caps to control: change the file ~sudo vi /etc/default/keyboard~ and change ~XKBOPTIONS="ctrl:nocaps"~.
   Run Jorge's command after that but as ~setxkbmap -option ctrl:nocaps~
+
+** Docker Commands
+
+*** mgdb
+docker run -itd \
+  --name mg \
+  --user "$(id -u):$(id -g)" \
+  -v ~/mg_data:/data/db \
+  -p 27017:27017 \
+  mongo
+
+
+
