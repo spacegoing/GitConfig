@@ -108,6 +108,29 @@ execute ~all-the-icons-install-fonts~
   https://docs.docker.com/engine/install/linux-postinstall/
   sometimes have to restart rather than log out
 - docker compose: ~docker compose version~ making sure its installed
+- ~sudo vi /etc/docker/daemon.json~ and ~sudo systemctl start docker~:
+#+begin_src json
+  # /etc/docker/daemon.json
+    {
+      "runtimes": {
+          "nvidia": {
+              "args": [],
+              "path": "nvidia-container-runtime"
+          }
+      },
+        # docker bridge IP conflicts
+    "bip": "172.1.0.1/16",
+        # In China, choose one
+    "registry-mirrors": [
+        "https://dockerproxy.com",
+        "https://hub-mirror.c.163.com",
+        "https://mirror.baidubce.com",
+        "https://ccr.ccs.tencentyun.com"
+    ],
+        # Must, change docker image place
+    "data-root": "/home/jddesk/docker_volumes"
+  }
+#+end_src
 
 *** Nvidia Container Tools
 - NV Driver:
