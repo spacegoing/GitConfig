@@ -5,7 +5,7 @@ import os
 parent_directory = "/home/jddesk/jdDeskCodeLab/coding_jd"
 remote_name = "secondary"
 jd_branch_appendix = "_jd_codex"
-remote_repo_template = "git@coding.jd.com:lichang93/{repo_name}.git"
+remote_repo_template = "git@coding.jd.com:xxx/{repo_name}.git"
 failed_repos = []  # List to store repositories that fail to push
 
 
