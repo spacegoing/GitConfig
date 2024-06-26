@@ -1,0 +1,14 @@
+# Same as Black.
+line-length = 65
+indent-width = 2
+unsafe-fixes = false
+
+[lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
+# McCabe complexity (`C901`) by default.
+ignore = ["E111"]
+
+[format]
+docstring-code-format = true
+skip-magic-trailing-comma = true
