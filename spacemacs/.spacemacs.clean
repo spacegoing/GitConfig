@@ -50,11 +50,19 @@ values."
      sorg
 
      c-c++
+     ;; python
      (python :variables
-               python-backend 'lsp
-               python-lsp-server 'pylsp
-               python-formatter 'yapf
-               )
+             python-backend 'lsp
+             python-formatter 'lsp
+             python-lsp-server 'pylsp
+             lsp-pylsp-plugins-flake8-enabled nil
+             lsp-pylsp-plugins-pydocstyle-enabled nil
+             lsp-idle-delay 0.0
+             lsp-lens-debounce-interval 0.0
+             )
+
+     ;; rust
+     rust
 
      ;; web
      html
