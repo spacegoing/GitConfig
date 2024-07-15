@@ -1,0 +1,11 @@
+10.31.76.2 node1
+10.31.76.3 node2
+10.31.76.4 node3
+10.31.76.5 node4
+10.31.76.6 node5
+10.31.76.7 node6
+10.31.76.8 node7
+10.31.76.9 node8
+10.31.76.10 node9
+10.31.76.11 node10
+# for pdsh, nodeN has to be removed
