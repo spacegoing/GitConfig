@@ -144,6 +144,7 @@ execute ~all-the-icons-install-fonts~
 - NV Driver:
   https://docs.nvidia.com/datacenter/tesla/tesla-installation-notes/index.html
   - Run File seems to be easier than package manager
+  - Preinstall deps: https://docs.nvidia.com/cuda/cuda-installation-guide-linux/#install-third-party-libraries
 - Install Container Toolkit
   - https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
   - Test ~docker run --rm --runtime=nvidia --gpus all nvidia/cuda:11.6.2-base-ubuntu20.04 nvidia-smi~
