@@ -142,29 +142,32 @@ execute ~all-the-icons-install-fonts~
 
 *** Nvidia Container Tools
 - NV Driver:
-  - https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/index.html#ubuntu
-#+begin_src bash
-    distro=ubuntu2204
-    arch=x86_64
-    sudo apt install linux-headers-$(uname -r) -y
-    wget https://developer.download.nvidia.com/compute/cuda/repos/$distro/$arch/cuda-keyring_1.1-1_all.deb
-    sudo dpkg -i cuda-keyring_1.1-1_all.deb
-    sudo apt update
-    sudo apt install cuda-drivers -y
-    sudo reboot
-    
-    # POST INSTALL
-    # systemctl status nvidia-persistenced.service
-    # sudo systemctl status nvidia-persistenced.service
-
-#+end_src
   - Preinstall deps: https://docs.nvidia.com/cuda/cuda-installation-guide-linux/#install-third-party-libraries
+        #+begin_src bash
+        sudo apt-get install -y g++ build-essential
+        #+end_src
+  - https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/index.html#ubuntu
+        #+begin_src bash
+            distro=ubuntu2204
+            arch=x86_64
+            sudo apt install linux-headers-$(uname -r) -y
+            wget https://developer.download.nvidia.com/compute/cuda/repos/$distro/$arch/cuda-keyring_1.1-1_all.deb
+            sudo dpkg -i cuda-keyring_1.1-1_all.deb
+            sudo apt update
+            sudo apt install cuda-drivers -y
+            sudo reboot
+            
+            # POST INSTALL
+            # systemctl status nvidia-persistenced.service
+            # sudo systemctl status nvidia-persistenced.service
+        #+end_src
 - Install Container Toolkit
-  - https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
-#+begin_src bash
-sudo nvidia-ctk runtime configure --runtime=docker
-sudo systemctl restart docker
-#+end_src
+  - Install: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
+  - Config: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#configuring-docker
+        #+begin_src bash
+        sudo nvidia-ctk runtime configure --runtime=docker
+        sudo systemctl restart docker
+        #+end_src
   - Test ~docker run --rm --runtime=nvidia --gpus all nvidia/cuda:11.6.2-base-ubuntu20.04 nvidia-smi~
 
 **** (On DGX) CUDA get device count bug:
@@ -172,9 +175,6 @@ sudo systemctl restart docker
 DGX CUDA needs installing two plugins:
 
 - Setting up NVIDIA Repo
-
- - NVIDIA Driver Installation Quickstart Guide :: NVIDIA Tesla Documentation
-   https://docs.nvidia.com/datacenter/tesla/tesla-installation-notes/index.html#ubuntu-lts
 
  - Updating the CUDA Linux GPG Repository Key | NVIDIA Technical Blog
    https://developer.nvidia.com/blog/updating-the-cuda-linux-gpg-repository-key/
@@ -200,6 +200,7 @@ DGX CUDA needs installing two plugins:
 
 **** sources.list not correctly setup bug
 
+#+begin_src bash
 echo "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /" | sudo tee /etc/apt/sources.list.d/cuda.list
 
 sudo apt-get update returns no public key:
@@ -220,6 +221,8 @@ N: See apt-secure(8) manpage for repository creation and user configuration deta
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A4B469963BF863CC
 sudo apt-get update
 sudo apt-get install cuda-drivers
+#+end_src
+
 
 **** Unable to locate package nvidia-container-toolkit
 - https://github.com/NVIDIA/nvidia-docker/issues/1238
