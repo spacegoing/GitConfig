@@ -57,8 +57,6 @@ values."
              python-lsp-server 'pylsp
              lsp-pylsp-plugins-flake8-enabled nil
              lsp-pylsp-plugins-pydocstyle-enabled nil
-             lsp-idle-delay 0.0
-             lsp-lens-debounce-interval 0.0
              )
 
      ;; rust
