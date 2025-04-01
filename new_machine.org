@@ -159,7 +159,7 @@ execute ~all-the-icons-install-fonts~
             
             # POST INSTALL
             # systemctl status nvidia-persistenced.service
-            # sudo systemctl status nvidia-persistenced.service
+            # sudo systemctl restart nvidia-persistenced.service
         #+end_src
 - Install Container Toolkit
   - Install: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
