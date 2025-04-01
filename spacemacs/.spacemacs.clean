@@ -49,6 +49,9 @@ values."
      sdired
 
      c-c++
+     (cmake :variables
+        cmake-backend 'lsp)
+
      ;; python
      (python :variables
              python-backend 'lsp
