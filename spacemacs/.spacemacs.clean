@@ -47,7 +47,6 @@ values."
 
      sdefaults
      sdired
-     sorg
 
      c-c++
      ;; python
@@ -477,6 +476,19 @@ you should place your code here."
         (semantic-stickyfunc-mode -1)
         (setq my-headerline-toggle-state t))))
 
+  ;; ORG MODE CONFIG
+  (with-eval-after-load 'org
+    (setq org-startup-indented t))
+  ;; (setq org-agenda-files '("/Users/spacegoing/macCodeLab-MBP2015/MyPrivate/orgagenda")))
+
+  ;; COMPANY + YASNIPPET for ORG MODE
+  (with-eval-after-load 'company
+    (add-hook 'org-mode-hook 'company-mode)
+    (with-eval-after-load 'yasnippet
+      (add-hook 'org-mode-hook
+                (lambda ()
+                  (setq-local company-backends
+                              (cons 'company-yasnippet company-backends))))))
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
