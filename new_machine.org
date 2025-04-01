@@ -78,10 +78,12 @@
 
 **** Using ruff
 ***** config file path:
-# https://docs.astral.sh/ruff/configuration/#config-file-discovery
-Linux	$XDG_CONFIG_HOME or $HOME/.config
-macOS	$HOME/Library/Application Support
-Windows	{FOLDERID_RoamingAppData}
+  #+BEGIN_SRC text
+    # https://docs.astral.sh/ruff/configuration/#config-file-discovery
+    Linux	$XDG_CONFIG_HOME or $HOME/.config
+    macOS	$HOME/Library/Application Support
+    Windows	{FOLDERID_RoamingAppData}
+  #+END_SRC
 
 ***** 
 
