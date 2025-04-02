@@ -52,17 +52,21 @@ values."
      (cmake :variables
             cmake-backend 'lsp)
 
+     (lsp :variables
+          lsp-pylsp-server-command '("/root/.venv/base/bin/pylsp" "-vvv" "--log-file" "/root/myCodeLab/lsp.log")
+          lsp-disabled-clients '(ruff)
+          ;; https://emacs-lsp.github.io/lsp-mode/page/lsp-pylsp/#lsp-pylsp-plugins-ruff-config
+          lsp-pylsp-plugins-ruff-enabled t
+          lsp-pylsp-plugins-ruff-executable "/root/.venv/base/bin/ruff"
+          lsp-pylsp-plugins-ruff-config "/root/myCodeLab/GitConfig/python/.config/ruff/ruff.toml"
+          lsp-pylsp-plugins-ruff-format-enabled t
+          lsp-pylsp-plugins-ruff-severities '(("D212" . "I"))
+          )
      ;; python
      (python :variables
              python-backend 'lsp
              python-formatter 'lsp
              python-lsp-server 'pylsp
-             ;; https://emacs-lsp.github.io/lsp-mode/page/lsp-pylsp/#lsp-pylsp-plugins-ruff-config
-             lsp-pylsp-plugins-ruff-enabled t
-             lsp-pylsp-plugins-ruff-executable "/root/.venv/base/bin/ruff"
-             lsp-pylsp-plugins-ruff-config "/root/myCodeLab/GitConfig/python/.config/ruff/ruff.toml"
-             lsp-pylsp-plugins-ruff-format-enabled t
-             lsp-pylsp-plugins-ruff-severities '(("D212" . "I"))
              )
 
      ;; rust
@@ -79,13 +83,12 @@ values."
      docker
 
      ;; pandoc
-
      (latex :variables
             latex-enable-auto-fill t
             latex-enable-folding t)
 
      semantic
-     lsp
+
      ;; (shell :variables
      ;;        shell-default-height 30
      ;;        shell-default-position 'bottom)
@@ -430,7 +433,6 @@ you should place your code here."
     (setq insert-directory-program "/opt/homebrew/opt/coreutils/libexec/gnubin/ls"))
   ;; (add-to-list 'evil-evilified-state-modes 'dired-mode)
   (setq dired-listing-switches "-laGh1v --group-directories-first")
-
 
   ;; my keys
   (setq hi-lock-face-defaults
