@@ -50,15 +50,19 @@ values."
 
      c-c++
      (cmake :variables
-        cmake-backend 'lsp)
+            cmake-backend 'lsp)
 
      ;; python
      (python :variables
              python-backend 'lsp
              python-formatter 'lsp
              python-lsp-server 'pylsp
-             lsp-pylsp-plugins-flake8-enabled nil
-             lsp-pylsp-plugins-pydocstyle-enabled nil
+             ;; https://emacs-lsp.github.io/lsp-mode/page/lsp-pylsp/#lsp-pylsp-plugins-ruff-config
+             lsp-pylsp-plugins-ruff-enabled t
+             lsp-pylsp-plugins-ruff-executable "/root/.venv/base/bin/ruff"
+             lsp-pylsp-plugins-ruff-config "/root/myCodeLab/GitConfig/python/.config/ruff/ruff.toml"
+             lsp-pylsp-plugins-ruff-format-enabled t
+             lsp-pylsp-plugins-ruff-severities '(("D212" . "I"))
              )
 
      ;; rust

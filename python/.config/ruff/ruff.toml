@@ -1,14 +1,30 @@
+# all settings: https://docs.astral.sh/ruff/settings/
+# ruff config doc: https://docs.astral.sh/ruff/configuration/
+
 # Same as Black.
 line-length = 65
 indent-width = 2
+
+# from https://github.com/python-lsp/python-lsp-ruff
+target-version = "py310"
 unsafe-fixes = false
+preview = false
+# exclude = ["__about__.py"]
 
 [lint]
+extend-select = ["I"]
+extend-ignore = ["C90", "D210", "E111"]
+
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
 # Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
 # McCabe complexity (`C901`) by default.
-ignore = ["E111"]
+# select = Default value: ["E4", "E7", "E9", "F"]
+# ignore = Default value: []
+
+[lint.per-file-ignores]
+"__init__.py" = ["CPY001"]
 
 [format]
 docstring-code-format = true
-skip-magic-trailing-comma = true
+# (a, b,) will not be auto splitted
+# skip-magic-trailing-comma = true
