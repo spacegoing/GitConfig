@@ -147,6 +147,8 @@ execute ~all-the-icons-install-fonts~
   - Preinstall deps: https://docs.nvidia.com/cuda/cuda-installation-guide-linux/#install-third-party-libraries
         #+begin_src bash
         sudo apt-get install -y g++ build-essential
+        # keep below updated
+        sudo apt-get install g++ freeglut3-dev build-essential libx11-dev libxmu-dev libxi-dev libglu1-mesa-dev libfreeimage-dev libglfw3-dev
         #+end_src
   - https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/index.html#ubuntu
         #+begin_src bash
