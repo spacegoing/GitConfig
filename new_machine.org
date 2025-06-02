@@ -2,7 +2,7 @@
 ** Manually
 *** ssh+git
   #+BEGIN_SRC bash
-    ssh-keygen -t rsa -b 4096 -C "spacegoing@gmail.com" -f /root/.ssh/id_rsa -N ""
+    ssh-keygen -t rsa -b 4096 -C "spacegoing@gmail.com" -N ""
     eval "$(ssh-agent -s)"
     # linux
     ssh-add ~/.ssh/id_rsa
