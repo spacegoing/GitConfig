@@ -311,6 +311,13 @@ sudo apt-get install cuda-drivers
 *** CapsLock -> CTRL
 - Linux: map caps to control: change the file ~sudo vi /etc/default/keyboard~ and change ~XKBOPTIONS="ctrl:nocaps"~.
   Run Jorge's command after that but as ~setxkbmap -option ctrl:nocaps~
+    #+begin_src bash
+      # Backup and modify keyboard config
+      sudo cp /etc/default/keyboard /etc/default/keyboard.bak
+      sudo sed -i 's/^XKBOPTIONS=.*/XKBOPTIONS="ctrl:nocaps"/' /etc/default/keyboard || echo 'XKBOPTIONS="ctrl:nocaps"' | sudo tee -a /etc/default/keyboard
+      # Apply immediately
+      setxkbmap -option ctrl:nocaps
+    #+end_src
 
 ** Docker Commands
 
