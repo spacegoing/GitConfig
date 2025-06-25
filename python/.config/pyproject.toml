@@ -1,6 +1,6 @@
 [tool.ruff]
 line-length = 65
-indent-width = 2
+indent-width = 4
 target-version = "py310"
 unsafe-fixes = false
 preview = false
