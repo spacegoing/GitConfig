@@ -47,3 +47,12 @@
 ;; (unpin! pinned-package another-pinned-package)
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;; (unpin! t)
+
+;; Window management
+(package! winum)  ; For Spacemacs-style window numbering
+
+;; Python development
+(package! python-pytest)  ; For running tests
+
+;; Formatting
+(package! apheleia)  ; Fast, async formatting with Ruff
