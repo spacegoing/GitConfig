@@ -60,6 +60,8 @@ values."
           lsp-pylsp-server-command '("/root/.venv/base/bin/pylsp")
           ;; lsp-pylsp-server-command '("/root/.venv/base/bin/pylsp" "-vvv" "--log-file" "/root/myCodeLab/lsp.log")
 
+          lsp-lens-enable nil
+
           ;; Keep all Jedi features EXCEPT symbols (the problematic one)
           lsp-pylsp-plugins-jedi-symbols-enabled nil  ; Disable only this
           lsp-pylsp-plugins-jedi-hover-enabled nil

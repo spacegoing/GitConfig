@@ -42,5 +42,4 @@
 (setq-default evil-escape-delay 0.2)
 
 ;; python indent 2 spaces
-(setq-default python-indent-offset 2)
-
+(setq-default python-indent-offset 4)
