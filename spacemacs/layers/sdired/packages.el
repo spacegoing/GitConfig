@@ -1,30 +1,35 @@
-;;; packages.el --- sdired layer packages file for Spacemacs.
+;;; packages.el --- sdired layer packages file for Spacemacs.  -*- lexical-binding: t -*-
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
-;;
-;; Author: spacegoing <spacegoing@LCs-MacBook-Pro.local>
+;; Author: spacegoing
 ;; URL: https://github.com/syl20bnr/spacemacs
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
 ;;; License: GPLv3
 
-;; https://github.com/sweord/.spacemacs.config/tree/master/.spacemacs.private
+;;; Commentary:
 
-(defconst sdired-packages '((dired :location local) dired+))
+;; Dired extras: dired+ (vendored in local/dired+/dired+.el, it is no longer
+;; on MELPA) and a `P' binding that goes to the parent directory following
+;; symlinks.
+
+;;; Code:
+
+(defconst sdired-packages
+  '((dired :location built-in)
+    (dired+ :location local)))
 
 (defun sdired/post-init-dired ()
-  (use-package dired
-    :defer t
-    :config (progn
-              (require 'dired+)
-              (define-key dired-mode-map (kbd "P") 'my-dired-up-directory) ;; for symlink
-              )))
+  (with-eval-after-load 'dired
+    (require 'dired+)
+    ;; `P': parent directory, resolving symlinks first (see funcs.el).
+    (define-key dired-mode-map (kbd "P") 'my-dired-up-directory)))
 
 (defun sdired/init-dired+ ()
   (use-package dired+
     :defer t
-    :config (diredp-toggle-find-file-reuse-dir 1)))
-
+    :config
+    ;; Reuse the same dired buffer when descending into directories.
+    (diredp-toggle-find-file-reuse-dir 1)))
 
 ;;; packages.el ends here
