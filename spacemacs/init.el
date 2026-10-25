@@ -795,6 +795,21 @@ lint comes from ruff. Raise it when you want real type checking.")
                   (seq " In[" (* (any space digit)) "]:")))))
   (add-hook 'python-mode-hook 'code-cells-mode)
 
+  ;;;; Rust: rust-analyzer through lsp-mode
+  ;; rust-analyzer is the rustup component (`rustup component add
+  ;; rust-analyzer'), found in ~/.cargo/bin. Diagnostics come from
+  ;; `cargo check' on save; set `lsp-rust-analyzer-cargo-watch-command' to
+  ;; "clippy" in local.el for clippy instead.
+  (setq lsp-rust-analyzer-server-command '("rust-analyzer")
+        ;; Emacs file watchers are off (see Performance); rust-analyzer
+        ;; watches the workspace itself.
+        lsp-rust-analyzer-use-client-watching nil
+        lsp-rust-analyzer-cargo-watch-command "check"
+        lsp-rust-analyzer-proc-macro-enable t
+        lsp-rust-analyzer-cargo-run-build-scripts t
+        ;; Format with `SPC m = =' when wanted, not on every save.
+        rustic-format-on-save nil)
+
   (defvar my-headerline-toggle-state nil)
   (defun my-toggle-headerline-modes ()
     "Toggle between lsp-headerline-breadcrumb-mode and semantic-stickyfunc-mode."
