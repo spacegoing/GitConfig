@@ -47,6 +47,8 @@ This function should only modify configuration layer settings."
      emacs-lisp
      git
      markdown
+     json
+     multiple-cursors
      org
 
      ;; ---- private layers (in ~/.spacemacs.d/layers) -----------------
@@ -55,6 +57,7 @@ This function should only modify configuration layer settings."
 
      ;; ---- languages -------------------------------------------------
      c-c++
+     cmake
      ;; Python IDE = basedpyright (types, completion, goto, hover, rename)
      ;; + ruff server (lint, format, imports), both through lsp-mode.
      ;; Details and the pylsp fallback: ";;;; Python" in user-config.
