@@ -77,8 +77,25 @@ This function should only modify configuration layer settings."
             latex-backend 'company-auctex)
 
      ;; ---- tooling ---------------------------------------------------
-     semantic
-     lsp
+     ;; `semantic' was removed on purpose: it parsed every Python/C buffer
+     ;; in Emacs Lisp (one of the freeze sources). The `, p' header-line
+     ;; toggle still enables semantic lazily when you ask for it.
+     (lsp :variables
+          ;; -- the settings that stop freezes on vllm/verl/Megatron --
+          ;; Do not make Emacs watch every file of the workspace: on a
+          ;; 50k-file repo that is a long synchronous directory walk and,
+          ;; on macOS, one kqueue descriptor per directory.
+          lsp-enable-file-watchers nil
+          ;; Debounce edits before talking to the server (0.0 meant a
+          ;; request on every keystroke).
+          lsp-idle-delay 0.5
+          ;; Code lenses re-query the server after every change.
+          lsp-lens-enable nil
+          ;; -- lighter, quieter --
+          lsp-keep-workspace-alive nil   ; stop the server with its last buffer
+          lsp-enable-suggest-server-download nil ; we install servers ourselves
+          lsp-log-io nil
+          lsp-headerline-breadcrumb-enable t)
      spell-checking
      syntax-checking)
 
@@ -488,6 +505,11 @@ It should only modify the values of Spacemacs settings."
    ;; (default 'evil)
    dotspacemacs-folding-method 'evil
 
+   ;; Undo backend (`undo-redo', `undo-fu' or `undo-tree'). Only newer
+   ;; Spacemacs reads this; the 2024 install always uses undo-tree. Kept at
+   ;; undo-tree on every machine so `SPC a u' behaves the same everywhere.
+   dotspacemacs-undo-system 'undo-tree
+
    ;; If non-nil and `dotspacemacs-activate-smartparens-mode' is also non-nil,
    ;; `smartparens-strict-mode' will be enabled in programming modes.
    ;; (default nil)
@@ -525,7 +547,7 @@ It should only modify the values of Spacemacs settings."
    ;; List of search tool executable names. Spacemacs uses the first installed
    ;; tool of the list. Supported tools are `rg', `ag', `pt', `ack' and `grep'.
    ;; (default '("rg" "ag" "pt" "ack" "grep"))
-   dotspacemacs-search-tools '("ag" "pt" "ack" "grep")
+   dotspacemacs-search-tools '("rg" "ag" "pt" "ack" "grep")
 
    ;; Format specification for setting the frame title.
    ;; %a - the `abbreviated-file-name', or `buffer-name'
@@ -674,7 +696,15 @@ before packages are loaded."
   (spacemacs/set-leader-keys "hhh" 'highlight-symbol-at-point)
   (spacemacs/set-leader-keys "hhu" 'unhighlight-regexp)
   (spacemacs/set-leader-keys "jm" 'lsp-ui-imenu)
-  (spacemacs/set-leader-keys "jM" 'helm-semantic)
+  ;; Symbol list: semantic when it is on, otherwise imenu (fed by lsp).
+  (spacemacs/set-leader-keys "jM" 'helm-semantic-or-imenu)
+
+  ;;;; Performance: undo history
+  ;; undo-tree stays (u / C-r / SPC a u unchanged) but no longer writes a
+  ;; history file per buffer to .cache/undo-tree-history: saving/loading
+  ;; those for big buffers is slow and the files corrupt easily (1200+ had
+  ;; piled up). Undo history now lives for the Emacs session only.
+  (setq undo-tree-auto-save-history nil)
 
   ;;;; Tool directories: language servers and rust toolchain
   ;; ~/.local/bin is where scripts/install-lsp-servers.sh links basedpyright
@@ -810,19 +840,25 @@ lint comes from ruff. Raise it when you want real type checking.")
         ;; Format with `SPC m = =' when wanted, not on every save.
         rustic-format-on-save nil)
 
-  (defvar my-headerline-toggle-state nil)
+  ;;;; Header line toggle (, p in python buffers)
+  ;; lsp's breadcrumb is shown by default. `, p' swaps it for semantic's
+  ;; sticky-function header and back. semantic-mode is switched on lazily
+  ;; the first time, since it is no longer enabled globally.
+  (defvar my-headerline-toggle-state 'breadcrumb
+    "Which header line is showing: `breadcrumb' or `stickyfunc'.")
   (defun my-toggle-headerline-modes ()
     "Toggle between lsp-headerline-breadcrumb-mode and semantic-stickyfunc-mode."
     (interactive)
-    (if my-headerline-toggle-state
+    (if (eq my-headerline-toggle-state 'breadcrumb)
         (progn
           (lsp-headerline-breadcrumb-mode -1)
+          (require 'semantic)
+          (unless (bound-and-true-p semantic-mode) (semantic-mode 1))
           (semantic-stickyfunc-mode 1)
-          (setq my-headerline-toggle-state nil))
-      (progn
-        (lsp-headerline-breadcrumb-mode 1)
-        (semantic-stickyfunc-mode -1)
-        (setq my-headerline-toggle-state t)))))
+          (setq my-headerline-toggle-state 'stickyfunc))
+      (semantic-stickyfunc-mode -1)
+      (lsp-headerline-breadcrumb-mode 1)
+      (setq my-headerline-toggle-state 'breadcrumb))))
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
