@@ -15,8 +15,6 @@
 ;; markdown mode variables
 (setq markdown-local-header "/Users/spacegoing/macCodeLab-MBP2015/MarkdownConfig/Pandoc_Header/programming_notes_header")
 
-;; paradox config
-(setq paradox-github-token "9a43680a53cf280d4342761b4d75e311380bbb5f")
 
 ;; -------------- emacs ------------------
 (set-frame-font "nil 22")
