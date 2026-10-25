@@ -1,8 +1,6 @@
-;;; packages.el --- sdefaults layer packages file for Spacemacs.
+;;; packages.el --- sdefaults layer packages file for Spacemacs.  -*- lexical-binding: t -*-
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
-;;
-;; Author: spacegoing <spacegoing@LCs-MacBook-Pro.local>
+;; Author: spacegoing
 ;; URL: https://github.com/syl20bnr/spacemacs
 ;;
 ;; This file is not part of GNU Emacs.
@@ -11,112 +9,57 @@
 
 ;;; Commentary:
 
-;; See the Spacemacs documentation and FAQs for instructions on how to implement
-;; a new layer:
-;;
-;;   SPC h SPC layers RET
-;;
-;;
-;; Briefly, each package to be installed or configured by this layer should be
-;; added to `sdefaults-packages'. Then, for each package PACKAGE:
-;;
-;; - If PACKAGE is not referenced by any other Spacemacs layer, define a
-;;   function `sdefaults/init-PACKAGE' to load and initialize the package.
-
-;; - Otherwise, PACKAGE is already referenced by another Spacemacs layer, so
-;;   define the functions `sdefaults/pre-init-PACKAGE' and/or
-;;   `sdefaults/post-init-PACKAGE' to customize the package as it is loaded.
+;; Small tweaks to packages that other Spacemacs layers own. Every function
+;; here is a `post-init'/`pre-init' hook: it runs after/before the owning
+;; layer configured the package. Nothing in this layer installs a package.
 
 ;;; Code:
 
-(defconst sdefaults-packages '((recentf :location local)
-                               ;; bookmark+
-                               ;; sphinx-doc
-                               ;; matlab-mode
-                               auto-complete
-                               spaceline
-                               helm
-                               evil))
+(defconst sdefaults-packages
+  '(recentf
+    spaceline
+    helm
+    evil))
 
 (defun sdefaults/post-init-recentf ()
-  (use-package recentf
-    :defer t
-    :config (progn
-              (setq recentf-exclude '("COMMIT_MSG" "COMMIT_EDITMSG" "github.*txt$"
-                                      "*tramp/" "/docker:" "/tmp/" "/sshx:" "/ssh:"
-                                      "/sudo:" "/TAGS$" "/GTAGS$" "/GRAGS$" "/GPATH$"
-                                      "\\.mkv$" "\\.mp[34]$" "\\.avi$" "\\.pdf$"
-                                      "\\.sub$" "\\.srt$" "\\.ass$" ".*png$"))
-              (setq recentf-max-saved-items 2048)
-              ;; Recentf record buffers
-              ;; todo: create banners in helm mini-buffer
-              (defun recentf-track-opened-file ()
-                "Insert the name of the dired or file just opened or written into the recent list."
-                (let ((buff-name (or buffer-file-name
-                                     (and (derived-mode-p 'dired-mode)
-                                          default-directory))))
-                  (and buff-name
-                       (recentf-add-file buff-name)))
-                ;; Must return nil because it is run from `write-file-functions'.
-                nil)
-              (add-hook 'dired-after-readin-hook 'recentf-track-opened-file))))
+  (with-eval-after-load 'recentf
+    (setq recentf-exclude '("COMMIT_MSG" "COMMIT_EDITMSG" "github.*txt$"
+                            "*tramp/" "/docker:" "/tmp/" "/sshx:" "/ssh:"
+                            "/sudo:" "/TAGS$" "/GTAGS$" "/GRAGS$" "/GPATH$"
+                            "\\.mkv$" "\\.mp[34]$" "\\.avi$" "\\.pdf$"
+                            "\\.sub$" "\\.srt$" "\\.ass$" ".*png$"))
+    (setq recentf-max-saved-items 2048)
+    ;; Also record visited dired directories in the recent list so they show
+    ;; up in `SPC f r' / helm-mini.
+    (defun sdefaults//recentf-track-dired ()
+      "Add the directory of the current dired buffer to `recentf-list'."
+      (when (and (derived-mode-p 'dired-mode) default-directory)
+        (recentf-add-file default-directory)))
+    (add-hook 'dired-after-readin-hook #'sdefaults//recentf-track-dired)))
 
-(defun sdefaults/post-init-auto-complete()
-  (setq global-auto-complete-mode t)
-)
-
-;; enable macOS to use `mdfind` instead of `locate`
 (defun sdefaults/pre-init-helm ()
-  (spacemacs|use-package-add-hook helm
-    :post-config
-    ;; Disable fuzzy matchting to make mdfind work with helm-locate
-    ;; https://github.com/hjjekwk/.spacemacs.d/blob/master/layers/my-osx/packages.el
-    ;; https://github.com/emacs-helm/helm/issues/799
-    (setq helm-locate-fuzzy-match nil)
-    (setq helm-locate-command "mdfind -name %s %s")))
-
+  ;; macOS: use Spotlight's `mdfind' instead of `locate' for helm-locate
+  ;; (SPC f L). Fuzzy matching must be off for mdfind to work.
+  ;; https://github.com/emacs-helm/helm/issues/799
+  (when (eq system-type 'darwin)
+    (spacemacs|use-package-add-hook helm
+      :post-config
+      (setq helm-locate-fuzzy-match nil)
+      (setq helm-locate-command "mdfind -name %s %s"))))
 
 (defun sdefaults/post-init-evil ()
-  ;; go to parent dir ( dired symlink / in evil mode )
-  (define-key evil-motion-state-map (kbd "^") 'my-file-up-directory) ;; for text edit buffer
+  ;; `^' opens the current file's directory in dired (follows symlinks).
+  (define-key evil-motion-state-map (kbd "^") 'my-file-up-directory)
 
-  ;; Enable emacs keybindings in evil
+  ;; Emacs-style movement in insert state.
   (define-key evil-insert-state-map (kbd "C-p") 'previous-line)
   (define-key evil-insert-state-map (kbd "C-n") 'next-line)
   (define-key evil-insert-state-map (kbd "C-a") 'beginning-of-line-text)
   (define-key evil-insert-state-map (kbd "C-e") 'end-of-line))
 
-
 (defun sdefaults/post-init-spaceline ()
+  ;; Leaner mode line: no minor-mode lighters, no major-mode name.
   (spaceline-toggle-minor-modes-off)
   (spaceline-toggle-major-mode-off))
-
-
-;; ???????????????????????????????????? MATLAB MODE ?????????????
-;; Matlab mode
-;; (autoload 'matlab-mode "matlab" "Matlab Editing Mode" t)
-;; (defun sdefaults/init-matlab-mode ()
-;;   (use-package matlab-mode
-;;     :defer t
-;;     :init (progn
-;;             (setq auto-mode-alist (append '(("\\.m\\'" . matlab-mode))
-;;                                           auto-mode-alist)))
-;;     :config
-;;     (progn
-;;       (setq matlab-indent-function t)
-;;       (setq matlab-shell-command "/Applications/MATLAB_R2016b.app/bin/matlab")
-;;       (setq matlab-shell-command-switches (list "-nodesktop -nosplash")))))
-;; alter auto-major-mode. overwrite default settings
-;; todo: Don't know why if these line before function
-;; my-dired-up-directory, that function will not be defined
-;; So I moved this code block to the very end of .spacemacs
-;; Other side effects are unknown
-;; (require 'matlab-mode)
-;; (setq auto-mode-alist
-;;       (append
-;;        '(("\\.m\\'" . matlab-mode))
-;;        auto-mode-alist))
-
-
 
 ;;; packages.el ends here

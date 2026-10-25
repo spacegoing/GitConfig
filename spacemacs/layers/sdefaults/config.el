@@ -1,43 +1,41 @@
-;; AutoFill Mode
+;;; config.el --- sdefaults layer configuration  -*- lexical-binding: t -*-
+;;
+;; Plain variable settings and hooks that do not belong to one package.
+;; Loaded before any package is configured, so only touch variables and hooks
+;; here; package-specific code goes to packages.el.
+
+;;; Code:
+
+;; Auto-fill in text modes, 65 columns everywhere.
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
-
-;; Dired hide details
-(add-hook 'dired-mode-hook 'dired-hide-details-mode)
-
-;; AutoFill Mode
 (setq-default fill-column 65)
 
-;; Magit Configuration
-(setq magit-visit-ref-behavior '(checkout-any focus-on-ref))
-(add-to-list 'magit-visit-ref-behavior 'create-branch)
+;; Dired: hide owner/size/date columns by default (toggle with `(').
+(add-hook 'dired-mode-hook 'dired-hide-details-mode)
 
-;; Pandoc Config
-;; markdown mode variables
-(setq markdown-local-header "/Users/spacegoing/macCodeLab-MBP2015/MarkdownConfig/Pandoc_Header/programming_notes_header")
+;; Magit: RET on a ref checks it out and focuses it; also offer branch creation.
+(with-eval-after-load 'magit
+  (setq magit-visit-ref-behavior '(checkout-any focus-on-ref create-branch)))
 
-
-;; -------------- emacs ------------------
-(set-frame-font "nil 22")
-(setq initial-frame-alist (quote ((fullscreen . maximized))))
-
-;; line number
-(setq-default dotspacemacs-line-numbers t)
-
-(setq ns-use-srgb-colorspace nil)
+;; Mode line separators.
 (setq powerline-default-separator 'arrow)
 
-;; vertical split window
+;; macOS: colours in the mode line look washed out with sRGB enabled.
+(when (eq system-type 'darwin)
+  (setq ns-use-srgb-colorspace nil))
+
+;; Prefer splitting windows side by side.
 (setq split-height-threshold 200)
 (setq split-width-threshold 120)
 
-;; Disable spell-checking for prog mode
-(add-hook 'prog-mode-hook (lambda ()
-                            ;; (flycheck-mode -1)
-                            (flyspell-mode -1)))
+;; No spell-checking in programming modes (flyspell-prog-mode is noisy).
+(add-hook 'prog-mode-hook (lambda () (flyspell-mode -1)))
 
-;; evil sequence
+;; `jk' quickly in insert state returns to normal state.
 (setq-default evil-escape-key-sequence "jk")
 (setq-default evil-escape-delay 0.2)
 
-;; python indent 2 spaces
+;; Python: 4-space indentation.
 (setq-default python-indent-offset 4)
+
+;;; config.el ends here
