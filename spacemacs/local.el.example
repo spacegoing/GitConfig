@@ -1,0 +1,24 @@
+;; -*- mode: emacs-lisp; lexical-binding: t -*-
+;; Per-machine overrides. Copy this file to ~/.spacemacs.d/local.el (it is
+;; git-ignored); init.el loads it at the very end of dotspacemacs/user-config,
+;; so anything set here wins over init.el.
+;;
+;; Only runtime variables belong here. Layer lists and dotspacemacs-* settings
+;; are read before this file and must stay in init.el (use `system-type' or
+;; `system-name' checks there if a machine needs a different layer set).
+
+;; Examples -------------------------------------------------------------
+
+;; Turn on real type checking from basedpyright ("off" = ruff lint only).
+;; (setq my/python-typecheck-mode "basic")
+
+;; Make basedpyright analyse against a fixed interpreter instead of the
+;; `python' found on PATH / the active virtualenv.
+;; (setq lsp-pyright-python-executable-cmd "/root/.venv/base/bin/python")
+
+;; Point the servers at explicit binaries if ~/.local/bin is not used.
+;; (setq lsp-ruff-lsp-server-command '("/root/.venv/base/bin/ruff" "server")
+;;       lsp-ruff-server-command     '("/root/.venv/base/bin/ruff" "server"))
+
+;; Use clippy instead of cargo check for Rust diagnostics on save.
+;; (setq lsp-rust-analyzer-cargo-watch-command "clippy")

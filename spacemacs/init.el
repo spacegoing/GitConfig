@@ -861,7 +861,13 @@ lint comes from ruff. Raise it when you want real type checking.")
           (setq my-headerline-toggle-state 'stickyfunc))
       (semantic-stickyfunc-mode -1)
       (lsp-headerline-breadcrumb-mode 1)
-      (setq my-headerline-toggle-state 'breadcrumb))))
+      (setq my-headerline-toggle-state 'breadcrumb)))
+
+  ;;;; Per-machine overrides (last, so they win): ~/.spacemacs.d/local.el
+  ;; Git-ignored; see local.el.example. Only runtime variables belong there.
+  (let ((local-file (expand-file-name "local.el" dotspacemacs-directory)))
+    (when (file-exists-p local-file)
+      (load local-file nil 'nomessage))))
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
