@@ -55,14 +55,17 @@ This function should only modify configuration layer settings."
 
      ;; ---- languages -------------------------------------------------
      c-c++
+     ;; Python IDE = basedpyright (types, completion, goto, hover, rename)
+     ;; + ruff server (lint, format, imports), both through lsp-mode.
+     ;; Details and the pylsp fallback: ";;;; Python" in user-config.
      (python :variables
              python-backend 'lsp
-             python-formatter 'lsp
-             python-lsp-server 'pylsp
-             lsp-pylsp-plugins-flake8-enabled nil
-             lsp-pylsp-plugins-pydocstyle-enabled nil
-             lsp-idle-delay 0.0
-             lsp-lens-debounce-interval 0.0)
+             python-lsp-server 'pyright   ; the pyright client runs basedpyright
+             python-formatter 'lsp        ; SPC m = =  -> ruff format
+             python-format-on-save nil
+             python-sort-imports-on-save nil
+             python-test-runner 'pytest
+             python-fill-column 65)       ; same as line-length in ruff.toml
      rust
      html
      yaml
@@ -93,7 +96,13 @@ This function should only modify configuration layer settings."
    dotspacemacs-frozen-packages '()
 
    ;; A list of packages that will not be installed and loaded.
-   dotspacemacs-excluded-packages '()
+   ;; importmagic: the python layer turns it on in every python buffer; it
+   ;;   starts a Python indexer per buffer and scans site-packages. lsp does
+   ;;   auto-import now.
+   ;; anaconda-mode / company-anaconda: the non-lsp python backend, unused.
+   dotspacemacs-excluded-packages '(importmagic
+                                    anaconda-mode
+                                    company-anaconda)
 
    ;; Defines the behaviour of Spacemacs when installing packages.
    ;; Possible values are `used-only', `used-but-keep-unused' and `all'.
@@ -666,6 +675,103 @@ before packages are loaded."
   (spacemacs/set-leader-keys "hhu" 'unhighlight-regexp)
   (spacemacs/set-leader-keys "jm" 'lsp-ui-imenu)
   (spacemacs/set-leader-keys "jM" 'helm-semantic)
+
+  ;;;; Tool directories: language servers and rust toolchain
+  ;; ~/.local/bin is where scripts/install-lsp-servers.sh links basedpyright
+  ;; and ruff; ~/.cargo/bin holds rust-analyzer (rustup). Put them first so
+  ;; an old `ruff' inside a conda env does not shadow them.
+  (dolist (dir '("~/.cargo/bin" "~/.local/bin"))
+    (let ((d (expand-file-name dir)))
+      (when (file-directory-p d)
+        (add-to-list 'exec-path d)
+        (unless (member d (split-string (getenv "PATH") path-separator))
+          (setenv "PATH" (concat d path-separator (getenv "PATH")))))))
+
+  ;;;; Python: language servers
+  ;; basedpyright = pyright with a pip-installable, node-bundled build.
+  ;; Install both servers with:  ~/.spacemacs.d/scripts/install-lsp-servers.sh
+  ;;
+  ;; What you get:        from
+  ;;   completion, goto definition/references, hover, rename   basedpyright
+  ;;   diagnostics: syntax errors, undefined names, bad imports basedpyright
+  ;;   diagnostics: lint (F, E, I ...), SPC m = = format,
+  ;;   organize imports (code action)                          ruff server
+  ;;
+  ;; Why not pylsp: pylsp+jedi indexes the whole workspace in-process and
+  ;; hangs on vllm/verl/Megatron sized repos (your 2025 commits fought
+  ;; exactly that). pylsp remains available: set python-lsp-server to 'pylsp
+  ;; in dotspacemacs/layers and the tuning further down applies.
+
+  (defvar my/python-typecheck-mode "off"
+    "basedpyright typeCheckingMode: \"off\", \"basic\", \"standard\" or \"strict\".
+\"off\" still reports syntax errors, undefined names and unresolved imports;
+lint comes from ruff. Raise it when you want real type checking.")
+
+  ;; These two are read when lsp-pyright registers its client, so set them
+  ;; before the package loads.
+  (setq lsp-pyright-multi-root nil                ; one server per project
+        lsp-pyright-langserver-command "basedpyright") ; lsp-pyright >= 2024-09
+  (setq lsp-pyright-diagnostic-mode "openFilesOnly" ; never analyse the whole repo
+        lsp-pyright-disable-organize-imports t)     ; ruff owns imports
+  (with-eval-after-load 'lsp-pyright
+    ;; Which executable the pyright client starts, in order of preference.
+    ;; Works for every lsp-pyright version (older ones only know
+    ;; `pyright-langserver'); the npm fallback is never reached when the
+    ;; install script has been run.
+    (lsp-dependency 'pyright
+                    '(:system "basedpyright-langserver")
+                    '(:system "pyright-langserver")
+                    '(:npm :package "basedpyright" :path "basedpyright-langserver"))
+    (lsp-register-custom-settings
+     '(("python.analysis.typeCheckingMode" my/python-typecheck-mode)
+       ("basedpyright.disableOrganizeImports" t t))))
+
+  ;; ruff's built-in language server (`ruff server', ruff >= 0.5). lsp-mode
+  ;; renamed its ruff client in 2024-08; set both generations' variables.
+  (setq lsp-ruff-lsp-server-command '("ruff" "server") ; client `ruff-lsp' (lsp-mode <= 2024-08)
+        lsp-ruff-server-command '("ruff" "server")     ; client `ruff'     (lsp-mode >= 2024-08)
+        lsp-ruff-lsp-show-notifications "off"
+        lsp-ruff-show-notifications "off")
+
+  ;; pylsp fallback tuning (only matters when python-lsp-server is 'pylsp or
+  ;; basedpyright is not installed): ruff does all linting, jedi's workspace
+  ;; symbol search is what hangs on large repos.
+  (setq lsp-pylsp-plugins-ruff-enabled t
+        lsp-pylsp-plugins-jedi-symbols-enabled nil
+        lsp-pylsp-plugins-pycodestyle-enabled nil
+        lsp-pylsp-plugins-pyflakes-enabled nil
+        lsp-pylsp-plugins-mccabe-enabled nil
+        lsp-pylsp-plugins-pydocstyle-enabled nil
+        lsp-pylsp-plugins-flake8-enabled nil
+        lsp-pylsp-plugins-autopep8-enabled nil
+        lsp-pylsp-plugins-yapf-enabled nil
+        lsp-pylsp-plugins-pylint-enabled nil
+        lsp-pylsp-plugins-rope-autoimport-enabled nil)
+  (when (eq python-lsp-server 'pylsp)
+    ;; pylsp runs ruff as a plugin; do not start the ruff server as well.
+    (with-eval-after-load 'lsp-mode
+      (add-to-list 'lsp-disabled-clients 'ruff-lsp)
+      (add-to-list 'lsp-disabled-clients 'ruff)))
+
+  ;;;; Python: conda / virtualenv switching
+  ;; `SPC m v w' (pyvenv-workon) lists the envs under WORKON_HOME; point it
+  ;; at the conda envs directory when the shell did not set it.
+  (unless (getenv "WORKON_HOME")
+    (let ((envs (seq-find #'file-directory-p
+                          (mapcar #'expand-file-name
+                                  '("~/mambaforge/envs" "~/miniforge3/envs"
+                                    "~/miniconda3/envs" "~/anaconda3/envs"
+                                    "~/.conda/envs")))))
+      (when envs (setenv "WORKON_HOME" envs))))
+  ;; After `SPC m v w' / `SPC m v a' / `SPC m v d' restart the servers of the
+  ;; current python buffer so basedpyright uses the newly selected interpreter.
+  (defun my/python-lsp-restart-after-venv-change (&rest _)
+    (when (and (memq this-command '(pyvenv-workon pyvenv-activate pyvenv-deactivate))
+               (derived-mode-p 'python-mode)
+               (bound-and-true-p lsp-mode))
+      (mapc #'lsp-workspace-restart (lsp-workspaces))))
+  (dolist (f '(pyvenv-workon pyvenv-activate pyvenv-deactivate))
+    (advice-add f :after #'my/python-lsp-restart-after-venv-change))
 
   ;;;; Python: REPL
   (when (executable-find "ipython")
