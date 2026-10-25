@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spacemacs Config Review</title>
+<style>
+  :root {
+    --bg: #fbfbf8; --fg: #1d1f21; --muted: #5c6166; --line: #d9dcd6;
+    --card: #ffffff; --accent: #2d6a4f; --warn: #b5651d; --bad: #a33a2e; --good: #2f7d4a;
+    --code-bg: #f1f2ee; --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #15171a; --fg: #e6e6e3; --muted: #9aa0a6; --line: #30343a;
+      --card: #1c1f23; --accent: #74c69d; --warn: #e0a458; --bad: #e07a6a; --good: #7fcf95;
+      --code-bg: #23272d;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #15171a; --fg: #e6e6e3; --muted: #9aa0a6; --line: #30343a;
+    --card: #1c1f23; --accent: #74c69d; --warn: #e0a458; --bad: #e07a6a; --good: #7fcf95;
+    --code-bg: #23272d;
+  }
+  html { background: var(--bg); }
+  body { margin: 0; padding: 0 16px 64px; background: var(--bg); color: var(--fg);
+         font: 16px/1.55 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+  main { max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; margin: 40px 0 4px; }
+  h2 { font-size: 1.35rem; margin: 44px 0 10px; padding-top: 14px; border-top: 1px solid var(--line); }
+  h3 { font-size: 1.05rem; margin: 26px 0 6px; }
+  p, li { max-width: 78ch; }
+  .sub { color: var(--muted); margin: 0 0 18px; }
+  code, pre { font-family: var(--mono); font-size: 0.9em; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+  pre { background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; line-height: 1.45; }
+  pre code { background: none; padding: 0; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0 18px; font-size: 0.95em; }
+  th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; }
+  td code { white-space: nowrap; }
+  .tag { display: inline-block; font-size: 0.78em; font-weight: 600; padding: 1px 8px; border-radius: 999px;
+         border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+  .tag.bad { color: var(--bad); border-color: var(--bad); }
+  .tag.warn { color: var(--warn); border-color: var(--warn); }
+  .tag.good { color: var(--good); border-color: var(--good); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; margin: 16px 0; }
+  .card h3 { margin-top: 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .kv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; }
+  .kv dt { color: var(--muted); } .kv dd { margin: 0; }
+  details { margin: 10px 0; } summary { cursor: pointer; color: var(--accent); }
+  .ok { color: var(--good); } .no { color: var(--bad); }
+  @media (max-width: 600px) { table { font-size: 0.85em; } th, td { padding: 6px 6px; } }
+</style>
+</head>
+<body>
+<main>
+
+<h1>Spacemacs config review</h1>
+<p class="sub">~/.spacemacs.d (GitConfig/spacemacs) &middot; reviewed 2026-10-25 &middot; Emacs 29.4 (Emacs.app, no native-comp) &middot; Spacemacs develop d8d4528 (2024-07)</p>
+
+<div class="card">
+<h3>Summary</h3>
+<p>Your live configuration was not touched. All work is on branch <code>spacemacs-overhaul</code>, checked out in a separate git worktree at <code>/Users/changli/sg21CodeLab/GitConfig-wt-spacemacs-overhaul</code>. Eleven commits, each one concern, each one revertable.</p>
+<ul>
+  <li><strong>Structure.</strong> Four drifting dotfiles and an absolute symlink became one <code>init.el</code> that works on every machine; the broken <code>sorg</code> layer is gone, <code>sdefaults</code>/<code>sdired</code> are cleaned, <code>dired+</code> has one owner.</li>
+  <li><strong>Python.</strong> basedpyright (IDE features) + <code>ruff server</code> (lint, format, imports) through the lsp layer you already use. pylsp stays one line away as a fallback.</li>
+  <li><strong>Rust.</strong> rust-analyzer via the rust layer, with rust-analyzer watching files itself.</li>
+  <li><strong>Freezes.</strong> Six concrete synchronous-stall sources removed (lsp file watchers, 0.0 debounce, code lenses, semantic parsing, importmagic, undo history files).</li>
+  <li><strong>Security.</strong> A GitHub personal access token has been sitting in <code>layers/sdefaults/config.el</code> since 2017. It is removed from the branch but is still in git history: <strong>revoke it on GitHub</strong>.</li>
+  <li><strong>Verified</strong> in an isolated copy of <code>~/.emacs.d</code>: batch and real GUI start-ups, both language servers attaching, diagnostics, formatting, your keys. Details in <a href="#verify">Verification</a>.</li>
+</ul>
+<p>Your habits are preserved: same keys, theme, font size, line numbers, dired behaviour, mirrors, REPL. The handful of visible differences are listed in <a href="#changes">What changes for you</a>.</p>
+</div>
+
+<h2 id="inventory">1. What was there</h2>
+
+<table>
+<tr><th>Path</th><th>Status</th><th>Finding</th></tr>
+<tr><td><code>init.el</code></td><td><span class="tag bad">broken on Linux</span></td><td>Absolute symlink to <code>/Users/changli/.spacemacs.d/.spacemacs.mac</code>. Resolves only on this Mac; on any Linux box <code>~/.spacemacs.d/init.el</code> dangles.</td></tr>
+<tr><td><code>.spacemacs.mac</code></td><td><span class="tag warn">live on Mac</span></td><td>2024-06. Old template (missing ~30 newer settings). pylsp, <code>lsp-idle-delay 0.0</code>, <code>lsp-lens-debounce-interval 0.0</code>, semantic layer, two <code>custom-set-variables</code> blocks.</td></tr>
+<tr><td><code>.spacemacs.clean</code></td><td><span class="tag warn">live on Linux</span></td><td>2025-11. Newer template. pylsp + python-lsp-ruff with hard-coded <code>/root/.venv/base/bin/...</code>, jedi symbols disabled after a hang, <code>lsp-disabled-clients '(ruff)</code>. Fixes made here never reached the Mac file and vice versa.</td></tr>
+<tr><td><code>.spacemacs</code>, <code>.spacemacs_linux_CN</code></td><td><span class="tag">dead</span></td><td>2017/2018. Unreferenced.</td></tr>
+<tr><td><code>layers/sorg/</code></td><td><span class="tag bad">broken</span></td><td>Package spec <code>((org-mode local))</code> is malformed and names a non-existent package; its functions are named <code>sdefaults/post-init-helm</code> and <code>sdefaults/post-init-company</code> (another layer's hooks, one of them configuring org from a helm hook); <code>org-agenda-files</code> points at a 2015 machine. Spacemacs printed a warning at every start. Already dropped from the Linux file in 2025.</td></tr>
+<tr><td><code>layers/sdefaults/</code></td><td><span class="tag warn">mixed</span></td><td>Hard-coded GitHub token. <code>auto-complete</code> listed as a package (not a Spacemacs package since 2015, hook never ran). <code>(recentf :location local)</code> for a built-in. Redefinition of the built-in <code>recentf-track-opened-file</code>. <code>(set-frame-font "nil 22")</code>, measured: keeps the current family and forces size 22, silently overriding the dotfile's size 18. <code>dotspacemacs-line-numbers</code> set from a layer. Dead markdown path. Good, keep-worthy pieces: evil keys, recentf excludes, mdfind, spaceline toggles, fill-column, jk escape.</td></tr>
+<tr><td><code>layers/sdired/</code> + <code>dired+.el</code></td><td><span class="tag warn">double owner</span></td><td>dired+ declared both as an additional package via a recipe with an absolute <code>~/.spacemacs.d/dired+.el</code> path and as a layer package. Works, but is built through quelpa on every fresh install.</td></tr>
+<tr><td><code>snippets/</code></td><td><span class="tag good">fine</span></td><td>2017 copy of yasnippet-snippets. Loads; yasnippet reports a few duplicate identities with the bundled set (harmless).</td></tr>
+<tr><td><code>README.md</code>, <code>local/</code>, <code>install_source.sh</code></td><td><span class="tag">clutter</span></td><td>README was the untouched Spacemacs template ("this directory is ignored by Git"). <code>local/</code> empty. Font installer at the top level.</td></tr>
+<tr><td><code>.spacemacs.env</code>, <code>.spacemacs.env.old</code></td><td><span class="tag">untracked</span></td><td>Generated per machine from the login shell; contains the whole environment. Needed a <code>.gitignore</code>.</td></tr>
+</table>
+
+<h3>Tooling found on this Mac</h3>
+<dl class="kv">
+  <dt>Emacs</dt><dd>29.4 Emacs.app, tree-sitter yes, <strong>native compilation no</strong></dd>
+  <dt>Spacemacs</dt><dd>develop, July 2024 checkout; packages (lsp-mode, lsp-pyright, rustic, ...) from July 2024, flat elpa layout <code>~/.emacs.d/elpa/develop/</code></dd>
+  <dt>Python servers</dt><dd>pylsp 1.7.4, ruff 0.4.8 and the deprecated <code>ruff-lsp</code> inside conda env <code>ray_macos</code> (which is on Emacs' PATH); no pyright/basedpyright anywhere</dd>
+  <dt>Rust</dt><dd>rustc / rust-analyzer 1.91.1 via rustup in <code>~/.cargo/bin</code> (on Emacs' PATH)</dd>
+  <dt>Search</dt><dd><code>rg</code> installed but not in <code>dotspacemacs-search-tools</code>; <code>ag</code> installed</dd>
+</dl>
+
+<h2 id="causes">2. Why it froze on big repos</h2>
+<p>None of these is a single bug; each is Emacs doing synchronous work that scales with repository or file size. On vllm / verl / Megatron they add up to a frozen frame.</p>
+<table>
+<tr><th>#</th><th>Mechanism</th><th>Where it came from</th><th>Fix (commit)</th></tr>
+<tr><td>P1</td><td><strong>lsp file watchers.</strong> With <code>lsp-enable-file-watchers t</code> (default) lsp-mode walks the whole workspace in Emacs Lisp to register a watcher per directory, prompts "watching N files may be slow", and on macOS uses one kqueue descriptor per directory. Every change under <code>.git/</code>, <code>build/</code> etc. wakes Emacs.</td><td>lsp-mode default</td><td>off; rust-analyzer watches itself (7, 8)</td></tr>
+<tr><td>P2</td><td><strong>Zero debounce.</strong> <code>lsp-idle-delay 0.0</code> and <code>lsp-lens-debounce-interval 0.0</code>: a server round-trip on every keystroke, lenses re-fetched on every change.</td><td>.spacemacs.mac (Linux file removed these in 2025-04, "fix lsp freeze 0.0 latency issue")</td><td>0.5 s, lenses off (8)</td></tr>
+<tr><td>P3</td><td><strong>semantic.</strong> The semantic layer puts <code>semantic-mode</code> on <code>python-mode-hook</code>: every Python buffer is parsed by the Emacs Lisp wisent parser and cached in semanticdb (274 cache dirs had accumulated). The sticky-function header and lsp's breadcrumb both wrote <code>header-line-format</code>.</td><td>semantic layer + python layer</td><td>layer removed, lazy toggle kept (8)</td></tr>
+<tr><td>P4</td><td><strong>importmagic.</strong> The python layer enables <code>importmagic-mode</code> in every Python buffer; it spawns a Python EPC process per buffer that indexes site-packages (torch, etc.).</td><td>python layer default</td><td>package excluded (6)</td></tr>
+<tr><td>P5</td><td><strong>undo-tree history files.</strong> One history file per buffer, written on kill and read on visit; slow for large buffers and prone to corruption (1264 files in the cache).</td><td>Spacemacs default</td><td><code>undo-tree-auto-save-history nil</code> (8)</td></tr>
+<tr><td>P6</td><td><strong>pylsp / jedi.</strong> In-process indexing of the workspace; <code>workspace/symbol</code> walks everything. Your own 2025 commit found the hang and disabled jedi symbols; completion and hover were disabled too, leaving little of an IDE.</td><td>python layer with pylsp</td><td>basedpyright + ruff (6)</td></tr>
+<tr><td>P7</td><td><code>SPC /</code> without <code>rg</code> falls back to ag/grep.</td><td>.spacemacs.mac</td><td>rg first (8)</td></tr>
+</table>
+<p>Not changed, but worth knowing: this Emacs.app build has <strong>no native compilation</strong>; lsp-mode's JSON handling is noticeably faster with a native-comp build (<code>brew install emacs-plus@29 --with-native-comp</code> or emacs-mac). Also optional: <code>lsp-use-plists</code> (needs recompiling lsp packages) and updating the 2024-07 Spacemacs/package set. See <a href="#next">Recommendations</a>.</p>
+
+<h2 id="design">3. Plan and design decisions</h2>
+
+<div class="grid">
+<div class="card">
+<h3>One dotfile, every machine</h3>
+<p><code>init.el</code> is a real file generated from the Spacemacs template that matches the installed version, with your real settings merged in (the diff between template and your files was small: theme, font, line numbers, layers, user code). Machine differences are handled inside it (<code>system-type</code> checks, "pick the elpa layout that exists") or in an untracked <code>local.el</code>.</p>
+</div>
+<div class="card">
+<h3>Python: basedpyright + ruff server</h3>
+<p>Pyright-family servers are incremental, out-of-process and handle vllm-sized trees in "open files only" mode. basedpyright is the pip-installable build with node bundled, so one install script works on the Mac and in the Linux container (no npm). <code>ruff server</code> is ruff's own LSP (stable since 0.5) and replaces both the deprecated <code>ruff-lsp</code> wrapper and the python-lsp-ruff plugin. lsp-mode runs ruff as an add-on next to basedpyright: lint and formatting from ruff, everything else from basedpyright. Type checking is <code>"off"</code> by default so diagnostics look like your ruff-only pylsp did; one variable raises it.</p>
+</div>
+<div class="card">
+<h3>Rust: rust-analyzer</h3>
+<p>The rust layer already selects lsp when the lsp layer is present and rust-analyzer is installed via rustup. The config now says so explicitly and tells rust-analyzer to watch files itself, since Emacs-side watching is off.</p>
+</div>
+<div class="card">
+<h3>Habits first</h3>
+<p>Every key, face and behaviour you had was listed before changing anything (see <a href="#changes">section 6</a>). Where a mechanism had to go (semantic), the key you press (<code>, p</code>, <code>SPC j M</code>) still does the same job through a different engine.</p>
+</div>
+<div class="card">
+<h3>Safe to try, safe to undo</h3>
+<p><code>dotspacemacs-install-packages</code> is <code>used-but-keep-unused</code>, so switching between branches never uninstalls packages. Every change is one commit. Rolling back is <code>git checkout master</code>.</p>
+</div>
+<div class="card">
+<h3>Tested, not assumed</h3>
+<p>Nothing was evaluated in your running Emacs. <code>~/.emacs.d</code> was cloned (APFS clone, cache wiped) into a scratch HOME, and the branch was started there in batch mode and as a real Emacs.app window.</p>
+</div>
+</div>
+
+<h2 id="commits">4. Commits on <code>spacemacs-overhaul</code></h2>
+<p>Oldest first. <code>git log --stat master..spacemacs-overhaul</code> shows the same with files.</p>
+<table>
+<tr><th>#</th><th>Commit</th><th>What and why</th></tr>
+<tr><td>1</td><td><code>de9f456</code><br>Remove hard-coded GitHub token</td><td><code>paradox-github-token</code> literal removed from <code>layers/sdefaults/config.el</code>. Paradox prompts when the variable is nil. The token is still in history: revoke it.</td></tr>
+<tr><td>2</td><td><code>521269d</code><br>One init.el replaces four dotfiles and the symlink</td><td>Real <code>init.el</code> from the installed template with your settings merged; <code>.spacemacs</code>, <code>.spacemacs.clean</code>, <code>.spacemacs.mac</code>, <code>.spacemacs_linux_CN</code> deleted (kept in history). Meant to be behaviour-preserving; two deliberate differences: keep-unused package policy, elpa layout auto-detection so no machine re-downloads 300 packages.</td></tr>
+<tr><td>3</td><td><code>7a00695</code><br>sdefaults: remove dead and broken config</td><td>Drop <code>auto-complete</code>, the font hack, the layer-set dotspacemacs variable, the dead markdown path, the maximized hack (now a dotspacemacs setting). Stop clobbering a built-in recentf function; keep the dired-in-recentf behaviour via a hook. mdfind only on macOS. Evil keys and spaceline toggles unchanged.</td></tr>
+<tr><td>4</td><td><code>053a28a</code><br>sdired: vendor dired+ with one owner</td><td><code>dired+.el</code> moved to <code>layers/sdired/local/dired+/</code>, declared <code>:location local</code>; removed from additional packages. No absolute path, no quelpa build. <code>P</code> binding and buffer reuse unchanged.</td></tr>
+<tr><td>5</td><td><code>031a573</code><br>Remove broken sorg layer</td><td>Layer deleted; its two working settings (<code>org-startup-indented</code>, company+yasnippet in org) moved to user-config exactly as the Linux file had them. Empty <code>local/</code> removed.</td></tr>
+<tr><td>6</td><td><code>3e9b685</code><br>Python: basedpyright + ruff server, pylsp fallback</td><td>python layer: lsp backend, pyright client, lsp formatter, pytest, fill-column 65. user-config: basedpyright through the pyright client (works with old and new lsp-pyright), one server per project, open files only, <code>ruff server</code> for both lsp-mode client generations, <code>my/python-typecheck-mode</code>, <code>~/.local/bin</code> and <code>~/.cargo/bin</code> first on PATH, conda envs listed by <code>SPC m v w</code>, servers restart after an env switch, pylsp tuning kept for the fallback. Excluded importmagic, anaconda-mode, company-anaconda.</td></tr>
+<tr><td>7</td><td><code>13ab585</code><br>Rust: rust-analyzer settings</td><td>Explicit server command, server-side file watching, cargo check on save, proc macros and build scripts on, no format-on-save.</td></tr>
+<tr><td>8</td><td><code>28889fe</code><br>Stop the freezes on large repos</td><td>lsp layer variables (watchers off, 0.5 s debounce, lenses off, servers stop with their last buffer, no download prompts). semantic layer removed; <code>, p</code> toggles breadcrumb/stickyfunc and enables semantic lazily; <code>SPC j M</code> is <code>helm-semantic-or-imenu</code>. undo-tree keeps working but stops writing history files. <code>rg</code> first in search tools. <code>dotspacemacs-undo-system 'undo-tree</code> for newer Spacemacs.</td></tr>
+<tr><td>9</td><td><code>3a1f814</code><br>Adopt json, multiple-cursors, cmake layers</td><td>The three layers the Linux file had and the Mac did not. First start installs helm-ctest, evil-mc, cmake-mode.</td></tr>
+<tr><td>10</td><td><code>00cba75</code><br>Repo hygiene</td><td><code>scripts/install-lsp-servers.sh</code>, <code>local.el.example</code> plus loader, <code>.gitignore</code>, real README, font installer moved under <code>scripts/</code>.</td></tr>
+<tr><td>11</td><td>(this file)<br>Review report</td><td><code>docs/spacemacs-review.html</code>.</td></tr>
+</table>
+
+<h2 id="verify">5. Verification</h2>
+<p><strong>Method.</strong> <code>~/.emacs.d</code> (367 MB) was cloned with APFS clonefile into a scratch HOME and its <code>.cache</code> emptied, so the test Emacs shared nothing writable with your real one. basedpyright 1.x and ruff 0.17.2 were installed into a scratch venv and linked into the scratch <code>~/.local/bin</code>, exactly what the install script does for real. Tests opened a tiny git-initialised Python package with deliberate lint errors and a <code>cargo new</code> project with a deliberate type error.</p>
+
+<table>
+<tr><th>Check</th><th>Before (your current config)</th><th>After (branch)</th></tr>
+<tr><td>Startup warnings</td><td class="no">"package org-mode not initialized in layer sorg" every start</td><td class="ok">none</td></tr>
+<tr><td>GUI start to usable</td><td>not measured</td><td class="ok">5.4 s (Emacs.app, scratch cache, no native-comp)</td></tr>
+<tr><td>Python servers on opening a .py</td><td>pylsp + deprecated ruff-lsp add-on</td><td class="ok">pyright (basedpyright) + ruff, both initialised, in batch and GUI</td></tr>
+<tr><td>Ruff diagnostics</td><td>n/a</td><td class="ok">F401 x2, F821, F841 reported on the test file</td></tr>
+<tr><td><code>lsp-format-buffer</code> (SPC m = =)</td><td>n/a</td><td class="ok">buffer reformatted by ruff</td></tr>
+<tr><td>Rust server on opening main.rs</td><td>not reproduced</td><td class="ok">rust-analyzer initialised; saving a type error gives the rustc "mismatched types" diagnostic</td></tr>
+<tr><td>Effective lsp settings</td><td>watchers on, idle 0.0, lenses on</td><td class="ok">watchers off, idle 0.5, lenses off, rust-analyzer watcher = notify</td></tr>
+<tr><td>Look and feel in GUI</td><td>Source Code Pro 22 (via hack), tsdh-dark, maximized, line numbers</td><td class="ok">Source Code Pro 22, tsdh-dark, maximized, line numbers, breadcrumb header, company, flycheck, lsp-ui all on</td></tr>
+<tr><td>Keys in GUI</td><td>&mdash;</td><td class="ok"><code>SPC h h h</code>, <code>SPC j m</code>, <code>SPC j M</code>, <code>, p</code> bound as intended</td></tr>
+<tr><td><code>, p</code> toggle</td><td>both headers active at once</td><td class="ok">breadcrumb &rarr; stickyfunc (semantic enabled lazily) &rarr; breadcrumb</td></tr>
+<tr><td><code>local.el</code> hook</td><td>&mdash;</td><td class="ok">loaded when present</td></tr>
+<tr><td>New layers' packages</td><td>&mdash;</td><td class="ok">helm-ctest, evil-mc, cmake-mode installed from the TUNA mirror on first start</td></tr>
+</table>
+
+<p><strong>Not tested.</strong> Interactive use (completion popups, goto-definition with the mouse/keys) beyond the servers being attached and answering; Linux and the container (same config, same script, but not run there); behaviour on a real 50k-file repository (the mechanisms removed are the documented causes; a live check on vllm is the first thing to do after adopting). One cosmetic notice remains: rust-analyzer 1.91 logs "invalid config value" for one option lsp-mode 2024-07 still sends in its pre-2024 shape; diagnostics work regardless, and a package update clears it.</p>
+
+<h2 id="adopt">6. How to adopt it</h2>
+<ol>
+<li><strong>Revoke the token</strong> on GitHub (Settings &rarr; Developer settings &rarr; Personal access tokens). It has been public in this repo's history since 2017 regardless of what you do with the branch.</li>
+<li><strong>Switch the live config to the branch</strong> (the worktree has to be released first, because git allows a branch to be checked out in one place only):
+<pre><code>cd ~/sg21CodeLab/GitConfig
+git worktree remove ~/sg21CodeLab/GitConfig-wt-spacemacs-overhaul
+git checkout spacemacs-overhaul        # ~/.spacemacs.d now has the new init.el</code></pre>
+Or keep working on master and fast-forward it: <code>git merge --ff-only spacemacs-overhaul</code> after the worktree is removed.</li>
+<li><strong>Install the servers</strong> (no conda env is modified; ~1 min):
+<pre><code>~/.spacemacs.d/scripts/install-lsp-servers.sh</code></pre></li>
+<li><strong>Start Emacs.</strong> First start installs three packages (helm-ctest, evil-mc, cmake-mode). Open a Python file: the mode line shows <code>LSP[pyright:...][ruff-lsp:...]</code>. If a server is missing, <code>SPC m b d</code> describes the session.</li>
+<li><strong>Linux box / container:</strong> pull the branch, run the same script, optionally copy <code>local.el.example</code> to <code>local.el</code> for machine-specific paths (the <code>/root/.venv/base</code> settings from the old Linux file go there).</li>
+</ol>
+<p><strong>Roll back</strong> at any time: <code>git checkout master</code> in GitConfig and restart Emacs. Nothing was uninstalled, so the old config starts as before. <code>.spacemacs.env</code> and <code>.spacemacs.env.old</code> stay where they are (now git-ignored).</p>
+
+<h2 id="changes">7. What changes for you</h2>
+<h3>Stays exactly the same</h3>
+<ul>
+<li>Keys: <code>SPC h h h</code> / <code>SPC h h u</code> highlight, <code>SPC j m</code> lsp imenu, <code>, h s</code> signature, <code>, p</code> header toggle, <code>^</code> opens the directory in dired, insert-state <code>C-p C-n C-a C-e</code>, <code>jk</code> to normal state, dired <code>P</code> parent-following-symlinks, dired details hidden, dired+ buffer reuse.</li>
+<li>Look: tsdh-dark, Source Code Pro 22, maximized frame, line numbers in code and text, mode line without minor/major mode names, arrow separators setting.</li>
+<li>Python: ipython REPL, code cells with indented <code># %%</code> markers, 4-space indent, lsp formatter on <code>SPC m = =</code>, flycheck diagnostics from ruff.</li>
+<li>Misc: TUNA package mirrors, recentf excludes and 2048 entries, GNU <code>ls</code> listing switches, helm-locate via mdfind, fill-column 65 and auto-fill in text modes, org indented start-up, company+snippets in org.</li>
+</ul>
+<h3>Different, on purpose</h3>
+<table>
+<tr><th>Change</th><th>Why</th><th>Undo if you dislike it</th></tr>
+<tr><td>Header line shows lsp's breadcrumb by default; <code>, p</code> switches to the semantic sticky header</td><td>semantic parsing removed from every Python buffer (freeze source)</td><td>press <code>, p</code>; or add <code>semantic</code> back to the layer list</td></tr>
+<tr><td><code>SPC j M</code> runs <code>helm-semantic-or-imenu</code></td><td>same symbol list, fed by lsp when semantic is off</td><td>bind <code>helm-semantic</code> in local.el</td></tr>
+<tr><td>Undo history not saved across sessions</td><td>history files were slow and corrupting</td><td><code>(setq undo-tree-auto-save-history t)</code> in local.el</td></tr>
+<tr><td>Python diagnostics: ruff + basedpyright syntax/undefined-name/import errors; type checking off</td><td>robust on huge repos; same noise level as before</td><td><code>(setq my/python-typecheck-mode "basic")</code> in local.el</td></tr>
+<tr><td><code>, r f</code> (importmagic fix import) gone</td><td>importmagic excluded; lsp offers auto-import completions</td><td>remove <code>importmagic</code> from excluded packages</td></tr>
+<tr><td>Python fill-column 65 (was 79 in Python buffers)</td><td>matches <code>line-length = 65</code> in your ruff.toml</td><td><code>python-fill-column 79</code> in the python layer variables</td></tr>
+<tr><td>Test runner pytest instead of nose</td><td>nose is unmaintained</td><td><code>python-test-runner 'nose</code></td></tr>
+<tr><td>multiple-cursors layer (evil-mc, <code>g r</code> prefix), json and cmake layers</td><td>your Linux file already had them</td><td>remove from the layer list</td></tr>
+<tr><td><code>SPC m v w</code> lists conda envs; after switching, the buffer's servers restart</td><td>basedpyright must know the interpreter</td><td><code>(setenv "WORKON_HOME" nil)</code></td></tr>
+<tr><td><code>rg</code> used by <code>SPC /</code></td><td>installed, fastest</td><td>reorder <code>dotspacemacs-search-tools</code></td></tr>
+<tr><td>Unused packages are kept instead of auto-removed</td><td>switching branches must not uninstall anything</td><td><code>dotspacemacs-install-packages 'used-only</code></td></tr>
+</table>
+
+<h2 id="next">8. Recommendations not done here</h2>
+<ul>
+<li><strong>Emacs build with native compilation</strong> (emacs-plus or emacs-mac). The single biggest remaining speed-up for lsp-mode on this machine.</li>
+<li><strong>Update Spacemacs and packages</strong> (<code>git pull</code> in <code>~/.emacs.d</code>, then <code>SPC f e U</code>). lsp-mode/lsp-pyright/rustic are from July 2024; newer versions name the ruff client <code>ruff</code> and know basedpyright natively. The config already handles both generations, so the update is optional and can wait until the new setup has settled.</li>
+<li><strong>ruff settings on the Mac.</strong> Your <code>GitConfig/python/.config/ruff/ruff.toml</code> (line-length 65, isort rules) is installed on the Linux boxes but not on this Mac (<code>~/.config/ruff/</code> does not exist), so ruff uses defaults here unless a project has its own <code>pyproject.toml</code>. Symlink it if you want the same rules everywhere.</li>
+<li><strong>dired+</strong> is a 2023 single-file package with <code>cl</code> and <code>case</code> deprecation warnings under Emacs 29; it works, but it is the most likely thing to break on a future Emacs upgrade. <code>dired-hide-details-mode</code> plus <code>dired-kill-when-opening-new-dired-buffer</code> cover most of what it is used for here.</li>
+<li><strong>Snippets:</strong> <code>snippets/python-mode</code> duplicates entries from the bundled yasnippet-snippets (yasnippet warns "multiple snippets with same identity"). Deleting the private copies that are identical to the bundled ones removes the warning.</li>
+<li><strong>Linux check:</strong> after pulling the branch on the Tokyo container, run the install script and open a Python file; the only expected difference is <code>local.el</code> for interpreter paths.</li>
+</ul>
+
+<p class="sub">Report written by Claude as part of the review session; evidence files (batch and GUI logs) were produced in a scratch directory and are summarised in section 5.</p>
+</main>
+</body>
+</html>
