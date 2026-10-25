@@ -52,7 +52,6 @@ This function should only modify configuration layer settings."
      ;; ---- private layers (in ~/.spacemacs.d/layers) -----------------
      sdefaults
      sdired
-     sorg
 
      ;; ---- languages -------------------------------------------------
      c-c++
@@ -636,8 +635,20 @@ before packages are loaded."
 
   ;;;; General
   (add-hook 'doc-view-mode-hook 'auto-revert-mode)
+
+  ;;;; Org
   (setq org-mobile-directory
         "~/Library/Mobile Documents/iCloud~com~mobileorg~mobileorg/Documents")
+  (with-eval-after-load 'org
+    (setq org-startup-indented t))
+  ;; Company completion with snippets in org buffers.
+  (with-eval-after-load 'company
+    (add-hook 'org-mode-hook 'company-mode)
+    (with-eval-after-load 'yasnippet
+      (add-hook 'org-mode-hook
+                (lambda ()
+                  (setq-local company-backends
+                              (cons 'company-yasnippet company-backends))))))
 
   ;;;; macOS: Homebrew PATH and GNU ls for dired
   (when (eq system-type 'darwin)
