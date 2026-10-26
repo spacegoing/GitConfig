@@ -1,0 +1,31 @@
+#+TITLE: sdev layer
+
+* Description
+Private layer with the development setup shared by every machine:
+language servers for Python (basedpyright + ruff) and Rust (rust-analyzer),
+the lsp-mode settings that keep large repos (vllm, verl, Megatron) from
+freezing Emacs, conda/venv switching, and a few keys.
+
+Both dotfiles (=init.macos.el=, =init.linux.el=) list this layer last, so
+the dotfiles themselves hold only what differs per OS.
+
+* Files
+- =config.el= : variables (lsp tuning, server options, PATH for =~/.local/bin= and =~/.cargo/bin=)
+- =funcs.el= : =my-toggle-headerline-modes=, lsp restart after venv change
+- =packages.el= : additions to the python, pyvenv, code-cells and lsp-mode packages
+- =keybindings.el= : =SPC h h h/u=, =SPC j m/M=
+
+* Key bindings
+| Key         | Description                                           |
+|-------------+-------------------------------------------------------|
+| ~SPC h h h~ | highlight symbol at point                             |
+| ~SPC h h u~ | remove a highlight                                    |
+| ~SPC j m~   | lsp symbol tree (lsp-ui-imenu)                        |
+| ~SPC j M~   | symbol list (helm semantic or imenu)                  |
+| ~, h s~     | python: signature of the call at point                |
+| ~, p~       | python: toggle header line breadcrumb <-> stickyfunc  |
+
+* Servers
+Install with =~/.spacemacs.d/scripts/install-lsp-servers.sh= (uses uv for
+basedpyright and ruff, rustup for rust-analyzer). Per-machine overrides go to
+=~/.spacemacs.d/local.el= (see =local.el.example=).
