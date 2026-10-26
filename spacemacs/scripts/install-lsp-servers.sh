@@ -1,43 +1,63 @@
 #!/usr/bin/env bash
-# Install the language servers that ~/.spacemacs.d/init.el expects.
+# Install the language servers used by ~/.spacemacs.d (layers/sdev):
 #
-#   basedpyright  -> basedpyright-langserver  Python IDE features
-#   ruff          -> ruff server              Python lint / format / imports
-#   rust-analyzer -> via rustup               Rust
+#   basedpyright   Python IDE features (pyright fork, node bundled)   via uv
+#   ruff           Python lint + format, has its own language server  via uv
+#   rust-analyzer  Rust                                               via rustup
 #
-# Nothing is installed into a conda env: Python tools go into a private
-# venv under ~/.local/share/lsp-servers and are symlinked into ~/.local/bin,
-# which init.el puts at the front of exec-path. Re-run to upgrade.
+# All Python tooling goes through uv: `uv tool install` gives each tool its
+# own isolated venv under ~/.local/share/uv/tools and links the executables
+# into ~/.local/bin, which layers/sdev/config.el puts first on PATH inside
+# Emacs. Nothing is written into your conda/project environments.
 #
-# Works on macOS and Linux (incl. the dev container); needs python3 >= 3.8
-# and network access (pip honours HTTPS_PROXY).
+# Re-run any time to upgrade (uv tool upgrade --all).
+#
+# Env:
+#   UV_INSTALL_DIR  where to put uv itself if it is missing   (default ~/.local/bin)
+#   NO_RUST=1       skip rust-analyzer
 set -euo pipefail
 
-PREFIX="${LSP_PREFIX:-$HOME/.local/share/lsp-servers}"
-BIN="${LSP_BIN:-$HOME/.local/bin}"
-PY="${PYTHON:-$(command -v python3 || command -v python)}"
+bin=${UV_INSTALL_DIR:-$HOME/.local/bin}
+export PATH="$bin:$HOME/.cargo/bin:$PATH"
 
-mkdir -p "$BIN"
-echo "==> Python servers: venv $PREFIX (using $PY)"
-if [ ! -x "$PREFIX/bin/python" ]; then
-    "$PY" -m venv "$PREFIX"
+say() { printf '\033[1m==> %s\033[0m\n' "$*"; }
+
+# ---- uv ---------------------------------------------------------------------
+if ! command -v uv >/dev/null 2>&1; then
+  say "installing uv into $bin"
+  curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="$bin" UV_NO_MODIFY_PATH=1 sh
 fi
-"$PREFIX/bin/python" -m pip install --quiet --disable-pip-version-check \
-    --upgrade pip basedpyright ruff
-for exe in basedpyright basedpyright-langserver ruff; do
-    ln -sfn "$PREFIX/bin/$exe" "$BIN/$exe"
+say "uv $(uv --version | awk '{print $2}')"
+
+# ---- basedpyright + ruff ----------------------------------------------------
+for tool in basedpyright ruff; do
+  if uv tool list 2>/dev/null | grep -q "^$tool "; then
+    say "upgrading $tool"
+    uv tool upgrade "$tool"
+  else
+    say "installing $tool"
+    uv tool install "$tool"
+  fi
 done
-echo "    $("$BIN/ruff" --version)"
-echo "    basedpyright $("$PREFIX/bin/python" -m pip show basedpyright | awk '/^Version/ {print $2}')"
+say "basedpyright $(basedpyright --version | head -1 | awk '{print $2}')  ($(command -v basedpyright-langserver))"
+say "ruff $(ruff --version | awk '{print $2}')  ($(command -v ruff))"
 
-echo "==> rust-analyzer"
-if command -v rustup >/dev/null 2>&1; then
-    if ! rustup component list --installed 2>/dev/null | grep -q '^rust-analyzer'; then
-        rustup component add rust-analyzer
-    fi
-    echo "    $("$HOME/.cargo/bin/rust-analyzer" --version)"
-else
-    echo "    rustup not found; install it from https://rustup.rs and re-run this script."
+# ---- rust-analyzer ----------------------------------------------------------
+if [[ -z ${NO_RUST:-} ]]; then
+  if ! command -v rustup >/dev/null 2>&1; then
+    say "installing rustup (stable, minimal profile)"
+    curl -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --no-modify-path
+  fi
+  if ! rustup component list --installed 2>/dev/null | grep -q '^rust-analyzer'; then
+    say "adding rust-analyzer component"
+    rustup component add rust-analyzer rustfmt clippy
+  fi
+  say "rust-analyzer $(rust-analyzer --version | awk '{print $2}')  ($(command -v rust-analyzer))"
 fi
 
-echo "==> Done. Restart Emacs, or run 'SPC m b r' in an open Python/Rust buffer."
+# ---- PATH check -------------------------------------------------------------
+case ":$PATH:" in
+  *":$bin:"*) ;;
+  *) say "NOTE: add $bin to PATH in your shell rc (Emacs already finds it)";;
+esac
+say "done"
