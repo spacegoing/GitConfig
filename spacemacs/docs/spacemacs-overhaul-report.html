@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spacemacs Overhaul Report</title>
+<meta name="description" content="What was done to ~/.spacemacs.d in October 2026, how it was verified in a Linux container and on the Mac, and every commit explained.">
+<style>
+:root{--bg:#fbfaf7;--fg:#1f2328;--muted:#5b6470;--line:#d9d4c7;--card:#ffffff;--accent:#0b6e4f;--accent2:#8a4b08;--kbd-bg:#f0ece2;--kbd-line:#bcb4a2;--code-bg:#f3f1ea;--warn:#8a4b08;--ok:#0b6e4f;--bad:#a3262c}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#15181c;--fg:#e6e3dc;--muted:#a3a79f;--line:#2e343b;--card:#1c2026;--accent:#5fd3a6;--accent2:#e2a865;--kbd-bg:#242a31;--kbd-line:#48515b;--code-bg:#20252b;--warn:#e2a865;--ok:#5fd3a6;--bad:#f08a8e}}
+:root[data-theme="dark"]{--bg:#15181c;--fg:#e6e3dc;--muted:#a3a79f;--line:#2e343b;--card:#1c2026;--accent:#5fd3a6;--accent2:#e2a865;--kbd-bg:#242a31;--kbd-line:#48515b;--code-bg:#20252b;--warn:#e2a865;--ok:#5fd3a6;--bad:#f08a8e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+main{max-width:1000px;margin:0 auto;padding:32px 16px 80px}
+h1{font-size:2rem;margin:0 0 4px;letter-spacing:-.01em}
+h2{font-size:1.4rem;margin:48px 0 12px;padding-top:12px;border-top:1px solid var(--line)}
+h3{font-size:1.08rem;margin:28px 0 8px}
+h4{font-size:1rem;margin:20px 0 6px;color:var(--accent2)}
+p.lead{color:var(--muted);margin:0 0 20px;font-size:1.05rem}
+kbd{display:inline-block;font:0.86em ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--kbd-bg);border:1px solid var(--kbd-line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;white-space:nowrap}
+code{font:0.9em ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--code-bg);padding:1px 5px;border-radius:4px}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow:auto;font:0.85em/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre code{background:none;padding:0}
+table{width:100%;border-collapse:collapse;margin:12px 0 20px;font-size:0.93rem}
+th,td{text-align:left;vertical-align:top;padding:7px 10px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:600;font-size:0.82rem;text-transform:uppercase;letter-spacing:.04em}
+td.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:14px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.ok{color:var(--ok);font-weight:600} .warn{color:var(--warn);font-weight:600} .bad{color:var(--bad);font-weight:600}
+.hash{font:0.85em ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--muted)}
+ul{padding-left:22px} li{margin:4px 0}
+nav{display:flex;flex-wrap:wrap;gap:8px 16px;margin:18px 0 8px;font-size:.95rem}
+nav a{color:var(--accent);text-decoration:none} nav a:hover{text-decoration:underline}
+a{color:var(--accent)}
+.small{color:var(--muted);font-size:.9rem}
+.todo{border-left:4px solid var(--accent2);padding-left:14px}
+</style>
+</head>
+<body>
+<main>
+<h1>Spacemacs overhaul report</h1>
+<p class="lead">October 2026. The <code>~/.spacemacs.d</code> repository was reviewed, rebuilt against the current Spacemacs develop branch and Emacs 30, developed and tested inside a Linux container, then staged on the Mac. This page records what was done, how each step was verified, and what every commit on the <code>spacemacs-overhaul</code> branch contains. The companion <a href="spacemacs-manual.html">manual</a> is the day-to-day guide.</p>
+
+<nav>
+<a href="#status">Status</a>
+<a href="#start">Starting point</a>
+<a href="#plan">Plan</a>
+<a href="#design">Decisions</a>
+<a href="#container">Container verification</a>
+<a href="#mac">Mac verification</a>
+<a href="#commits">Commits</a>
+<a href="#adopt">Your part</a>
+<a href="#caveats">Caveats</a>
+<a href="#harness">Appendix: harness</a>
+</nav>
+
+<h2 id="status">Status in one screen</h2>
+<div class="grid">
+<div class="card">
+<h3 style="margin-top:0">Done</h3>
+<ul>
+<li>18 commits on <code>spacemacs-overhaul</code> (11 review commits, 7 from this phase), nothing on <code>master</code> touched.</li>
+<li>Dotfiles regenerated from the current Spacemacs template; one file per OS, the symlink stays your switch.</li>
+<li>Python: basedpyright + ruff server through lsp-mode, installed with uv. Rust: rust-analyzer from rustup.</li>
+<li>Verified in a Debian 13 container (Emacs 30.1, Spacemacs develop <code>88393ec34</code>) on vllm, verl, Megatron-LM and a Rust crate, twice, plus two baseline runs with the old settings for comparison.</li>
+<li>Verified on this Mac with GUI Emacs 30.2 (emacs-plus) and a staged <code>~/.emacs.d-next</code>, twice.</li>
+<li>Manual and this report written; README, local.el.example, install and switch scripts updated.</li>
+</ul>
+</div>
+<div class="card todo">
+<h3 style="margin-top:0">Left for you (by design)</h3>
+<ol>
+<li>Quit Emacs. In <code>~/.spacemacs.d</code> run <code>git checkout spacemacs-overhaul</code>.</li>
+<li>Run <code>scripts/mac-switch.sh</code>. It backs up <code>~/.emacs.d</code>, moves <code>~/.emacs.d-next</code> into place and points <code>init.el</code> at <code>init.macos.el</code>.</li>
+<li>Open the Emacs 30.2 app it prints (and optionally link it into <code>/Applications</code>).</li>
+<li>Revoke the leaked token at github.com/settings/tokens (details in <a href="#c-de9f456">the first commit</a>).</li>
+</ol>
+<p class="small">Undo at any time: <code>scripts/mac-switch.sh --undo ~/.emacs.d.bak-&lt;date&gt;</code>, then <code>git checkout master</code>. See <a href="#adopt">Your part</a>.</p>
+</div>
+</div>
+
+<h2 id="start">Starting point</h2>
+<p>The repository on <code>master</code> (commit <code>12362e3</code>) had grown since 2015 and 2017 without a cleanup. The review phase found these problems; each is fixed by one of the commits below.</p>
+<table>
+<tr><th>Finding</th><th>Effect you saw</th><th>Fixed in</th></tr>
+<tr><td>A GitHub personal access token in <code>layers/sdefaults/config.el</code>, committed in 2017</td><td>Leaked credential in git history</td><td><a href="#c-de9f456">de9f456</a> + your revocation</td></tr>
+<tr><td>Four dotfiles (<code>.spacemacs.mac</code>, <code>.spacemacs.clean</code>, <code>.spacemacs</code>, <code>.spacemacs_linux_CN</code>) that had drifted apart; <code>init.el</code> was an absolute symlink that only resolved on this Mac</td><td>Fixes made on one machine never reached the other</td><td><a href="#c-521269d">521269d</a>, <a href="#c-4f682d1">4f682d1</a></td></tr>
+<tr><td>lsp-mode file watchers on, <code>lsp-idle-delay</code> 0.0, code lenses on, pylsp with jedi workspace indexing, importmagic indexing per buffer, the semantic layer parsing every Python and C buffer</td><td>Emacs froze on vllm / verl / Megatron-LM</td><td><a href="#c-28889fe">28889fe</a>, <a href="#c-3e9b685">3e9b685</a>, <a href="#c-89df127">89df127</a></td></tr>
+<tr><td>The <code>sorg</code> layer never worked (malformed package list, functions named after another layer, 2015 agenda path)</td><td>"package org-mode not initialized" at every start, <kbd>SPC a o a</kbd> errored</td><td><a href="#c-031a573">031a573</a></td></tr>
+<tr><td><code>dired+</code> declared twice, once through an absolute path; <code>auto-complete</code> package that no longer exists; <code>recentf</code> built-in redefined; a hidden <code>set-frame-font "nil 22"</code> overriding your font size</td><td>Warnings at start, font size not what the dotfile said</td><td><a href="#c-7a00695">7a00695</a>, <a href="#c-053a28a">053a28a</a></td></tr>
+<tr><td>1200+ undo-tree history files, 274 semanticdb directories in the cache</td><td>Slow saves on big buffers, "Create directory for SemanticDB?" at exit</td><td><a href="#c-28889fe">28889fe</a>, <a href="#c-89df127">89df127</a></td></tr>
+<tr><td>The 2017-era dotfile template no longer passes the develop branch's validation (<code>dotspacemacs-search-tools</code> rejects <code>"pt"</code>; <code>dotspacemacs-directory</code> now comes from <code>early-init.el</code>)</td><td>Would not start on the current Spacemacs</td><td><a href="#c-4f682d1">4f682d1</a></td></tr>
+</table>
+<p>The full review with root-cause explanations is in <a href="spacemacs-review.html">docs/spacemacs-review.html</a> (commit c218692).</p>
+
+<h2 id="plan">Plan and how it went</h2>
+<ol>
+<li><strong>Develop in a lightweight Linux container</strong> against the latest Spacemacs develop branch, with your real repos mounted, Python tooling installed through uv, so nothing touches the Emacs you use every day.</li>
+<li><strong>Replicate on the Mac</strong>: install Emacs 30 from emacs-plus next to the existing one, clone Spacemacs develop into <code>~/.emacs.d-next</code>, install the servers with the same uv script, run the same developer session against GUI Emacs.</li>
+<li><strong>You flip the switch</strong> with <code>scripts/mac-switch.sh</code> once you have read this.</li>
+</ol>
+<p>Two things changed along the way. The <code>silex/emacs</code> images are amd64 only, so the container is plain <code>debian:trixie-slim</code> with Debian's Emacs 30.1 (arm64 native, no emulation). And the develop branch moved <code>dotspacemacs-directory</code> into <code>early-init.el</code>, which is why the generated dotfiles come from the develop template rather than from editing the 2017 one.</p>
+
+<h2 id="design">Design decisions</h2>
+<h3>One dotfile per OS, the symlink stays</h3>
+<p>You asked to keep <code>ln -s</code> as the way to pick the init file and not to have a unified file. Spacemacs itself has no "per-OS dotfile" switch: it reads exactly one file, <code>$SPACEMACSDIR/init.el</code> (or <code>~/.spacemacs</code>). So the layout is:</p>
+<pre><code>~/.spacemacs.d/
+  init.el        -&gt; init.macos.el   (symlink, git-ignored; on Linux: -&gt; init.linux.el)
+  init.macos.el                      full dotfile, macOS values
+  init.linux.el                      full dotfile, Linux values
+  layers/sdev/                       everything that is the same on both</code></pre>
+<p>The two files are generated from the same template and the same layer list by a small script, so they differ only in the OS blocks (font sizes and fallbacks, line numbers, undo system, Homebrew PATH, GNU ls dired switches, iCloud org directory). Everything else lives in the <code>sdev</code> layer, which both load. The result is what you had, minus the drift: the shared part cannot diverge because there is one copy of it.</p>
+<p><code>init.el</code> is git-ignored so each machine can point it wherever it wants without producing a diff. The one-time step on a machine is the <code>ln -sfn</code> you already know.</p>
+
+<h3>Latest Spacemacs develop, Emacs 30</h3>
+<p>Spacemacs develop HEAD <code>88393ec34</code> (2026-10-20) with Emacs 30 (30.2 on the Mac, 30.1 in Debian 13). Emacs 30 brings native compilation, which makes lsp-mode noticeably faster, at the cost of a one-time compile when a package is first loaded (see <a href="#caveats">caveats</a>). The new Spacemacs also has <code>dotspacemacs-undo-system</code>, so the Mac keeps undo-tree while Linux uses the built-in undo-redo, each chosen in its dotfile.</p>
+
+<h3>Python: basedpyright + ruff server, installed with uv</h3>
+<p>pylsp with jedi indexes the workspace in-process and is what hung on repos of this size. basedpyright is pyright packaged for pip/uv with node bundled, so the same <code>uv tool install basedpyright</code> works on the Mac and in the container. ruff's own language server does lint, format (<kbd>SPC m = =</kbd>) and import organisation. lsp-mode runs the two side by side. Type checking is "off" by default so untyped ML code does not light up; one line in <code>local.el</code> raises it. pylsp stays one word away in the dotfile, with its tuning kept.</p>
+<p>basedpyright finds the interpreter on its own: the venv activated with <kbd>SPC m v w</kbd>, else <code>./.venv</code> or <code>./venv</code> in the project (uv convention), else <code>python</code> on PATH. The test repos each had a uv venv at <code>.venv</code> with the project installed, which is the real dev scenario.</p>
+
+<h3>Rust: rust-analyzer from rustup</h3>
+<p>Already in use; now with explicit settings so it watches files itself (lsp-mode's watchers are off), runs <code>cargo check</code> on save and does not format on save.</p>
+
+<h3>What was deliberately not changed</h3>
+<p>Your keys and habits: helm, evil, the <kbd>SPC h h h</kbd> highlight, <kbd>, p</kbd> header toggle, <kbd>SPC j M</kbd>, the dired+ setup, theme tsdh-dark, Source Code Pro 22, TUNA mirrors, the <code>*spacegoing*</code> home buffer. The manual's <a href="spacemacs-manual.html#changed">"what changed"</a> table has the short list of visible differences.</p>
+
+<h2 id="container">Verification in the container</h2>
+<p>Container <code>spacemacs-dev</code>: Debian 13 (arm64), Emacs 30.1 (<code>emacs-nox</code>, run as <code>emacs -nw</code> inside tmux), Spacemacs develop <code>88393ec34</code>, 289 packages installed from the TUNA mirrors, basedpyright 1.40.2, ruff 0.17.2, pylsp 1.15.0 (for the baseline), rust-analyzer from rustup. Repositories were APFS clones of your local vllm, verl and Megatron-LM checkouts with uv venvs created inside the container, plus a small cargo project.</p>
+<p>A driver script typed the keys a developer types, through tmux, and measured what Emacs did. In parallel an <code>emacsclient --eval t</code> probe ran three times a second; its round-trip time is how long Emacs was unresponsive at that moment, which is the "freeze" you reported. The session per repo was:</p>
+<ol>
+<li>Open a large file (<code>vllm/v1/worker/gpu_model_runner.py</code>, <code>verl/trainer/ppo/ray_trainer.py</code>, <code>megatron/core/transformer/transformer_layer.py</code>), answer the one-time "import project root" prompt with <kbd>i</kbd>, wait for both servers.</li>
+<li>Hover on an imported name, <kbd>SPC m g g</kbd> to its definition (lands in a typeshed stub), type <code>os.path.jo</code> and check the company popup.</li>
+<li>Add an unused import and badly spaced code; check ruff and basedpyright diagnostics; <kbd>SPC m = =</kbd> to format.</li>
+<li><kbd>, p</kbd> twice (breadcrumb to sticky function header and back), <kbd>SPC j M</kbd>, <kbd>SPC p f</kbd>, <kbd>SPC /</kbd>, <kbd>SPC g s</kbd>.</li>
+<li>Close all file buffers, check the servers.</li>
+<li>Rust: open <code>main.rs</code>, hover, insert a type error, save, expect rustc's "mismatched types".</li>
+<li>Quit; check the <code>*Warnings*</code> buffer and that Emacs exited without a question.</li>
+</ol>
+
+<h3>New configuration (run3, final; run4 repeated after the baseline)</h3>
+<table>
+<tr><th>Step</th><th>vllm (3935 files)</th><th>verl (1491 files)</th><th>Megatron-LM (2251 files)</th></tr>
+<tr><td>Emacs up, Spacemacs initialised</td><td colspan="3">1.5 s to a usable frame</td></tr>
+<tr><td>File visible after <kbd>SPC f f</kbd></td><td class="num">1.7 s (first python buffer)</td><td class="num">0.09 s</td><td class="num">0.13 s</td></tr>
+<tr><td>Both servers initialised after <kbd>i</kbd></td><td class="num">0.6 s</td><td class="num">&lt;0.1 s</td><td class="num">&lt;0.1 s</td></tr>
+<tr><td>First diagnostics</td><td class="num">11.6 s (basedpyright, 6)</td><td class="num">&lt;0.1 s (ruff 5, basedpyright 1)</td><td class="num">&lt;0.1 s (basedpyright 2)</td></tr>
+<tr><td>Hover</td><td class="num">0.53 s</td><td class="num">0.52 s</td><td class="num">0.53 s</td></tr>
+<tr><td><kbd>SPC m g g</kbd> on <code>defaultdict</code> / <code>ABC</code></td><td><span class="ok">__init__.pyi</span></td><td><span class="ok">__init__.pyi</span></td><td><span class="ok">abc.py</span></td></tr>
+<tr><td>Completion popup for <code>os.path.jo</code></td><td><span class="ok">join</span></td><td><span class="ok">join</span></td><td><span class="ok">join</span></td></tr>
+<tr><td>Ruff diagnostics after edit</td><td><span class="ok">2</span></td><td><span class="ok">2</span></td><td><span class="warn">none, see note</span></td></tr>
+<tr><td><kbd>SPC m = =</kbd> reformatted</td><td class="num">0.5 s <span class="ok">yes</span></td><td><span class="warn">timed out in the container runs (driver typing, see run4); passed on the Mac</span></td><td class="num">0.05 s <span class="ok">yes</span></td></tr>
+<tr><td><kbd>, p</kbd> twice</td><td colspan="3"><span class="ok">stickyfunc on then breadcrumb back</span>, in all three</td></tr>
+<tr><td><kbd>SPC g s</kbd> magit status</td><td class="num">1.5 s (first use)</td><td class="num">&lt;0.1 s</td><td class="num">&lt;0.1 s</td></tr>
+<tr><td>Emacs RSS after the repo</td><td class="num">263 MB</td><td class="num">292 MB</td><td class="num">301 MB</td></tr>
+<tr><td>Rust: rust-analyzer, hover, "mismatched types" on save</td><td colspan="3"><span class="ok">all three</span>, hover 0.53 s, diagnostics 0.6 s after save</td></tr>
+<tr><td><code>*Warnings*</code> at the end</td><td colspan="3"><span class="ok">empty</span></td></tr>
+</table>
+<p><strong>Responsiveness during the whole session (run3)</strong>: 1451 probes, mean 12 ms, 7 above 300 ms, 4 above 1 s, worst 2.4 s (opening magit on vllm the first time). No probe during editing, hovering, completing or formatting exceeded 300 ms.</p>
+<p class="small">Megatron-LM note: its <code>pyproject.toml</code> selects only rule S506 for ruff, so ruff correctly reports nothing on an unused import there; basedpyright reported it instead ("Import collections_zz_unused is not accessed"). Format still works. The "servers left" count after closing buffers reflects the driver killing buffers in bulk from Lisp; closing them with <kbd>SPC b d</kbd> stops the servers as intended (checked separately).</p>
+
+<h3 id="run4">Repeat run (run4)</h3>
+<p>The identical session a second time, after the baseline runs, with the current config and a warm package cache. Results agree with run3: Emacs up in 1.9 s, servers initialised on all three repos, hover 0.52 s each, <kbd>SPC m g g</kbd> lands in <code>__init__.pyi</code> / <code>abc.py</code>, ruff and basedpyright diagnostics present, <kbd>, p</kbd> toggles both ways, magit opens (1.4 s the first time, under 10 ms after), rust-analyzer hover 0.52 s and "mismatched types" 0.58 s after save, <code>*Warnings*</code> empty, Emacs quit on <kbd>SPC q q</kbd> without any question. Memory 264 to 300 MB. Responsiveness: 1653 probes, mean 11 ms, 9 above 300 ms, 5 above 1 s, worst 2.4 s (again magit's first open on vllm).</p>
+<p>Two steps did not pass in run4 and both trace back to the test driver, not the configuration: the text it typed into two buffers through tmux arrived garbled ("ort os" instead of "import os", a race between the keystrokes and evil entering insert state), which left the file with a syntax error. ruff then correctly refused to format ("No formatting changes provided") and completion had nothing to complete. The same steps passed in run3 (vllm, Megatron-LM) and in both Mac runs, where the driver calls the real key binding instead of typing. Stale lock files from a killed baseline Emacs also produced one "file locked by pid" question in the Megatron-LM buffer; they were removed before the next run.</p>
+
+<h3 id="baseline">Baseline: the same session with the old settings</h3>
+<p>To quantify what the overhaul removes, the identical driver session was run with a dotfile carrying the pre-overhaul settings: pylsp as the Python server with jedi symbols, pyflakes, pycodestyle and mccabe on, the semantic layer, lsp file watchers on with no threshold, <code>lsp-idle-delay</code> 0.0, code lenses on, workspaces kept alive, and anaconda-mode / importmagic not excluded.</p>
+<p>Two baseline runs were made, both on the same Spacemacs develop and Emacs 30.1 as the new config.</p>
+<h4>Baseline 1: old settings including the semantic layer</h4>
+<p>lsp-mode never came up. On all three repos the Python buffer opened (1.5 s on vllm), flycheck's own python checker ran, but after 120 s no language server had started and <code>lsp-mode</code> was not even loaded, so there was no hover, no goto definition, no completion from a server, no ruff. <kbd>, p</kbd> could not toggle anything. The first start of this dotfile also failed to byte-compile the layer's <code>srefactor</code> package on Emacs 30 ("There should be a mode declaration in .../srecode/c.srt"). The same dotfile loaded in a batch session does load lsp-mode, so the exact interactive failure was not pinned down; what is established is that the semantic layer, as the old config used it, is incompatible with the current Spacemacs and Emacs 30 in practice, and that removing it (which the new config does) makes the difference.</p>
+<h4>Baseline 2: old lsp settings, semantic layer removed</h4>
+<p>pylsp started on every repo; the driver's "two servers initialised" check reports a timeout only because it looks for pyright and ruff. What the old settings gave versus the new config in the same container:</p>
+<table>
+<tr><th>Measure</th><th>Old settings (pylsp, watchers, idle 0, lenses)</th><th>New config (basedpyright + ruff)</th></tr>
+<tr><td>Diagnostics on opening <code>gpu_model_runner.py</code></td><td>pycodestyle 353, mccabe 8 (style noise on every line)</td><td>basedpyright 6</td></tr>
+<tr><td>Diagnostics on opening <code>ray_trainer.py</code></td><td>pycodestyle 311, mccabe 2</td><td>ruff 5, basedpyright 1</td></tr>
+<tr><td>Completion response, vllm</td><td class="num">22.3 s (company gave up: "Timeout while waiting for response")</td><td class="num">&lt;0.01 s</td></tr>
+<tr><td>Completion response, verl</td><td class="num">5.6 s</td><td class="num">&lt;0.01 s</td></tr>
+<tr><td>Completion response, Megatron-LM</td><td class="num">1.0 s</td><td class="num">&lt;0.01 s</td></tr>
+<tr><td>Hover, vllm</td><td class="num">1.0 s</td><td class="num">0.5 s</td></tr>
+<tr><td>Lint after an edit (unused import)</td><td>pyflakes reported it on verl only within 60 s; nothing on vllm and Megatron-LM</td><td>ruff within 10 ms on vllm and verl; basedpyright on Megatron-LM</td></tr>
+<tr><td><kbd>SPC m = =</kbd></td><td>"No formatting changes provided" (no formatter configured in pylsp)</td><td>ruff format (container run3, both Mac runs)</td></tr>
+<tr><td>Emacs RSS after the three repos</td><td class="num">317 MB</td><td class="num">300 MB</td></tr>
+<tr><td>Responsiveness probe</td><td>3498 samples, mean 7 ms, worst 2.2 s, 6 above 1 s</td><td>1653 samples, mean 11 ms, worst 2.4 s, 5 above 1 s</td></tr>
+</table>
+<p>On Linux the file watchers did not freeze Emacs itself: inotify watches are cheap, Linux is not where the freezes were reported, and the container's Emacs 30 has native compilation. The parts of the old setup that hurt everywhere are measurable above: a completion that takes 5 to 22 s and then times out, hundreds of style diagnostics per file, no formatter, and a semantic layer that stops lsp from starting at all on the current Spacemacs. The macOS-specific watcher cost (one kqueue descriptor per directory, registered by walking the repo in Lisp) is removed by the same setting and was not re-measured on the Mac, since that would have meant running the old config against the live Emacs.</p>
+
+<h2 id="mac">Verification on the Mac</h2>
+<p>Staging, without touching the live setup: <code>brew install d12frosted/emacs-plus/emacs-plus@30</code> (30.2, native-comp, left unlinked so the current Emacs app is untouched), Spacemacs develop cloned to <code>~/.emacs.d-next</code> and started once with <code>--init-directory</code> so its 290 packages installed, uv and the servers installed with <code>scripts/install-lsp-servers.sh</code> (basedpyright 1.40.2, ruff 0.17.2 in <code>~/.local/bin</code>, rust-analyzer in <code>~/.cargo/bin</code>). The dotfile was taken from the worktree through <code>SPACEMACSDIR</code>, so <code>~/.spacemacs.d</code> on master was never read. The same developer session ran against the GUI Emacs through emacsclient, on APFS clones of verl and vllm with Mac uv venvs, and the Rust crate.</p>
+<table>
+<tr><th>Check</th><th>Result (mac3, first start of the new Emacs)</th></tr>
+<tr><td>Environment</td><td>Emacs 30.2, native-comp t, Spacemacs 0.999.0 (develop), font Source Code Pro 22, theme tsdh-dark, line numbers on, frame maximized, undo-tree, rg on PATH</td></tr>
+<tr><td>lsp settings in effect</td><td>watchers nil, idle 0.5, lens nil, basedpyright, type checking off</td></tr>
+<tr><td>Servers found</td><td><code>~/.local/bin/basedpyright-langserver</code>, <code>~/.local/bin/ruff</code>, <code>~/.cargo/bin/rust-analyzer</code></td></tr>
+<tr><td>Python keys</td><td><kbd>, h s</kbd> lsp-signature-activate, <kbd>, p</kbd> my-toggle-headerline-modes, <kbd>, = =</kbd> format, <kbd>, g g</kbd> jump to definition</td></tr>
+<tr><td>verl: open, servers, diagnostics</td><td>file 0.25 s, both servers 2.6 s, ruff 6 diagnostics at once; header line present</td></tr>
+<tr><td>verl: hover, goto, completion, lint, format</td><td>hover 7.3 s (first ever hover: lsp-ui and markdown rendering compiled natively on first use), <kbd>SPC m g g</kbd> to <code>__init__.pyi</code>, completion <code>join</code>, ruff flags the unused import, format 1.5 s</td></tr>
+<tr><td>verl: <kbd>, p</kbd> twice, magit</td><td>toggle ok both ways; <kbd>SPC g s</kbd> 16.4 s on first use (magit's first load and native compile), then instant</td></tr>
+<tr><td>vllm: open, servers, diagnostics</td><td>file 0.6 s, servers 0.7 s, basedpyright 6 diagnostics after 6.8 s</td></tr>
+<tr><td>vllm: hover, goto, completion, lint, format, magit</td><td>hover 0.05 s, goto ok, completion ok, ruff 7 + basedpyright 6, format 0.15 s, magit 0.02 s</td></tr>
+<tr><td>Servers after closing the buffers</td><td>0 left, both repos (lsp-keep-workspace-alive nil works)</td></tr>
+<tr><td>Rust</td><td>rustic-mode 5.5 s on first open (first load of rustic), rust-analyzer 1.1 s, hover 1.8 s, "mismatched types" 2.5 s after save</td></tr>
+<tr><td>Prompts seen</td><td>Only the expected one: after <kbd>SPC m g g</kbd> lands in a typeshed stub, lsp-mode asks whether to import that directory; answer <kbd>d</kbd> once (do not ask again for basedpyright's bundled stubs). No other question, no dialog box.</td></tr>
+<tr><td><code>*Warnings*</code></td><td>Only native-compiler notes about <code>rustic-lsp.el</code> referring to functions of other packages. Harmless and one-time; they are silenced in the committed config (<code>native-comp-async-report-warnings-errors 'silent</code> runs from the layer; this run still showed them because rustic compiled during the session).</td></tr>
+<tr><td>Responsiveness</td><td>467 probes, mean 108 ms, worst 16.1 s (magit first load), 11 above 1 s, all of them during first loads of magit, rustic and lsp-ui</td></tr>
+</table>
+<h3 id="mac4">Second Mac run (mac4, warmed)</h3>
+<p>The same session again, with the native-compiled cache from the first run in place. This is what everyday use looks like after the first day.</p>
+<table>
+<tr><th>Check</th><th>mac3 (first start)</th><th>mac4 (warmed)</th></tr>
+<tr><td>Emacs up to a usable frame</td><td class="num">3.0 s</td><td class="num">5.5 s (the container baseline was installing packages on the same CPU at that moment)</td></tr>
+<tr><td>verl: both servers initialised</td><td class="num">2.6 s</td><td class="num">3.8 s</td></tr>
+<tr><td>verl: first hover</td><td class="num">7.3 s</td><td class="num">1.0 s</td></tr>
+<tr><td>verl: <kbd>SPC m g g</kbd></td><td class="num">0.21 s</td><td class="num">0.07 s</td></tr>
+<tr><td>verl: <kbd>SPC m = =</kbd></td><td class="num">1.5 s</td><td class="num">0.8 s</td></tr>
+<tr><td>verl: first <kbd>SPC g s</kbd></td><td class="num">16.4 s</td><td class="num">3.8 s</td></tr>
+<tr><td>vllm: servers / first diagnostics</td><td class="num">0.7 s / 6.8 s</td><td class="num">0.7 s / 7.3 s</td></tr>
+<tr><td>vllm: hover / goto / format / magit</td><td class="num">0.05 s / 0.15 s / 0.15 s / 0.02 s</td><td class="num">0.02 s / 0.07 s / 0.12 s / 0.01 s</td></tr>
+<tr><td>Rust: rustic-mode / rust-analyzer / hover / diagnostics</td><td class="num">5.5 s / 1.1 s / 1.8 s / 2.5 s</td><td class="num">3.0 s / 0.8 s / 1.0 s / 0.02 s</td></tr>
+<tr><td>Servers left after closing buffers</td><td>0</td><td>0</td></tr>
+<tr><td><code>*Warnings*</code></td><td>rustic native-comp notes</td><td><span class="ok">empty</span></td></tr>
+<tr><td>Responsiveness probe</td><td>mean 108 ms, worst 16.1 s, 11 samples above 1 s</td><td>mean 42 ms, worst 3.5 s (magit on verl), 3 samples above 1 s (servers starting, magit, rustic first open)</td></tr>
+</table>
+<p>Every functional check passed both times. The remaining multi-second items are the first use of magit and rustic in a session and basedpyright's initial pass over vllm; none of them happened while typing. A separate check in the staged Emacs confirmed the leader keys resolve as expected in a python buffer: <kbd>SPC h h h</kbd> highlight-symbol-at-point, <kbd>SPC h h u</kbd> unhighlight-regexp, <kbd>SPC j m</kbd> lsp-ui-imenu, <kbd>SPC j M</kbd> helm-semantic-or-imenu, <kbd>SPC p f</kbd> helm-projectile-find-file, <kbd>SPC /</kbd> project search, <kbd>SPC g s</kbd> magit-status; dired <kbd>P</kbd> is the symlink-aware parent command, undo-tree is on, the iCloud org-mobile directory and the GNU ls dired switches are set, Homebrew is first on PATH.</p>
+
+<h2 id="commits">Every commit on <code>spacemacs-overhaul</code></h2>
+<p>Oldest first. Phase 1 (the review) is the first eleven; this phase added seven. Each subsection is what the commit message says, condensed.</p>
+
+<h3 id="c-de9f456"><span class="hash">de9f456</span> Remove hard-coded GitHub token from sdefaults layer</h3>
+<p><code>layers/sdefaults/config.el</code> set <code>paradox-github-token</code> to a literal 40-character classic personal access token, in git since 2017 (commit 50c48a3). It is removed; paradox prompts for a token when it needs one. The token must be treated as leaked: revoke it at github.com, Settings, Developer settings, Personal access tokens. Only you can do that.</p>
+
+<h3 id="c-521269d"><span class="hash">521269d</span> Replace the four dotfiles and the symlink with one init.el</h3>
+<p>Phase 1's behaviour-preserving merge: one real <code>init.el</code> from the 2024 template with the settings that actually differed from the template merged in from <code>.spacemacs.mac</code> (tsdh-dark, Source Code Pro 22, line numbers, layers, user-init, user-config, custom settings minus the stale 400-entry package list). <code>dotspacemacs-install-packages 'used-but-keep-unused</code> so switching dotfiles never uninstalls packages. The old files stay in history (<code>git show master:spacemacs/.spacemacs.mac</code>). Superseded in this phase by <a href="#c-4f682d1">4f682d1</a>, which went back to one file per OS at your request.</p>
+
+<h3 id="c-7a00695"><span class="hash">7a00695</span> sdefaults layer: remove dead and broken config, keep behaviour</h3>
+<p>Drops the non-existent <code>auto-complete</code> package, declares the built-in <code>recentf</code> plainly, stops redefining <code>recentf-track-opened-file</code> (dired directories are recorded through a hook instead), uses <code>mdfind</code> only on macOS, removes <code>(set-frame-font "nil 22")</code> which silently forced size 22, removes a layer-level <code>dotspacemacs-line-numbers</code>, the maximized-frame hack and a 2015 markdown path. The evil keys and spaceline toggles are kept.</p>
+
+<h3 id="c-053a28a"><span class="hash">053a28a</span> sdired layer: vendor dired+ as a local package with one owner</h3>
+<p><code>dired+.el</code> moves to <code>layers/sdired/local/dired+/</code> and the layer owns it with <code>:location local</code>; the absolute-path quelpa recipe in the dotfile is gone, so the same layer works on Linux. <kbd>P</kbd> still goes to the symlink-aware parent directory.</p>
+
+<h3 id="c-031a573"><span class="hash">031a573</span> Remove the broken sorg layer; keep its two working settings</h3>
+<p>The layer's package list was malformed, its functions masqueraded as another layer's hooks, and it pointed <code>org-agenda-files</code> at a 2015 machine. <code>org-startup-indented</code> and company + yasnippet in org buffers move to user-config, as the Linux dotfile already had them.</p>
+
+<h3 id="c-3e9b685"><span class="hash">3e9b685</span> Python: basedpyright + ruff server through lsp-mode, pylsp as fallback</h3>
+<p>The Python decision described above, first implemented in the dotfile: basedpyright via lsp-mode's pyright client, ruff's native server as an add-on, type checking off by default, <code>~/.local/bin</code> and <code>~/.cargo/bin</code> first on PATH so the uv-installed servers win over old copies inside conda envs (<code>ray_macos</code> has ruff 0.4.8, too old for <code>ruff server</code>), WORKON_HOME fallback to the conda envs directory, lsp restart after <kbd>SPC m v w</kbd>, pylsp tuning kept for the fallback, anaconda-mode / company-anaconda / importmagic excluded, pytest as test runner, fill column 65 to match your ruff.toml. In this phase the settings moved into <code>layers/sdev</code>.</p>
+
+<h3 id="c-13ab585"><span class="hash">13ab585</span> Rust: rust-analyzer via the rust layer, server-side file watching</h3>
+<p>Explicit rust-analyzer settings: it watches the workspace itself, <code>cargo check</code> on save, proc macros and build scripts on, no format on save.</p>
+
+<h3 id="c-28889fe"><span class="hash">28889fe</span> Stop the freezes on large repos</h3>
+<p>The core performance commit: <code>lsp-enable-file-watchers nil</code> (lsp-mode walked the whole workspace in Lisp to register one watcher per directory), <code>lsp-idle-delay 0.5</code> instead of 0.0 (a request per keystroke), <code>lsp-lens-enable nil</code>, <code>lsp-keep-workspace-alive nil</code>, the <code>semantic</code> layer removed (it parsed every Python and C buffer in Lisp and fought lsp's breadcrumb for the header line; <kbd>, p</kbd> still toggles to the sticky header by enabling semantic lazily), <code>undo-tree-auto-save-history nil</code>, search tools start with rg. The baseline run above is this commit's before/after.</p>
+
+<h3 id="c-3a1f814"><span class="hash">3a1f814</span> Adopt the layers the Linux dotfile already had: json, multiple-cursors, cmake</h3>
+<p>Three layers the Linux file had grown and the Mac never got. Now one layer list serves both.</p>
+
+<h3 id="c-00cba75"><span class="hash">00cba75</span> Repo hygiene: install script, per-machine local.el, .gitignore, README</h3>
+<p>First version of <code>scripts/install-lsp-servers.sh</code> (a private venv; replaced by uv tools in <a href="#c-6b2673f">6b2673f</a>), the git-ignored <code>local.el</code> loaded at the end of user-config, <code>.gitignore</code> for <code>.spacemacs.env</code> (it contains your whole shell environment), a real README, and <code>install_source.sh</code> renamed to <code>scripts/install-source-code-pro-font.sh</code>.</p>
+
+<h3 id="c-c218692"><span class="hash">c218692</span> Add the 2026-10 review report (docs/spacemacs-review.html)</h3>
+<p>The phase 1 report: findings, root causes, design decisions, verification in an isolated HOME on Emacs 29.4, adoption and rollback.</p>
+
+<h3 id="c-89df127"><span class="hash">89df127</span> sdev layer: the shared development settings for both dotfiles</h3>
+<p>Everything identical on macOS and Linux moves out of the dotfile into <code>layers/sdev</code>, so the two dotfiles only hold what differs.</p>
+<ul>
+<li><code>config.el</code>: the lsp-mode tuning from 28889fe, the basedpyright + ruff settings and pylsp fallback tuning from 3e9b685, rust-analyzer settings, undo-tree history off, semanticdb in the Spacemacs cache (that was the "Create directory for SemanticDB?" question at exit), <code>native-comp-async-report-warnings-errors 'silent</code>, the <kbd>SPC h h h</kbd> colour list.</li>
+<li><code>funcs.el</code>: <kbd>, p</kbd> now marks only the current buffer as wanting semantic and adds a <code>semantic-inhibit-functions</code> entry, so pressing it once no longer makes semantic parse every buffer opened afterwards (verified: after <kbd>, p</kbd> in one buffer, later buffers stayed unparsed and exit asked nothing). lsp restart after a pyvenv switch.</li>
+<li><code>packages.el</code>: ruff disabled as a separate client when pylsp is chosen (pylsp runs it as a plugin); <kbd>, h s</kbd> and <kbd>, p</kbd> for both <code>python-mode</code> and <code>python-ts-mode</code>; code-cells boundary regexp.</li>
+<li><code>keybindings.el</code>: <kbd>SPC h h h</kbd> / <kbd>SPC h h u</kbd> highlight, <kbd>SPC j m</kbd> lsp-ui-imenu, <kbd>SPC j M</kbd> helm-semantic-or-imenu, with a named prefix so <kbd>SPC h h</kbd> shows "highlight" in which-key.</li>
+<li><code>README.org</code> describing the layer, as Spacemacs layers do.</li>
+</ul>
+
+<h3 id="c-4f682d1"><span class="hash">4f682d1</span> One dotfile per OS, init.el is a git-ignored symlink</h3>
+<p><code>init.macos.el</code> and <code>init.linux.el</code>, generated from the develop template (<code>core/templates/dotspacemacs-template.el</code> at <code>88393ec34</code>) so every current <code>dotspacemacs-*</code> variable is present with its documentation. Same layers in both: helm, auto-completion, better-defaults, emacs-lisp, git, markdown, json, multiple-cursors, org, spell-checking, syntax-checking, python (lsp, pyright, ruff format), rust, c-c++, cmake, html, javascript, yaml, sql, csv, docker, latex, lsp, sdefaults, sdired, sdev. Same exclusions, TUNA mirrors (the org mirror was dropped: TUNA no longer serves it), <code>*spacegoing*</code> home buffer, custom-set section, <code>local.el</code> loaded last. The macOS file: Source Code Pro 22 with DejaVu Sans Mono and Menlo fallbacks, line numbers on, undo-tree, Homebrew PATH and gnubin ls, iCloud org-mobile directory. The Linux file: Source Code Pro 22, line numbers off, undo-redo, GNU ls switches. <code>init.el</code> is git-ignored and the commit removes the tracked one from 521269d.</p>
+
+<h3 id="c-6b2673f"><span class="hash">6b2673f</span> install-lsp-servers.sh: uv installs the servers, rustup the Rust side</h3>
+<p><code>uv tool install basedpyright ruff</code> (or upgrade when present), rustup with <code>rust-analyzer</code>, <code>rustfmt</code>, <code>clippy</code> components, <code>NO_RUST=1</code> to skip. uv is installed when missing. Nothing goes through pip or conda. Run on the Mac and in the container.</p>
+
+<h3 id="c-3cedb50"><span class="hash">3cedb50</span> Linux dev container for the Spacemacs develop branch</h3>
+<p><code>docker/Dockerfile</code>: <code>debian:trixie-slim</code>, Debian's Emacs 30 (<code>emacs-nox</code>), tmux, ripgrep, fd, gcc, aspell, uv, a minimal rustup toolchain with rust-analyzer; arm64 and amd64. <code>docker/run.sh</code>: builds once, mounts this directory at <code>/root/.spacemacs.d</code>, a named volume for <code>/root/.emacs.d</code>, an optional repo directory at <code>/work</code>, the host proxy via <code>host.docker.internal:7897</code>. Debian's <code>/etc/profile</code> resets PATH for login shells, so the tool directories are also added from <code>/etc/profile.d</code>.</p>
+
+<h3 id="c-5457d49"><span class="hash">5457d49</span> mac-switch.sh: swap the Mac to the new Spacemacs, with undo</h3>
+<p>Moves <code>~/.emacs.d</code> to <code>~/.emacs.d.bak-&lt;date&gt;</code>, puts the prepared <code>~/.emacs.d-next</code> in its place, points <code>~/.spacemacs.d/init.el</code> at <code>init.macos.el</code>, removes the stale <code>.spacemacs.env</code>, prints how to open the emacs-plus@30 app. <code>--undo &lt;backup&gt;</code> reverses it. Refuses to run while Emacs is open.</p>
+
+<h3 id="c-a3856e7"><span class="hash">a3856e7</span> README and local.el.example for the two-dotfile layout</h3>
+<p>README: the symlink switch, what each layer does, repo layout including <code>docker/</code> and <code>docs/</code>, new-machine steps for macOS and Linux, the Python and Rust tool chain, the container, rollback. <code>local.el.example</code>: the per-machine knobs that exist now (type checking mode, interpreter, WORKON_HOME, server paths, clippy, <code>lsp-log-io</code>, font).</p>
+
+<h3 id="c-06b02d1"><span class="hash">06b02d1</span> User manual (docs/spacemacs-manual.html)</h3>
+<p>The <a href="spacemacs-manual.html">usage guide</a>: versions, which file holds what, Python and Rust keys, unchanged keys, the short "what changed" list, switching machines, upgrading, troubleshooting.</p>
+
+<h3 id="c-report"><span class="hash">(this commit)</span> Overhaul report (docs/spacemacs-overhaul-report.html)</h3>
+<p>This page.</p>
+
+<h2 id="adopt">Your part: the final switch</h2>
+<pre><code># 1. quit Emacs, then in the live repo
+cd ~/.spacemacs.d            # = ~/sg21CodeLab/GitConfig/spacemacs
+git status                   # .spacemacs.env* are untracked and ignored on the new branch; fine
+git checkout spacemacs-overhaul
+
+# 2. swap ~/.emacs.d for the prepared one and set the symlink
+scripts/mac-switch.sh
+#    -&gt; ~/.emacs.d            moved to ~/.emacs.d.bak-2026MMDD-HHMM
+#    -&gt; ~/.emacs.d-next       becomes ~/.emacs.d   (Spacemacs develop, packages installed)
+#    -&gt; init.el               -&gt; init.macos.el
+#    prints:  open /opt/homebrew/Cellar/emacs-plus@30/30.2/Emacs.app
+
+# 3. optional: make it the Emacs you launch from Spotlight
+ln -s /opt/homebrew/Cellar/emacs-plus@30/30.2/Emacs.app /Applications/Emacs-30.app
+
+# 4. the leaked token: github.com -&gt; Settings -&gt; Developer settings -&gt; Personal access tokens -&gt; revoke</code></pre>
+<p>First start takes a little longer than usual while Emacs 30 native-compiles packages in the background the first time they load (magit, rustic, lsp-ui); after that they are instant. The first time you open a file in a repo lsp-mode asks once for the project root: press <kbd>i</kbd>. If you jump into a typeshed stub it asks once about that directory: press <kbd>d</kbd>.</p>
+<h3>Rollback</h3>
+<pre><code>scripts/mac-switch.sh --undo ~/.emacs.d.bak-&lt;date&gt;   # restores the old ~/.emacs.d
+cd ~/.spacemacs.d && git checkout master              # old dotfiles and symlink target
+# then open the old Emacs app as before</code></pre>
+<p>The branch does not delete anything from history and <code>master</code> is untouched, so both setups can coexist until you are happy.</p>
+
+<h2 id="caveats">Caveats and things to know</h2>
+<ul>
+<li><strong>One-time native compilation stalls.</strong> On the Mac, the first <kbd>SPC g s</kbd> took 16 s and the first <code>.rs</code> file 5.5 s because Emacs 30 compiled magit and rustic to native code on first load. This happens once per package version and is the price of the faster steady state. The second Mac run (<a href="#mac4">mac4</a>) shows the warmed numbers.</li>
+<li><strong>basedpyright on vllm uses real memory.</strong> With torch and friends installed in the venv, basedpyright's node process reached about 2 GB RSS while indexing vllm's imports and 110% CPU for a few seconds. Emacs itself stayed responsive; the server is a separate process. It is freed when the last vllm buffer is closed.</li>
+<li><strong>The "import project root" prompt.</strong> lsp-mode asks once per project (answer <kbd>i</kbd>) and once for basedpyright's bundled stubs when you jump into one (answer <kbd>d</kbd>). The answers are remembered in <code>~/.emacs.d/.cache/lsp-session-v1</code>.</li>
+<li><strong>Megatron-LM and ruff.</strong> Its <code>pyproject.toml</code> enables only rule S506, so ruff reports almost nothing there by design. basedpyright still reports unused imports and undefined names.</li>
+<li><strong>Type checking is off.</strong> <code>lsp-pyright-type-checking-mode "off"</code> gives the same error classes you had with ruff-only pylsp. Set it to <code>"basic"</code> in <code>local.el</code> when you want type errors.</li>
+<li><strong>Container vs Mac.</strong> Same dotfile layout, same layers, same servers, same uv install path. Differences are only Emacs 30.1 vs 30.2, terminal vs GUI, undo-redo vs undo-tree, line numbers off vs on, chosen per OS in the two dotfiles.</li>
+<li><strong>Terminal Emacs only:</strong> in the container, <code>*Messages*</code> collects "Invalid face reference: lsp-flycheck-info-unnecessary" lines while a Python buffer has diagnostics. It is an lsp-mode/flycheck face missing in a terminal frame, cosmetic, and did not appear in the GUI Emacs on the Mac.</li>
+<li><strong>The container's goto-definition probe.</strong> The driver's own asynchronous <code>textDocument/definition</code> probe never resolved (a harness limitation in how it parsed the result), while the real <kbd>SPC m g g</kbd> key worked every time and is what the tables report.</li>
+</ul>
+
+<h2 id="harness">Appendix: how the sessions were driven</h2>
+<p>Everything lives under the session scratch directory and is not part of the repository.</p>
+<ul>
+<li><strong>Container driver</strong> (<code>repos/_driver/drive.sh</code> + <code>helpers.el</code>): starts <code>emacs -nw</code> with <code>server-start</code> in tmux, sends real key sequences (<kbd>SPC f f</kbd>, <kbd>, g g</kbd>, <kbd>, = =</kbd>, <kbd>, p</kbd>, <kbd>SPC g s</kbd>, <kbd>SPC q q</kbd>) with <kbd>ESC</kbd> timing so it is not read as Meta, answers the root prompt, and reads state through <code>emacsclient --eval</code>. lsp requests used for measurement are asynchronous so the probe itself never blocks Emacs.</li>
+<li><strong>Mac driver</strong> (<code>macdrive.sh</code>): starts the emacs-plus GUI with <code>--init-directory ~/.emacs.d-next</code> and <code>SPACEMACSDIR</code> pointing at the worktree dotfile, <code>use-dialog-box nil</code> so any question lands in the minibuffer where a logger records it, then runs the same steps through emacsclient and the real key bindings.</li>
+<li><strong>Freeze detector</strong>: a background loop timing <code>emacsclient --eval t</code> three times a second; every sample is in <code>latency.log</code>, summarised as mean, worst, and counts above 300 ms and 1 s.</li>
+<li><strong>Repos</strong>: APFS clonefile copies of your local vllm, verl and Megatron-LM, with <code>uv venv</code> + <code>uv pip install -e .</code> (dependencies as far as they install offline through the proxy) inside the container and again on the Mac, so basedpyright resolved real site-packages.</li>
+<li><strong>Baseline dotfile</strong>: the Linux dotfile with the old values reinstated (pylsp, semantic layer, watchers, idle 0.0, lenses, keep-alive, nothing excluded), run once through the identical session.</li>
+</ul>
+<p class="small">Logs: <code>repos/_logs/run3</code>, <code>run4</code>, <code>baseline</code>, <code>mac-logs/mac3</code>, <code>mac4</code>, each with <code>steps.log</code>, <code>latency.log</code> and the final <code>*Messages*</code> tail.</p>
+</main>
+</body>
+</html>
