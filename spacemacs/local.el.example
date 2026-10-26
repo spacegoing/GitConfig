@@ -1,24 +1,31 @@
-;; -*- mode: emacs-lisp; lexical-binding: t -*-
-;; Per-machine overrides. Copy this file to ~/.spacemacs.d/local.el (it is
-;; git-ignored); init.el loads it at the very end of dotspacemacs/user-config,
-;; so anything set here wins over init.el.
+;;; local.el --- per-machine overrides, loaded last by both dotfiles  -*- lexical-binding: t -*-
 ;;
-;; Only runtime variables belong here. Layer lists and dotspacemacs-* settings
-;; are read before this file and must stay in init.el (use `system-type' or
-;; `system-name' checks there if a machine needs a different layer set).
+;; Copy to ~/.spacemacs.d/local.el (git-ignored). Everything here runs at the
+;; end of dotspacemacs/user-config, so it wins over layers/sdev/config.el.
+;; Delete what you do not need; an empty file is fine.
 
-;; Examples -------------------------------------------------------------
+;;;; Python type checking
+;; "off" (default): syntax errors, undefined names and unresolved imports only.
+;; "basic" / "standard" / "strict": real type errors from basedpyright.
+;; (setq lsp-pyright-type-checking-mode "basic")
 
-;; Turn on real type checking from basedpyright ("off" = ruff lint only).
-;; (setq my/python-typecheck-mode "basic")
-
-;; Make basedpyright analyse against a fixed interpreter instead of the
-;; `python' found on PATH / the active virtualenv.
+;;;; Which python basedpyright uses when no venv is active in Emacs
+;; Default order: the venv activated with SPC m v w, then ./venv or ./.venv
+;; in the project (uv convention), then `python' on PATH. To force one:
 ;; (setq lsp-pyright-python-executable-cmd "/root/.venv/base/bin/python")
+;; Or point SPC m v w at a different envs directory:
+;; (setenv "WORKON_HOME" (expand-file-name "~/miniconda3/envs"))
 
-;; Point the servers at explicit binaries if ~/.local/bin is not used.
-;; (setq lsp-ruff-lsp-server-command '("/root/.venv/base/bin/ruff" "server")
-;;       lsp-ruff-server-command     '("/root/.venv/base/bin/ruff" "server"))
+;;;; Servers at non-standard locations
+;; (setq lsp-ruff-server-command '("/opt/tools/bin/ruff" "server"))
+;; (setq lsp-pyright-langserver-command "pyright")   ; plain pyright instead of basedpyright
+;; (setq lsp-rust-analyzer-server-command '("/opt/rust/bin/rust-analyzer"))
 
-;; Use clippy instead of cargo check for Rust diagnostics on save.
+;;;; Rust: clippy instead of cargo check on save
 ;; (setq lsp-rust-analyzer-cargo-watch-command "clippy")
+
+;;;; Debugging a language server
+;; (setq lsp-log-io t)   ; then read *lsp-log* / SPC m b d
+
+;;;; Font on a particular screen
+;; (spacemacs/set-default-font '("Source Code Pro" :size 18.0 :weight normal :width normal))
