@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spacemacs Manual</title>
+<meta name="description" content="What is installed, what to press, and what changed in the 2026-10 Spacemacs setup (macOS + Linux).">
+<style>
+:root{--bg:#fbfaf7;--fg:#1f2328;--muted:#5b6470;--line:#d9d4c7;--card:#ffffff;--accent:#0b6e4f;--accent2:#8a4b08;--kbd-bg:#f0ece2;--kbd-line:#bcb4a2;--code-bg:#f3f1ea;--warn:#8a4b08;--ok:#0b6e4f}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#15181c;--fg:#e6e3dc;--muted:#a3a79f;--line:#2e343b;--card:#1c2026;--accent:#5fd3a6;--accent2:#e2a865;--kbd-bg:#242a31;--kbd-line:#48515b;--code-bg:#20252b;--warn:#e2a865;--ok:#5fd3a6}}
+:root[data-theme="dark"]{--bg:#15181c;--fg:#e6e3dc;--muted:#a3a79f;--line:#2e343b;--card:#1c2026;--accent:#5fd3a6;--accent2:#e2a865;--kbd-bg:#242a31;--kbd-line:#48515b;--code-bg:#20252b;--warn:#e2a865;--ok:#5fd3a6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 ui-sans-serif,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+main{max-width:960px;margin:0 auto;padding:32px 16px 80px}
+h1{font-size:2rem;margin:0 0 4px;letter-spacing:-.01em}
+h2{font-size:1.35rem;margin:44px 0 12px;padding-top:12px;border-top:1px solid var(--line)}
+h3{font-size:1.05rem;margin:24px 0 8px}
+p.lead{color:var(--muted);margin:0 0 20px;font-size:1.05rem}
+kbd{display:inline-block;font:0.86em ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--kbd-bg);border:1px solid var(--kbd-line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;white-space:nowrap}
+code{font:0.9em ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--code-bg);padding:1px 5px;border-radius:4px}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow:auto;font:0.85em/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre code{background:none;padding:0}
+table{width:100%;border-collapse:collapse;margin:12px 0 20px;font-size:0.95rem}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:600;font-size:0.85rem;text-transform:uppercase;letter-spacing:.04em}
+td:first-child{white-space:nowrap}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:14px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.tag{display:inline-block;font-size:.78rem;padding:1px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin-left:6px;vertical-align:middle}
+.same{color:var(--ok)} .diff{color:var(--warn)}
+ul{padding-left:22px} li{margin:4px 0}
+nav{display:flex;flex-wrap:wrap;gap:8px 16px;margin:18px 0 8px;font-size:.95rem}
+nav a{color:var(--accent);text-decoration:none} nav a:hover{text-decoration:underline}
+.small{color:var(--muted);font-size:.9rem}
+</style>
+</head>
+<body>
+<main>
+<h1>Spacemacs manual</h1>
+<p class="lead">Your Spacemacs after the 2026-10 overhaul: what is installed, which keys do what, and the short list of things that behave differently. Everything not listed here works exactly as before.</p>
+
+<nav>
+<a href="#installed">What is installed</a>
+<a href="#files">Which file is which</a>
+<a href="#python">Python</a>
+<a href="#rust">Rust</a>
+<a href="#keys">Keys</a>
+<a href="#changed">What changed</a>
+<a href="#machines">Switching machines</a>
+<a href="#maintain">Upgrading</a>
+<a href="#trouble">When something is off</a>
+</nav>
+
+<h2 id="installed">What is installed</h2>
+<table>
+<tr><th>Piece</th><th>Version</th><th>Where / how</th></tr>
+<tr><td>Emacs</td><td>30.2 (macOS, native-comp) · 30.1 (Debian 13 container)</td><td>macOS: <code>brew install d12frosted/emacs-plus/emacs-plus@30</code>, app in <code>/opt/homebrew/Cellar/emacs-plus@30/30.2/Emacs.app</code>. Linux: <code>apt install emacs-nox</code> (or your distro's Emacs 30).</td></tr>
+<tr><td>Spacemacs</td><td>develop branch, 2026-10-20 (<code>88393ec34</code>)</td><td><code>~/.emacs.d</code> is a git clone; update with <code>git pull</code> there.</td></tr>
+<tr><td>basedpyright</td><td>1.40</td><td>Python language server (completion, goto, hover, rename, errors). <code>uv tool install basedpyright</code>, linked in <code>~/.local/bin</code>.</td></tr>
+<tr><td>ruff</td><td>0.17</td><td>Python lint and formatter, runs as its own language server beside basedpyright. <code>uv tool install ruff</code>.</td></tr>
+<tr><td>rust-analyzer</td><td>rustup component</td><td><code>rustup component add rust-analyzer</code>, in <code>~/.cargo/bin</code>.</td></tr>
+<tr><td>uv</td><td>0.13</td><td>The only Python installer used by this setup. <code>brew install uv</code> / <code>curl -LsSf https://astral.sh/uv/install.sh | sh</code>.</td></tr>
+<tr><td>ripgrep, aspell</td><td>brew / apt</td><td><code>SPC /</code> and <code>SPC s p</code> search with <code>rg</code>; aspell is what the spell-checking layer uses.</td></tr>
+</table>
+<p class="small">One script does the servers: <code>~/.spacemacs.d/scripts/install-lsp-servers.sh</code>. Re-run it any time to upgrade basedpyright, ruff and rust-analyzer.</p>
+
+<h2 id="files">Which file is which</h2>
+<div class="grid">
+<div class="card"><strong>init.el</strong> <span class="tag">symlink, git-ignored</span><br>Points at <code>init.macos.el</code> on the Mac and <code>init.linux.el</code> on Linux. <kbd>SPC f e d</kbd> opens it (you land in the real file). Switch with <code>ln -sfn init.linux.el init.el</code>.</div>
+<div class="card"><strong>init.macos.el / init.linux.el</strong> <span class="tag">tracked</span><br>Full Spacemacs dotfiles with the template's explanations kept. Only OS-specific values differ: font, line numbers, undo system, Homebrew/GNU-ls paths, iCloud org folder. Paste snippets here as before.</div>
+<div class="card"><strong>layers/sdev/</strong> <span class="tag">tracked</span><br>Everything shared: Python/Rust servers, the lsp tuning that stops the freezes, conda/venv switching, <kbd>SPC h h</kbd>, <kbd>SPC j m</kbd>, <kbd>, p</kbd>. <kbd>SPC h l</kbd> then <code>sdev</code> shows its README.</div>
+<div class="card"><strong>local.el</strong> <span class="tag">optional, git-ignored</span><br>Per-machine overrides, loaded last. Copy <code>local.el.example</code>. Typical: type checking on, a fixed python path, clippy instead of cargo check.</div>
+</div>
+
+<h2 id="python">Python</h2>
+<p>Open any <code>.py</code> file. Both servers start by themselves; the mode line shows <code>LSP[pyright:…][ruff:…]</code>.</p>
+<ol>
+<li><strong>First file of a project:</strong> lsp-mode asks where the project root is (<em>Select action</em>). Press <kbd>i</kbd> once; it remembers. Same question as before the overhaul.</li>
+<li><strong>Interpreter:</strong> the venv you activated with <kbd>SPC m v w</kbd> (the list comes from <code>WORKON_HOME</code>, your conda envs directory is detected), else <code>./.venv</code> or <code>./venv</code> inside the project (what <code>uv venv</code> creates), else <code>python</code> on PATH. After <kbd>SPC m v w</kbd> the servers of the buffer restart on their own.</li>
+<li><strong>What the squiggles mean:</strong> ruff reports lint (<code>F401</code> unused import, <code>E702</code> …) and honours the project's <code>pyproject.toml</code>/<code>ruff.toml</code> (Megatron-LM selects only <code>S506</code>, so you see almost nothing there; that is their config, not a fault). basedpyright reports syntax errors, undefined names and unresolved imports. Type errors are off by default; <code>(setq lsp-pyright-type-checking-mode "basic")</code> in <code>local.el</code> turns them on.</li>
+</ol>
+<table>
+<tr><th>Key</th><th>Does</th></tr>
+<tr><td><kbd>SPC m = =</kbd></td><td>Format the buffer with ruff (same as <code>ruff format</code>).</td></tr>
+<tr><td><kbd>SPC m g g</kbd> · <kbd>SPC m g r</kbd></td><td>Go to definition · references (basedpyright). Jumping into a library/stub file asks the root question for that directory; <kbd>d</kbd> = never ask again there.</td></tr>
+<tr><td><kbd>SPC m h h</kbd> · <kbd>, h s</kbd></td><td>Documentation at point · signature of the call you are in.</td></tr>
+<tr><td><kbd>SPC m r r</kbd></td><td>Rename symbol across the project.</td></tr>
+<tr><td><kbd>SPC m a a</kbd></td><td>Code actions: ruff's <em>Organize imports</em> and <em>Fix all</em> live here.</td></tr>
+<tr><td><kbd>SPC e l</kbd> · <kbd>SPC e n</kbd></td><td>Error list · next error (flycheck fed by lsp).</td></tr>
+<tr><td><kbd>SPC j m</kbd> · <kbd>SPC j M</kbd></td><td>Symbol tree from the server · symbol list (helm).</td></tr>
+<tr><td><kbd>, p</kbd></td><td>Toggle the header line: lsp breadcrumb ↔ semantic sticky function. Semantic is switched on only for that buffer.</td></tr>
+<tr><td><kbd>SPC m v w</kbd> · <kbd>SPC m v a</kbd> · <kbd>SPC m v d</kbd></td><td>Choose / activate / deactivate a venv or conda env.</td></tr>
+<tr><td><kbd>SPC m b d</kbd> · <kbd>SPC m b r</kbd></td><td>Describe the lsp session (which servers, which root) · restart the servers.</td></tr>
+<tr><td><kbd>SPC m s i</kbd> · <kbd>SPC m s b</kbd></td><td>ipython REPL · send buffer, as before.</td></tr>
+</table>
+
+<h2 id="rust">Rust</h2>
+<p>Open a <code>.rs</code> file inside a Cargo project; rust-analyzer starts (answer <kbd>i</kbd> the first time). Diagnostics come from <code>cargo check</code> on every save. rust-analyzer watches the files itself, Emacs does not.</p>
+<table>
+<tr><th>Key</th><th>Does</th></tr>
+<tr><td><kbd>SPC m = =</kbd></td><td>rustfmt the buffer (not on save).</td></tr>
+<tr><td><kbd>SPC m g g</kbd> · <kbd>SPC m h h</kbd> · <kbd>SPC m r r</kbd></td><td>Definition · documentation · rename.</td></tr>
+<tr><td><kbd>SPC m c c</kbd> · <kbd>SPC m c t</kbd> · <kbd>SPC m c r</kbd></td><td>cargo build · test · run (rustic).</td></tr>
+<tr><td><kbd>SPC m a a</kbd></td><td>Code actions (imports, fixes).</td></tr>
+</table>
+<p class="small">Clippy instead of check: <code>(setq lsp-rust-analyzer-cargo-watch-command "clippy")</code> in <code>local.el</code>.</p>
+
+<h2 id="keys">Keys that are yours (unchanged)</h2>
+<table>
+<tr><th>Key</th><th>Does</th><th>Defined in</th></tr>
+<tr><td><kbd>SPC h h h</kbd> · <kbd>SPC h h u</kbd></td><td>Highlight symbol at point · remove highlight</td><td>sdev/keybindings.el</td></tr>
+<tr><td><kbd>SPC j m</kbd> · <kbd>SPC j M</kbd></td><td>lsp symbol tree · helm symbol list</td><td>sdev/keybindings.el</td></tr>
+<tr><td><kbd>, p</kbd> · <kbd>, h s</kbd></td><td>header line toggle · signature help (python)</td><td>sdev/packages.el</td></tr>
+<tr><td><kbd>j k</kbd></td><td>Escape to normal state (evil-escape)</td><td>sdefaults/config.el</td></tr>
+<tr><td><kbd>^</kbd> in motion state</td><td>file's parent directory (dired)</td><td>sdefaults/packages.el</td></tr>
+<tr><td><kbd>C-p</kbd> <kbd>C-n</kbd> <kbd>C-a</kbd> <kbd>C-e</kbd> in insert state</td><td>Emacs-style movement</td><td>sdefaults/packages.el</td></tr>
+<tr><td><kbd>P</kbd> in dired</td><td>parent directory following symlinks; dired+ reuses the buffer</td><td>sdired</td></tr>
+<tr><td><kbd>SPC g s</kbd> · <kbd>SPC p f</kbd> · <kbd>SPC /</kbd></td><td>magit · project file (fd/git) · search with rg</td><td>Spacemacs layers</td></tr>
+<tr><td><kbd>g r</kbd> (visual)</td><td>multiple cursors (evil-mc), from the Linux dotfile, now on both</td><td>multiple-cursors layer</td></tr>
+</table>
+
+<h2 id="changed">What changed (all of it)</h2>
+<table>
+<tr><th>Area</th><th>Before</th><th>Now</th></tr>
+<tr><td>Python backend</td><td>pylsp (Linux) with jedi + python-lsp-ruff; pylsp on the Mac without ruff</td><td class="diff">basedpyright + ruff server on both. pylsp still available: set <code>python-lsp-server 'pylsp</code> in the dotfile.</td></tr>
+<tr><td>Type errors</td><td>none (pylsp)</td><td class="same">none by default (basedpyright <code>typeCheckingMode off</code>); opt-in per machine.</td></tr>
+<tr><td>Header line</td><td>semantic sticky function everywhere (semantic layer parsed every Python buffer)</td><td class="diff">lsp breadcrumb by default; <kbd>, p</kbd> gives the sticky function back for that buffer only.</td></tr>
+<tr><td>Undo</td><td>Mac: undo-tree with a history file per buffer; Linux: undo-redo</td><td class="diff">Mac: undo-tree, history kept for the session only (no files). Linux: undo-redo, as before.</td></tr>
+<tr><td>Search tool</td><td>ag first; <code>pt</code> in the list</td><td class="diff">rg first (<code>pt</code> is no longer accepted by Spacemacs).</td></tr>
+<tr><td>Fill column (python)</td><td>79 (Mac), ruff.toml says 65</td><td class="diff">65 on both, matching your ruff.toml.</td></tr>
+<tr><td>Test runner</td><td>nose (old default)</td><td class="diff">pytest (<kbd>SPC m t t</kbd>).</td></tr>
+<tr><td>Startup warnings</td><td>sorg layer warning at every start; native-comp warnings window (Emacs 30)</td><td class="same">none.</td></tr>
+<tr><td>Exit</td><td>"Create directory ~/.emacs.d/semanticdb?" after using semantic</td><td class="same">no question; databases live in <code>.cache/semanticdb</code>.</td></tr>
+<tr><td>Dotfile</td><td><code>init.el</code> absolute symlink to <code>.spacemacs.mac</code>, Linux variant drifting</td><td class="diff">relative, git-ignored symlink to <code>init.macos.el</code> / <code>init.linux.el</code>; shared code in <code>layers/sdev</code>.</td></tr>
+<tr><td>Packages</td><td>sqlite3 (C module) compiled on every machine</td><td class="same">dropped; Emacs 30 has sqlite built in.</td></tr>
+<tr><td>Emacs</td><td>29.4 Emacs.app, no native-comp</td><td class="diff">30.2 with native-comp (macOS), 30.1 (Linux). Old app and <code>~/.emacs.d</code> kept as a backup by <code>scripts/mac-switch.sh</code>.</td></tr>
+</table>
+
+<h2 id="machines">Switching machines</h2>
+<pre><code># new Linux box or container
+git clone &lt;GitConfig&gt; ~/sg21CodeLab/GitConfig
+ln -s ~/sg21CodeLab/GitConfig/spacemacs ~/.spacemacs.d
+cd ~/.spacemacs.d &amp;&amp; ln -sfn init.linux.el init.el
+git clone -b develop https://github.com/syl20bnr/spacemacs ~/.emacs.d
+~/.spacemacs.d/scripts/install-lsp-servers.sh
+emacs            # first start installs ~290 packages (6 min from the TUNA mirror)
+
+# the Mac (after you say go)
+cd ~/sg21CodeLab/GitConfig &amp;&amp; git checkout spacemacs-overhaul
+~/.spacemacs.d/scripts/mac-switch.sh     # backs up ~/.emacs.d, installs the new one, links init.macos.el
+open /opt/homebrew/Cellar/emacs-plus@30/30.2/Emacs.app</code></pre>
+<p>Container for trying things without touching anything: <code>~/.spacemacs.d/docker/run.sh</code> (Debian 13, Emacs 30, uv, rustup; mounts this directory).</p>
+
+<h2 id="maintain">Upgrading</h2>
+<ul>
+<li><strong>Servers:</strong> <code>~/.spacemacs.d/scripts/install-lsp-servers.sh</code> (runs <code>uv tool upgrade</code>).</li>
+<li><strong>Spacemacs:</strong> <code>cd ~/.emacs.d &amp;&amp; git pull</code>, then <kbd>SPC f e U</kbd> for packages. Check the startup note afterwards.</li>
+<li><strong>Emacs (Mac):</strong> <code>brew upgrade emacs-plus@30</code>. Packages are per Emacs version (<code>elpa/30.2/</code>), so a new minor version recompiles them once.</li>
+<li><strong>Config:</strong> edit <code>init.macos.el</code> / <code>init.linux.el</code> or <code>layers/sdev/config.el</code>, commit, pull on the other machines.</li>
+</ul>
+
+<h2 id="trouble">When something is off</h2>
+<table>
+<tr><th>Symptom</th><th>Check</th></tr>
+<tr><td>No completion in a .py file</td><td><kbd>SPC m b d</kbd>: are <code>pyright</code> and <code>ruff</code> listed? If not, <code>basedpyright-langserver --version</code> in a shell; the script installs it. Then <kbd>SPC m b r</kbd>.</td></tr>
+<tr><td>Imports marked unresolved</td><td>The server is using the wrong python. <kbd>SPC m v w</kbd> to pick the env, or put <code>lsp-pyright-python-executable-cmd</code> in <code>local.el</code>.</td></tr>
+<tr><td>Asked for the project root again and again</td><td>You answered <kbd>n</kbd>. Next time press <kbd>i</kbd> (remembered in <code>.cache/lsp-session-v1</code>).</td></tr>
+<tr><td>Emacs feels slow in a repo</td><td><kbd>SPC m b d</kbd> shows one server per project; <code>M-x lsp-workspace-shutdown</code> on ones you are done with. Memory per basedpyright server on vllm/verl-sized repos is about 2 GB.</td></tr>
+<tr><td>Rust: no diagnostics</td><td>They appear after save (<code>cargo check</code>). <code>*rust-analyzer::stderr*</code> has the log.</td></tr>
+<tr><td>Need the protocol log</td><td><code>(setq lsp-log-io t)</code> in <code>local.el</code>, restart servers, read <code>*lsp-log*</code>.</td></tr>
+<tr><td>Want the old setup back</td><td>Mac: <code>scripts/mac-switch.sh --undo ~/.emacs.d.bak-&lt;date&gt;</code> and <code>git checkout master</code>. Nothing was deleted.</td></tr>
+</table>
+<p class="small">Report of the work, every commit and the measurements: <code>docs/spacemacs-overhaul-report.html</code>. Phase 1 review: <code>docs/spacemacs-review.html</code>.</p>
+</main>
+</body>
+</html>
