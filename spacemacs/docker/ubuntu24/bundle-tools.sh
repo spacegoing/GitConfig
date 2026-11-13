@@ -20,7 +20,9 @@ for l in "$dst"/lib/*.so*; do patchelf --set-rpath "$dst/lib" "$l"; done
 # aspell looks for its data in fixed /usr paths: keep data and dictionaries
 # together here and tell it where they are.
 cp -rL /usr/lib/aspell/. /var/lib/aspell/. "$dst/share/aspell/"
-printf '#!/bin/sh\nexec %s/libexec/aspell --data-dir=%s/share/aspell --dict-dir=%s/share/aspell "$@"\n' \
-  "$dst" "$dst" "$dst" > "$dst/bin/aspell"
+# Its filter modules (*.amf, *-filter.so) are in an arch-named sub-folder.
+filters=$(cd "$dst/share/aspell" && ls -d */ | head -1)
+printf '#!/bin/sh\nexec %s/libexec/aspell --data-dir=%s/share/aspell --dict-dir=%s/share/aspell --filter-path=%s/share/aspell/%s "$@"\n' \
+  "$dst" "$dst" "$dst" "$dst" "${filters%/}" > "$dst/bin/aspell"
 chmod +x "$dst/bin/aspell"
 ls "$dst/bin" "$dst/lib"; du -sh "$dst"
