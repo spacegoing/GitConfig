@@ -9,11 +9,15 @@
 #   /opt/spacemacs/emacs   Emacs 30 (terminal build, native compilation), with
 #                          the shared libraries it needs bundled in lib/
 #   /opt/spacemacs/tools   uv, basedpyright, ruff and the Python they run on
-#   /root/.emacs.d         Spacemacs (develop), packages install here on first start
+#   /root/.emacs.d         Spacemacs (develop) with every package installed and
+#                          native-compiled at build time (bake.sh)
+#   /root/.spacemacs.d     the config from this repo, copied in
 #
-# Not in the image: your config. Mount it at /root/.spacemacs.d (see run.sh).
+# Nothing is downloaded when a container starts: `docker run -it spacemacs-u24 emacs`
+# works with the network off.
 #
-#   docker build -t spacemacs-u24 docker/ubuntu24
+# The build context is the spacemacs/ directory (the config), not this folder:
+#   docker build -t spacemacs-u24 -f docker/ubuntu24/Dockerfile .
 ARG UBUNTU=24.04
 
 # ---------------------------------------------------------------- build Emacs
@@ -28,8 +32,8 @@ RUN curl -fsSL https://ftpmirror.gnu.org/emacs/emacs-${EMACS_VERSION}.tar.xz | t
 WORKDIR /tmp/emacs-${EMACS_VERSION}
 # Terminal only (no X, no image libraries, no libxml2: it drags in 35 MB of ICU
 # and is only used by the built-in web browser). Native compilation is on; Lisp is
-# compiled to native code the first time it is loaded and cached in
-# ~/.emacs.d/eln-cache, which keeps the image small.
+# compiled to native code at build time by bake.sh, into
+# ~/.emacs.d/eln-cache.
 RUN ./configure --prefix=/opt/spacemacs/emacs \
       --with-native-compilation --with-tree-sitter --with-gnutls --without-xml2 \
       --with-sqlite3 --with-modules --with-zlib \
@@ -91,13 +95,24 @@ RUN set -eux; export UV_UNMANAGED_INSTALL=/opt/spacemacs/tools/bin; \
     uv tool install basedpyright; uv tool install ruff; \
     # the standalone Python only has to run basedpyright's small launcher: drop
     # its test suite, Tk, IDLE, headers and static libraries (about 70 MB)
-    py=$(echo /opt/spacemacs/tools/python/cpython-*); \
+    py=$(readlink -f /opt/spacemacs/tools/python/cpython-*-gnu | head -1); test -d "$py/lib"; \
     rm -rf "$py"/lib/python3*/test "$py"/lib/python3*/idlelib "$py"/lib/python3*/tkinter \
            "$py"/lib/python3*/turtledemo "$py"/lib/python3*/ensurepip "$py"/lib/python3*/config-* \
            "$py"/lib/tcl* "$py"/lib/tk* "$py"/lib/itcl* "$py"/lib/thread* "$py"/lib/*.a \
            "$py"/include "$py"/share; \
     find /opt/spacemacs/tools -name __pycache__ -prune -exec rm -rf {} +; \
     basedpyright --version; ruff --version; du -sh /opt/spacemacs/tools/*
+
+# Emacs' Python layer runs "python3" for small helper scripts, and Ubuntu's
+# minimal image has none. Reuse the interpreter uv already installed (no extra
+# size); a project venv earlier on PATH still wins.
+# Mounted repos belong to a host user, not to root: tell git to accept them,
+# otherwise Magit fails with "dubious ownership".
+RUN set -eux; py=$(readlink -f /opt/spacemacs/tools/python/cpython-*-gnu | head -1); test -d "$py/lib"; \
+    ln -s "$py/bin/python3" /opt/spacemacs/tools/bin/python3; \
+    ln -s python3 /opt/spacemacs/tools/bin/python; \
+    python3 -c 'import sys, json, ast; print("python3", sys.version.split()[0])'; \
+    git config --system --add safe.directory '*'
 
 # Spacemacs itself, pinned to the commit the config was developed against.
 ARG SPACEMACS_REF=88393ec346620f8794348798ab28f8bdf562b767
@@ -109,6 +124,13 @@ RUN set -eux; git init -q /root/.emacs.d; cd /root/.emacs.d; \
 # Prove native compilation works with only the runtime pieces above.
 RUN emacs --batch --eval '(progn (require (quote comp)) (let ((f "/tmp/t.el")) (with-temp-file f (insert ";;; -*- lexical-binding: t -*-\n(defun t-add (a b) (+ a b))\n")) (princ (format "native-compiled: %s\n" (native-compile f)))))' \
  && rm -rf /tmp/* /root/.emacs.d/eln-cache
+
+# The config, then everything it asks for: bake.sh installs all packages, checks
+# a second start installs nothing, and native-compiles the packages. Logs stay in
+# /var/log/spacemacs-bake. The same script was developed by hand in a container.
+COPY . /root/.spacemacs.d
+RUN BAKE_LOG=/var/log/spacemacs-bake bash /root/.spacemacs.d/docker/ubuntu24/bake.sh \
+ && rm -rf /tmp/* /root/.cache
 
 WORKDIR /work
 CMD ["bash", "-l"]

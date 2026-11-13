@@ -1,0 +1,7 @@
+.git
+docs
+init.el
+local.el
+.spacemacs.env
+.spacemacs.env.*
+*.elc

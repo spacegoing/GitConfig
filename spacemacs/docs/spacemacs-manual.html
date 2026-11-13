@@ -94,6 +94,16 @@ nav a{color:var(--accent);text-decoration:none} nav a:hover{text-decoration:unde
 <tr><td><kbd>SPC m s i</kbd> · <kbd>SPC m s b</kbd></td><td>ipython REPL · send buffer, as before.</td></tr>
 </table>
 
+<h2 id="json">JSON</h2>
+<p>JSON files open in <code>json-mode</code> with syntax checking (flycheck) and no language server, so node is not needed. Formatting is done by Emacs itself and works on the selected region or, with no selection, the whole buffer.</p>
+<table>
+<tr><th>Key</th><th>What it does</th></tr>
+<tr><td><kbd>, = =</kbd></td><td>Pretty-print (indent taken from <code>js-indent-level</code>)</td></tr>
+<tr><td><kbd>, = s</kbd></td><td>Pretty-print with keys sorted</td></tr>
+<tr><td><kbd>, = m</kbd></td><td>Minify to one line</td></tr>
+<tr><td><kbd>, T h</kbd></td><td>Browse the JSON as a tree (json-navigator)</td></tr>
+</table>
+
 <h2 id="rust">Rust</h2>
 <p>Open a <code>.rs</code> file inside a Cargo project; rust-analyzer starts (answer <kbd>i</kbd> the first time). Diagnostics come from <code>cargo check</code> on every save. rust-analyzer watches the files itself, Emacs does not.</p>
 <table>
