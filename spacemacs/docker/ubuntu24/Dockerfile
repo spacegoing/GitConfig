@@ -1,20 +1,25 @@
 # syntax=docker/dockerfile:1
 #
-# spacemacs-u24: a small, portable Spacemacs image on Ubuntu 24.04.
+# spacemacs-u24: Spacemacs as one self-contained folder, on Ubuntu 24.04.
 #
-# Same Ubuntu as verlai/verl:uv.cu130.dev5 (nvidia/cuda 13.0.2 on ubuntu24.04),
-# so the same glibc: project venvs built in that image resolve here, and the
-# two directories this image produces can be mounted into that image as is.
+# Everything the editor needs is under /opt/spacemacs and is made at build time:
 #
-#   /opt/spacemacs/emacs   Emacs 30 (terminal build, native compilation), with
-#                          the shared libraries it needs bundled in lib/
-#   /opt/spacemacs/tools   uv, basedpyright, ruff and the Python they run on
-#   /root/.emacs.d         Spacemacs (develop) with every package installed and
-#                          native-compiled at build time (bake.sh)
-#   /root/.spacemacs.d     the config from this repo, copied in
+#   /opt/spacemacs/bin/emacs     launcher (the only thing to put on PATH)
+#   /opt/spacemacs/emacs         Emacs 30 (terminal build, native compilation),
+#                                with the shared libraries it needs in lib/
+#   /opt/spacemacs/tools         basedpyright, ruff, rg, fd, jq, aspell;
+#                                fallback/ holds uv and a python3 used only when
+#                                the surrounding image has none
+#   /opt/spacemacs/emacs.d       Spacemacs (develop), every package installed
+#                                and native-compiled (bake.sh)
+#   /opt/spacemacs/spacemacs.d   the config from this repo
 #
-# Nothing is downloaded when a container starts: `docker run -it spacemacs-u24 emacs`
-# works with the network off.
+# Nothing is downloaded when a container starts and nothing lives in $HOME.
+#
+# Use it in another Ubuntu 24.04 image (same Ubuntu as verlai/verl:uv.cu130.dev5)
+# with two lines; that image only needs git:
+#   COPY --from=spacemacs-u24:latest /opt/spacemacs /opt/spacemacs
+#   ENV PATH=/opt/spacemacs/bin:$PATH
 #
 # The build context is the spacemacs/ directory (the config), not this folder:
 #   docker build -t spacemacs-u24 -f docker/ubuntu24/Dockerfile .
@@ -65,71 +70,72 @@ RUN set -eux; cd /opt/spacemacs/emacs; mkdir -p lib; \
     find share/emacs -name '*.el.gz' -path '*/leim/*' -delete || true; \
     ./bin/emacs --batch --eval '(princ (format "%s native=%s json=%s treesit=%s\n" emacs-version (native-comp-available-p) (fboundp (quote json-parse-string)) (treesit-available-p)))'
 
+# ---------------------------------------------------------------- bundle tools
+# rg, fd, jq and aspell copied out of Ubuntu's packages into the folder, with
+# their libraries, so the folder does not depend on apt packages elsewhere.
+FROM ubuntu:${UBUNTU} AS tools-build
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      ripgrep fd-find jq aspell aspell-en patchelf
+COPY docker/ubuntu24/bundle-tools.sh /tmp/bundle-tools.sh
+RUN bash /tmp/bundle-tools.sh /opt/spacemacs/tools
+
 # ---------------------------------------------------------------- final image
 FROM ubuntu:${UBUNTU}
 ARG DEBIAN_FRONTEND=noninteractive
-# git/curl/gnupg: Spacemacs and package downloads.  ripgrep/fd: SPC / and SPC p f.
-# jq: JSON syntax check (flycheck).  aspell: spell-checking layer.
-# binutils: the assembler and linker libgccjit calls to turn Lisp into native
-# code at run time. Everything else it needs is bundled in /opt/spacemacs/emacs.
+# For this stand-alone image only (none of it is needed inside /opt/spacemacs):
+# git for Magit and the Spacemacs download, curl/gnupg for package downloads at
+# build time, binutils for the native compiler, tmux/less/ssh for comfort.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      ca-certificates git curl gnupg openssh-client less tmux \
-      ripgrep fd-find jq aspell aspell-en \
-      binutils \
- && ln -s /usr/bin/fdfind /usr/local/bin/fd \
+      ca-certificates git curl gnupg openssh-client less tmux binutils \
  && rm -rf /var/lib/apt/lists/* /usr/share/doc/* /usr/share/man/*
 
 COPY --from=emacs-build /opt/spacemacs/emacs /opt/spacemacs/emacs
+COPY --from=tools-build /opt/spacemacs/tools /opt/spacemacs/tools
+COPY --chmod=755 docker/ubuntu24/emacs-launcher.sh /opt/spacemacs/bin/emacs
+RUN ln -s ../emacs/bin/emacsclient /opt/spacemacs/bin/emacsclient
 
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8 TERM=xterm-256color COLORTERM=truecolor \
-    PATH=/opt/spacemacs/emacs/bin:/opt/spacemacs/tools/bin:/root/.local/bin:/root/.cargo/bin:$PATH
-RUN printf 'export PATH=/opt/spacemacs/emacs/bin:/opt/spacemacs/tools/bin:$HOME/.local/bin:$HOME/.cargo/bin:$PATH\n' \
-      > /etc/profile.d/10-spacemacs.sh
+    PATH=/opt/spacemacs/bin:$PATH
+RUN printf 'export PATH=/opt/spacemacs/bin:$PATH\n' > /etc/profile.d/10-spacemacs.sh
 
-# uv installs the language servers into /opt/spacemacs/tools, together with the
-# standalone Python they run on. basedpyright brings its own node.
-RUN set -eux; export UV_UNMANAGED_INSTALL=/opt/spacemacs/tools/bin; \
-    curl -LsSf https://astral.sh/uv/install.sh | sh; \
-    export UV_TOOL_DIR=/opt/spacemacs/tools/uv UV_TOOL_BIN_DIR=/opt/spacemacs/tools/bin \
-           UV_PYTHON_INSTALL_DIR=/opt/spacemacs/tools/python UV_NO_CACHE=1; \
-    uv tool install basedpyright; uv tool install ruff; \
+# Language servers, pinned, installed by uv together with the standalone Python
+# they run on. basedpyright brings its own node. uv itself and a python3 link go
+# to tools/fallback, which the launcher puts last on PATH.
+ARG UV_VERSION=0.13.8
+ARG BASEDPYRIGHT_VERSION=1.40.2
+ARG RUFF_VERSION=0.17.5
+RUN set -eux; t=/opt/spacemacs/tools; mkdir -p $t/fallback; \
+    export UV_UNMANAGED_INSTALL=$t/fallback; \
+    curl -LsSf https://astral.sh/uv/${UV_VERSION}/install.sh | sh; \
+    export PATH=$t/fallback:$t/bin:$PATH UV_TOOL_DIR=$t/uv UV_TOOL_BIN_DIR=$t/bin \
+           UV_PYTHON_INSTALL_DIR=$t/python UV_NO_CACHE=1; \
+    uv tool install basedpyright==${BASEDPYRIGHT_VERSION}; uv tool install ruff==${RUFF_VERSION}; \
     # the standalone Python only has to run basedpyright's small launcher: drop
-    # its test suite, Tk, IDLE, headers and static libraries (about 70 MB)
-    py=$(readlink -f /opt/spacemacs/tools/python/cpython-*-gnu | head -1); test -d "$py/lib"; \
+    # its test suite, Tk, IDLE, headers and static libraries
+    py=$(readlink -f $t/python/cpython-*-gnu | head -1); test -d "$py/lib"; \
     rm -rf "$py"/lib/python3*/test "$py"/lib/python3*/idlelib "$py"/lib/python3*/tkinter \
            "$py"/lib/python3*/turtledemo "$py"/lib/python3*/ensurepip "$py"/lib/python3*/config-* \
            "$py"/lib/tcl* "$py"/lib/tk* "$py"/lib/itcl* "$py"/lib/thread* "$py"/lib/*.a \
            "$py"/include "$py"/share; \
-    find /opt/spacemacs/tools -name __pycache__ -prune -exec rm -rf {} +; \
-    basedpyright --version; ruff --version; du -sh /opt/spacemacs/tools/*
-
-# Emacs' Python layer runs "python3" for small helper scripts, and Ubuntu's
-# minimal image has none. Reuse the interpreter uv already installed (no extra
-# size); a project venv earlier on PATH still wins.
-# Mounted repos belong to a host user, not to root: tell git to accept them,
-# otherwise Magit fails with "dubious ownership".
-RUN set -eux; py=$(readlink -f /opt/spacemacs/tools/python/cpython-*-gnu | head -1); test -d "$py/lib"; \
-    ln -s "$py/bin/python3" /opt/spacemacs/tools/bin/python3; \
-    ln -s python3 /opt/spacemacs/tools/bin/python; \
-    python3 -c 'import sys, json, ast; print("python3", sys.version.split()[0])'; \
-    git config --system --add safe.directory '*'
+    find $t -name __pycache__ -prune -exec rm -rf {} +; \
+    ln -s "$py/bin/python3" $t/fallback/python3; ln -s python3 $t/fallback/python; \
+    basedpyright --version; ruff --version; $t/fallback/python3 --version; du -sh $t/*
 
 # Spacemacs itself, pinned to the commit the config was developed against.
 ARG SPACEMACS_REF=88393ec346620f8794348798ab28f8bdf562b767
-RUN set -eux; git init -q /root/.emacs.d; cd /root/.emacs.d; \
+RUN set -eux; git init -q /opt/spacemacs/emacs.d; cd /opt/spacemacs/emacs.d; \
     git remote add origin https://github.com/syl20bnr/spacemacs; \
     git fetch -q --depth 1 origin "$SPACEMACS_REF"; git checkout -q -B develop FETCH_HEAD; \
     git gc -q --prune=now
 
-# Prove native compilation works with only the runtime pieces above.
-RUN emacs --batch --eval '(progn (require (quote comp)) (let ((f "/tmp/t.el")) (with-temp-file f (insert ";;; -*- lexical-binding: t -*-\n(defun t-add (a b) (+ a b))\n")) (princ (format "native-compiled: %s\n" (native-compile f)))))' \
- && rm -rf /tmp/* /root/.emacs.d/eln-cache
-
 # The config, then everything it asks for: bake.sh installs all packages, checks
-# a second start installs nothing, and native-compiles the packages. Logs stay in
-# /var/log/spacemacs-bake. The same script was developed by hand in a container.
-COPY . /root/.spacemacs.d
-RUN BAKE_LOG=/var/log/spacemacs-bake bash /root/.spacemacs.d/docker/ubuntu24/bake.sh \
+# a second start installs nothing, native-compiles the packages and checks the
+# result. Logs stay in /opt/spacemacs/bake-log. The same script was developed by
+# hand in a container.
+COPY . /opt/spacemacs/spacemacs.d
+RUN BAKE_LOG=/opt/spacemacs/bake-log bash /opt/spacemacs/spacemacs.d/docker/ubuntu24/bake.sh \
+ && ln -s /opt/spacemacs/spacemacs.d /root/.spacemacs.d \
  && rm -rf /tmp/* /root/.cache
 
 WORKDIR /work

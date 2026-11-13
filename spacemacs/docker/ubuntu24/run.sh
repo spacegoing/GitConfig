@@ -7,7 +7,7 @@
 # The image is complete: Emacs, Spacemacs, all packages and the config are inside.
 # Mounts (both optional):
 #   $REPOS            -> /work                code to edit
-#   this config dir   -> /root/.spacemacs.d   only with LIVE_CONFIG=1, to edit the
+#   this config dir   -> /opt/spacemacs/spacemacs.d   only with LIVE_CONFIG=1, to edit the
 #                        config without rebuilding. New packages you add are then
 #                        installed inside the container and lost when it is removed;
 #                        rebuild the image to keep them.
@@ -31,7 +31,7 @@ if ! "${docker[@]}" container inspect "$name" >/dev/null 2>&1; then
   if [[ -n ${LIVE_CONFIG:-} ]]; then
     # init.el is a per-machine symlink (git-ignored); this is a Linux machine.
     [[ -e $dotdir/init.el ]] || ln -sfn init.linux.el "$dotdir/init.el"
-    args+=(-v "$dotdir":/root/.spacemacs.d)
+    args+=(-v "$dotdir":/opt/spacemacs/spacemacs.d)
   fi
   [[ -n ${REPOS:-} ]] && args+=(-v "$REPOS":/work)
   [[ -n ${PROXY:-} ]] && args+=(-e https_proxy="$PROXY" -e http_proxy="$PROXY" -e no_proxy=localhost,127.0.0.1)
