@@ -34,158 +34,191 @@ a{color:var(--accent)}
 </style>
 </head><body><main>
 <h1>spacemacs-u24: dev notes</h1>
-<p class="lead">13 November 2026. A Spacemacs image on Ubuntu 24.04, built on the Tokyo box, with a container running there for you to try. This page says what was asked, what was built, how it was checked, and where every file and log is.</p>
-<nav><a href="#try">Try it</a><a href="#asked">What you asked</a><a href="#design">Design</a><a href="#how">How it was built</a><a href="#test">Test results</a><a href="#problems">Problems and fixes</a><a href="#verl">Use with the verl image</a><a href="#refs">References</a><a href="#dockerfile">Dockerfile</a><a href="#open">Open points</a></nav>
+<p class="lead">13 November 2026. Spacemacs as one self-contained folder on Ubuntu 24.04, built on the Tokyo box, running there in a container for you to try, and tested inside the verl image. This page says what was asked, where the line between the two Dockerfiles is, what was built, how it was checked, and where every file and log is.</p>
+<nav><a href="#try">Try it</a><a href="#asked">What you asked</a><a href="#boundary">The boundary</a><a href="#design">What is in the folder</a><a href="#how">How it is built</a><a href="#test">Test results</a><a href="#verl">With the verl image</a><a href="#problems">Problems and fixes</a><a href="#refs">References</a><a href="#open">Open points</a><a href="#files">The files</a></nav>
 
 <h2 id="try">Try it</h2>
 <pre><code>tokyo            # on the Mac: opens the SSM session to the Tokyo box
-smx emacs        # Emacs inside the container, in /work
-smx              # or a shell in the container; then type: emacs</code></pre>
+smx emacs        # Emacs in the stand-alone container, in /work
+smx              # or a shell there; then type: emacs</code></pre>
+<p>Inside the verl image (same editor, verl's own Python and uv):</p>
+<pre><code>sudo docker run --rm -it --entrypoint bash -v /opt/spacemacs-dev/repos:/work verl-spacemacs:latest
+emacs            # add --gpus all to the docker run line when you need the GPUs</code></pre>
 <ul>
-<li>Container <code>spacemacs-u24</code>, image <code>spacemacs-u24:latest</code> (<span class="hash">sha256:bdacf09ede01</span>, 1.16 GB). It restarts by itself after a reboot.</li>
-<li><code>/work</code> in the container is <code>/opt/spacemacs-dev/repos</code> on the box: <code>verl</code>, <code>vllm</code>, <code>Megatron-LM</code>, <code>transformers</code> (shallow clones made for this test).</li>
-<li>Nothing is installed when it starts. Packages, native code and your config are inside the image. It was tested with the network switched off.</li>
-<li>First time you open a Python file in a repo, lsp-mode asks "Select action": press <kbd>i</kbd> (import the project root). If go-to-definition lands in a library stub and it asks again, press <kbd>d</kbd> (do not ask again). This is the same behaviour as in your config on the Mac.</li>
-<li>JSON: <kbd>, = =</kbd> pretty-print, <kbd>, = s</kbd> pretty-print with sorted keys, <kbd>, = m</kbd> minify, <kbd>, T h</kbd> tree view. No node and no language server are needed for JSON.</li>
-<li>Your other containers on the box (<code>dev-tokyo</code>, <code>sgdev</code>, <code>cc-*</code>) were not touched. The live Spacemacs on the Mac was not touched.</li>
+<li>Container <code>spacemacs-u24</code>, image <code>spacemacs-u24:latest</code> (<span class="hash">sha256:bf3b88533029</span>, 1.18 GB). It restarts by itself after a reboot.</li>
+<li><code>/work</code> is <code>/opt/spacemacs-dev/repos</code> on the box: <code>verl</code>, <code>vllm</code>, <code>Megatron-LM</code>, <code>transformers</code>.</li>
+<li>Nothing is installed or compiled when it starts. It was tested with the network switched off.</li>
+<li>First time you open a Python file in a repo, lsp-mode asks "Select action": press <kbd>i</kbd>. If it asks again after go-to-definition lands in a library file, press <kbd>d</kbd>.</li>
+<li>JSON: <kbd>, = =</kbd> pretty-print, <kbd>, = s</kbd> sorted keys, <kbd>, = m</kbd> minify, <kbd>, T h</kbd> tree view.</li>
+<li>Your other containers on the box and the live Spacemacs on the Mac were not touched.</li>
 </ul>
 
 <h2 id="asked">What you asked</h2>
 <table>
 <tr><th>Requirement</th><th>Result</th></tr>
-<tr><td>Base compatible with <code>verlai/verl:uv.cu130.dev5</code>, but not the verl image itself</td><td><span class="ok">Done.</span> The verl image is <code>nvidia/cuda</code> 13.0.2 on Ubuntu 24.04, so this image is plain <code>ubuntu:24.04</code>: same glibc.</td></tr>
-<tr><td>Minimal and portable</td><td><span class="ok">Done</span>, with a note. Emacs and tools live in one relocatable folder, <code>/opt/spacemacs</code>. Size is 1.16 GB after baking packages in; see <a href="#design">Design</a> for where the bytes go.</td></tr>
-<tr><td>Self-contained, plug and play, no online install at start</td><td><span class="ok">Done.</span> All 297 package folders and 1723 native-compiled files are made at build time. Checked by running the tests in a container with <code>--network none</code>.</td></tr>
-<tr><td>Debug in a container first, then put the same code in the Dockerfile</td><td><span class="ok">Done</span> for the install step: <code>bake.sh</code> was run by hand in a scratch container (<code>sm-dev</code>), then the Dockerfile runs the same file. The earlier Emacs build step was debugged through <code>docker build</code> (builds 1 to 6), which was the slow way.</td></tr>
-<tr><td>Built on Tokyo, everything through the Dockerfile, logged</td><td><span class="ok">Done.</span> Logs are in <code>/opt/spacemacs-dev/logs</code> on the box.</td></tr>
-<tr><td>Container with verl and other large AI code mounted</td><td><span class="ok">Done.</span> Four repos in <code>/work</code>.</td></tr>
-<tr><td>JSON support and prettify</td><td><span class="ok">Done.</span> In both <code>init.linux.el</code> and <code>init.macos.el</code>.</td></tr>
+<tr><td>Same Ubuntu as <code>verlai/verl:uv.cu130.dev5</code>, but not the verl image</td><td><span class="ok">Done.</span> Plain <code>ubuntu:24.04</code>; the verl image is Ubuntu 24.04.3.</td></tr>
+<tr><td>Minimal and portable; usable inside the verl image later</td><td><span class="ok">Done.</span> One folder, <code>/opt/spacemacs</code> (1.1 GB). Tested inside the verl image.</td></tr>
+<tr><td>Self-contained, plug and play, no online install</td><td><span class="ok">Done.</span> Packages, native code, tools and config are made at build time. All tests ran with <code>--network none</code>.</td></tr>
+<tr><td>Debug in a container first, then the same code in the Dockerfile</td><td><span class="ok">Done from the bake step on.</span> <code>bake.sh</code> and <code>bundle-tools.sh</code> were run by hand in scratch containers, and the Dockerfile runs the same files. The first Emacs build was debugged through <code>docker build</code> (builds 1 to 6), the slow way.</td></tr>
+<tr><td>Do the work on the box, not from the Mac</td><td><span class="ok">Done from build 11 on.</span> The branch is on GitHub, the box has a clone at <code>/opt/spacemacs-dev/src/GitConfig</code>, edits and builds happen there. Before that I edited on the Mac and uploaded small files, which cost time and one failed build.</td></tr>
+<tr><td>Clear boundary between the Spacemacs Dockerfile and the verl one</td><td><span class="ok">Done.</span> See the next section.</td></tr>
+<tr><td>JSON support and prettify</td><td><span class="ok">Done.</span> In <code>init.linux.el</code> and <code>init.macos.el</code>.</td></tr>
 </table>
 
-<h2 id="design">Design</h2>
+<h2 id="boundary">The boundary</h2>
+<div class="grid">
+<div class="card"><h3>Spacemacs Dockerfile owns the editor</h3>
+<p><code>docker/ubuntu24/Dockerfile</code></p>
+<ul><li>Emacs, Spacemacs, all packages and their native code, your config.</li>
+<li>The language servers and every tool the editor calls: basedpyright, ruff, rg, fd, jq, aspell.</li>
+<li>Pinned versions, and checks that fail the build.</li>
+<li>Its contract: one folder <code>/opt/spacemacs</code>, one command <code>/opt/spacemacs/bin/emacs</code>, for Ubuntu 24.04 x86_64.</li></ul></div>
+<div class="card"><h3>The verl Dockerfile only composes</h3>
+<p><code>docker/verl/Dockerfile</code></p>
+<pre><code>FROM verlai/verl:uv.cu130.dev5
+COPY --from=spacemacs-u24 /opt/spacemacs /opt/spacemacs
+ENV PATH=/opt/spacemacs/bin:$PATH</code></pre>
+<ul><li>No apt packages, no settings, no PATH order rules for the editor.</li>
+<li>Python, uv, the <code>.venv</code> and git stay verl's business.</li></ul></div>
+</div>
+<p>How the folder keeps to its side:</p>
+<ul>
+<li>The launcher puts the editor's tools on PATH <b>for Emacs only</b>. In the verl image's shell, <code>python3</code> and <code>uv</code> are still verl's, and <code>ruff</code> and <code>rg</code> are not visible at all.</li>
+<li>The folder's own <code>python3</code> and <code>uv</code> are in <code>tools/fallback</code>, last on Emacs's PATH. They are used only where the image has none.</li>
+<li>Nothing is in <code>$HOME</code>: the launcher starts Emacs with <code>--init-directory</code> and <code>SPACEMACSDIR</code>.</li>
+<li>Repos mounted from a host belong to another user, and git refuses them. The launcher allows them for Emacs (Magit) only; the image's git settings are not changed.</li>
+</ul>
+<p>My first version did not keep this line: the verl side needed an <code>apt-get</code> for four tools, a PATH order rule, files in <code>/root</code> and a system git setting. That version is gone.</p>
+
+<h2 id="design">What is in the folder</h2>
 <table>
-<tr><th>Path in the image</th><th>Size</th><th>What it is</th></tr>
-<tr><td><code>/opt/spacemacs/emacs</code></td><td class="num">196 MB</td><td>Emacs 30.2 built from source: terminal only, native compilation, tree-sitter. The shared libraries it needs are copied into <code>lib/</code>, and the few GCC files the native compiler links with are in <code>lib/gcc/</code>. It runs in any Ubuntu 24.04 container without installing packages (only <code>binutils</code> is needed if you compile more Lisp).</td></tr>
-<tr><td><code>/opt/spacemacs/tools</code></td><td class="num">435 MB</td><td><code>uv</code> 0.13.8, <code>basedpyright</code> 1.40.2 (brings its own node, about 300 MB with ruff), <code>ruff</code> 0.17.5, and the Python 3.15.2 they run on (also linked as <code>python3</code>).</td></tr>
-<tr><td><code>/root/.emacs.d</code></td><td class="num">379 MB</td><td>Spacemacs develop at commit <span class="hash">88393ec34662</span>, all packages, and the native code cache.</td></tr>
-<tr><td><code>/root/.spacemacs.d</code></td><td class="num">4 MB</td><td>Your config, copied from the repo. <code>init.el</code> points to <code>init.linux.el</code>.</td></tr>
-<tr><td>Ubuntu 24.04 + apt</td><td class="num">about 210 MB</td><td>git, curl, tmux, ripgrep, fd, jq, aspell, binutils, openssh-client.</td></tr>
+<tr><th>Path</th><th>What it is</th></tr>
+<tr><td><code>/opt/spacemacs/bin/emacs</code></td><td>The launcher (a 13-line shell script). <code>emacsclient</code> is next to it.</td></tr>
+<tr><td><code>/opt/spacemacs/emacs</code></td><td>Emacs 30.2 built from source: terminal only, native compilation, tree-sitter. Its shared libraries are in <code>lib/</code>, and the GCC files the native compiler links with are in <code>lib/gcc/</code>. About 196 MB.</td></tr>
+<tr><td><code>/opt/spacemacs/tools</code></td><td><code>bin/</code>: basedpyright 1.40.2 (brings its own node), ruff 0.17.5, rg, fd, jq, aspell with the English dictionary. <code>fallback/</code>: uv 0.13.8 and python3 3.15. About 450 MB, most of it basedpyright's node.</td></tr>
+<tr><td><code>/opt/spacemacs/emacs.d</code></td><td>Spacemacs develop at <span class="hash">88393ec34662</span>, 297 package folders, 1933 native-compiled files.</td></tr>
+<tr><td><code>/opt/spacemacs/spacemacs.d</code></td><td>Your config from the repo. <code>init.el</code> points to <code>init.linux.el</code>. In the stand-alone image <code>/root/.spacemacs.d</code> links here.</td></tr>
+<tr><td><code>/opt/spacemacs/bake-log</code></td><td>Logs of the build-time install, compile and checks.</td></tr>
 </table>
-<p>Before packages were baked in the image was 855 MB. Baking adds about 300 MB and removes the 6 minute install and the background compiling at first start. The largest single item is basedpyright's bundled node.</p>
 
-<h2 id="how">How it was built</h2>
-<p>Build command, run on the box in <code>/opt/spacemacs-dev</code> (the build context is the config folder):</p>
-<pre><code>sudo docker build -t spacemacs-u24:latest \
-  -f GitConfig/spacemacs/docker/ubuntu24/Dockerfile GitConfig/spacemacs</code></pre>
+<h2 id="how">How it is built</h2>
+<p>On the box, from the git clone (the build context is the config folder):</p>
+<pre><code>cd /opt/spacemacs-dev
+sudo docker build -t spacemacs-u24:latest \
+  -f src/GitConfig/spacemacs/docker/ubuntu24/Dockerfile src/GitConfig/spacemacs
+sudo docker build -t verl-spacemacs:latest src/GitConfig/spacemacs/docker/verl</code></pre>
 <ol>
-<li><b>Stage 1</b> compiles Emacs 30.2 and makes the folder self-contained (about 10 minutes, cached after the first time).</li>
-<li><b>Stage 2</b> starts from a clean <code>ubuntu:24.04</code>, adds the apt tools, copies Emacs in, installs uv, basedpyright and ruff, and fetches Spacemacs at the pinned commit.</li>
-<li>The config is copied in and <code>docker/ubuntu24/bake.sh</code> runs:
- <ul><li>start Emacs in batch mode, which installs every package (239 installed, 399 s);</li>
- <li>start again and fail the build if anything is still being installed (nothing was);</li>
- <li>native-compile all packages with <code>native-compile-all.el</code> (1723 files, 355 s on 8 cores).</li></ul></li>
+<li><b>Stage emacs-build</b> compiles Emacs and makes its folder self-contained (about 6 minutes on 8 cores, cached afterwards).</li>
+<li><b>Stage tools-build</b> runs <code>bundle-tools.sh</code>: copies rg, fd, jq and aspell with their libraries out of Ubuntu's packages (18 MB).</li>
+<li><b>Final stage</b>: clean <code>ubuntu:24.04</code>, the two folders above, the launcher, pinned uv + basedpyright + ruff, Spacemacs at the pinned commit, then the config and <code>bake.sh</code>:
+ <ol><li>install every package (239 installed, 262 s);</li>
+ <li>start again; fail if anything is still being installed;</li>
+ <li>native-compile all packages (1723 files, 350 s);</li>
+ <li>warm start: run a real terminal session so Emacs's own built-in Lisp is compiled too (210 more files, 85 s); a second session must have nothing left to compile and no spell-check error;</li>
+ <li>self-check: Magit runs as native code, every tool is found, spell-check marks a misspelt line, rg/fd/jq/aspell run.</li></ol></li>
 </ol>
-<p>Run command used for your container:</p>
+<p>A change to the config repeats only the bake (about 12 minutes). The container on the box was started with:</p>
 <pre><code>sudo docker run -d --name spacemacs-u24 --hostname spacemacs-u24 --restart unless-stopped \
   -v /opt/spacemacs-dev/repos:/work spacemacs-u24:latest sleep infinity</code></pre>
-<p><code>docker/ubuntu24/run.sh</code> does the same on any machine (<code>REPOS=/path DOCKER="sudo docker" docker/ubuntu24/run.sh</code>). With <code>LIVE_CONFIG=1</code> it mounts the repo's config over the baked one, so you can edit the config without rebuilding.</p>
 
 <h2 id="test">Test results</h2>
-<p>A script (<code>/opt/spacemacs-dev/repos/_verify/verify.sh</code>) starts a real terminal Emacs in tmux inside a fresh container with <code>--network none</code>, and drives it through one large file per repo. While it works, a second loop asks Emacs a trivial question every 0.3 s; a slow answer means Emacs was blocked.</p>
+<p>A script (<code>docker/ubuntu24/test/verify.sh</code>, on the box at <code>/opt/spacemacs-dev/repos/_verify/</code>) starts a real terminal Emacs in a fresh container with <code>--network none</code> and drives it through one large file per repo. A second loop asks Emacs a trivial question every 0.3 s; a slow answer means Emacs was blocked. Numbers below are from the final image (build 11), one run each.</p>
 <table>
-<tr><th>Step</th><th>verl<br><span class="small">ray_trainer.py</span></th><th>vllm<br><span class="small">v1/engine/async_llm.py</span></th><th>Megatron-LM<br><span class="small">transformer_layer.py</span></th><th>transformers<br><span class="small">trainer.py</span></th></tr>
-<tr><td>Files in repo</td><td class="num">1341</td><td class="num">9233</td><td class="num">3377</td><td class="num">6771</td></tr>
-<tr><td>Open file</td><td class="num">1.0 s</td><td class="num">0.08 s</td><td class="num">0.05 s</td><td class="num">0.06 s</td></tr>
-<tr><td>basedpyright + ruff started</td><td class="num">2.7 s</td><td class="num">0.5 s</td><td class="num">0.5 s</td><td class="num">0.5 s</td></tr>
-<tr><td>First diagnostics</td><td class="num">2.5 s</td><td><span class="warn">none in 90 s</span> (see note)</td><td class="num">2.0 s</td><td class="num">11.1 s</td></tr>
-<tr><td>Hover</td><td class="num">0.5 s</td><td class="num">0.5 s</td><td class="num">0.5 s</td><td class="num">0.5 s</td></tr>
-<tr><td><kbd>, g g</kbd> go to definition</td><td class="num">0.2 s</td><td class="num">0.1 s</td><td class="num">0.04 s</td><td class="num">0.08 s</td></tr>
-<tr><td>Completion <code>os.path.jo</code> gives <code>join</code></td><td class="num">1.6 s</td><td class="num">1.5 s</td><td class="num">1.5 s</td><td class="num">5.0 s</td></tr>
-<tr><td>Unused import reported</td><td><span class="ok">ruff</span></td><td><span class="ok">ruff</span></td><td><span class="ok">basedpyright</span></td><td><span class="ok">ruff</span></td></tr>
-<tr><td><kbd>, = =</kbd> format with ruff</td><td class="num">0.01 s</td><td class="num">0.01 s</td><td class="num">3.6 s</td><td class="num">0.02 s</td></tr>
-<tr><td><kbd>SPC g s</kbd> Magit status</td><td class="num">1.6 s</td><td class="num">0.5 s</td><td class="num">0.5 s</td><td class="num">0.5 s</td></tr>
-<tr><td>Emacs memory after the repo</td><td class="num">226 MB</td><td class="num">243 MB</td><td class="num">253 MB</td><td class="num">270 MB</td></tr>
+<tr><th>Check</th><th>Stand-alone image</th><th>Inside the verl image</th></tr>
+<tr><td>Packages loaded, native code, config location</td><td>289, yes, <code>/opt/spacemacs</code></td><td>289, yes, <code>/opt/spacemacs</code></td></tr>
+<tr><td><code>python3</code> and <code>uv</code> seen by Emacs</td><td>the folder's fallback ones</td><td><span class="ok">verl's</span>: <code>/workspace/verl/.venv/bin/python3</code>, <code>/usr/bin/uv</code></td></tr>
+<tr><td>Anything written to <code>~/.emacs.d</code></td><td><span class="ok">no</span></td><td><span class="ok">no</span></td></tr>
+<tr><td>verl, Megatron-LM, transformers: servers, diagnostics, hover, go-to-definition, completion, lint, format, Magit</td><td><span class="ok">all passed</span></td><td><span class="ok">all passed</span></td></tr>
+<tr><td>vllm (<code>v1/engine/async_llm.py</code>)</td><td>all passed except: <span class="warn">no diagnostics within 90 s</span></td><td>same</td></tr>
+<tr><td>First diagnostics: verl / Megatron-LM / transformers</td><td class="num">2.0 s / 2.0 s / 11.6 s</td><td class="num">13.7 s / 3.0 s / 20.2 s</td></tr>
+<tr><td>Go to definition</td><td class="num">0.05 to 0.17 s</td><td class="num">0.05 to 0.26 s (lands in verl's Python 3.12)</td></tr>
+<tr><td>Magit status</td><td class="num">0.5 s</td><td class="num">0.5 s</td></tr>
+<tr><td>JSON keys, pretty-print, flycheck</td><td><span class="ok">passed</span></td><td><span class="ok">passed</span></td></tr>
+<tr><td>Spell-check error at start</td><td><span class="ok">none</span></td><td><span class="ok">none</span></td></tr>
+<tr><td><b>Did Emacs block?</b></td><td><span class="ok">No.</span> 433 probes, mean 4 ms, slowest 33 ms</td><td><span class="ok">No.</span> 513 probes, mean 4 ms, slowest 41 ms</td></tr>
 </table>
 <ul>
-<li><b>Did Emacs block?</b> No. 434 probes, mean 4 ms, slowest 30 ms, none over 300 ms.</li>
-<li><b>Start-up:</b> Emacs answered 2.1 s after launch, with 289 packages loaded and native compilation on. <code>*Warnings*</code> was empty at the end.</li>
-<li><b>JSON:</b> <code>json-mode</code>, no language server; the four keys are bound; pretty-print turned a one-line file into 12 lines; sorted and minify gave the expected text; flycheck checker active.</li>
-<li><b>vllm note:</b> basedpyright sent no diagnostics for that file within 90 s. The server was alive (hover, go-to-definition and completion answered). I did not find out whether the file simply has nothing to report in the default "off" type-checking mode or whether analysis of this repo is slow; worth a look when you try it.</li>
-<li>These times are from one run (log: <code>/opt/spacemacs-dev/logs/verify-offline.log</code>). An earlier run of the same image with the network on (<code>verify-v2.log</code>) gave the same picture.</li>
+<li><b>Start-up:</b> init takes 1.0 s; Emacs answered 1.4 s after launch on a terminal that sends no queries. In the test's fake terminal it shows about 4 s, because Emacs waits 2 s for terminal answers that never come; a real terminal answers at once. I did not time it in your real terminal.</li>
+<li><b>vllm:</b> basedpyright sent no diagnostics for that file within 90 s in every run, while hover, go-to-definition and completion answered. I did not find out why. Worth a look when you try it.</li>
+<li><b>Diagnostics are slower inside verl</b> because basedpyright now reads verl's real environment (torch and 256 other packages) instead of finding nothing.</li>
+<li>After a long session 3 more built-in files were waiting for background compilation. The warm start covers start-up and common file types, not every feature.</li>
+<li>Logs on the box: <code>/opt/spacemacs-dev/logs/verify-next2.log</code> (stand-alone), <code>verify-inverl3.log</code> (in verl).</li>
+</ul>
+
+<h2 id="verl">With the verl image</h2>
+<ul>
+<li><code>verlai/verl:uv.cu130.dev5</code> is pulled on the box (26.9 GB). <code>verl-spacemacs:latest</code> is that plus the folder (27.9 GB).</li>
+<li><b>The verl image has no language server, no ruff, no node.</b> It has Python 3.12, uv 0.11.16, the verl source in <code>/workspace/verl</code> and a 13 GB uv cache.</li>
+<li><b>It has no venv and no torch until first use, by design.</b> From its own <code>docker/Dockerfile.uv.cu130</code>: "bakes NO fixed .venv ... <code>uv run --extra ...</code> installs the requested extras into /workspace/verl/.venv from the baked cache (fast / offline, no network)". Checked on the box with the network off:
+<pre><code>cd /workspace/verl
+uv run --frozen --offline --all-packages --extra vllm --extra fsdp python3 -c "import torch; print(torch.__version__)"
+# 14 s, 257 packages, prints 2.13.0+cu130</code></pre></li>
+<li>Once <code>.venv</code> exists, basedpyright uses it by itself (the config looks for <code>.venv</code> in the project), so torch imports resolve in the editor.</li>
+<li>I read the documentation shipped in the image. I did not search verl's GitHub issues.</li>
 </ul>
 
 <h2 id="problems">Problems and fixes</h2>
 <table>
 <tr><th>Problem</th><th>Fix</th></tr>
-<tr><td>Builds 1 and 2: native compilation failed in the final image (<code>ld: cannot find crtbeginS.o</code>, <code>-lgcc</code>, <code>-lc</code>). The copied libgccjit could not find GCC's link files.</td><td>Bundle those files in <code>/opt/spacemacs/emacs/lib/gcc</code> and set <code>native-comp-driver-options</code> in <code>site-start.el</code>. Build 3 passed.</td></tr>
-<tr><td>First test: <code>python3</code> not found; git said "dubious ownership" on the mounted repos, so Magit failed.</td><td>Link uv's Python as <code>python3</code>; <code>git config --system safe.directory '*'</code>. Builds 5 and 6.</td></tr>
-<tr><td>Build 5 failed, and the Python trim in build 4 did nothing: uv keeps two names for its Python folder and my shell variable held both.</td><td>Resolve the real folder with <code>readlink -f</code> and check it exists.</td></tr>
-<tr><td>Packages were installed at first start into a volume, not in the image.</td><td>You asked for a self-contained image. <code>bake.sh</code> now runs at build time; the volume is gone. Build 7.</td></tr>
-<tr><td>About 2.5 hours lost on my side: a poll script had a <code>grep</code> with no file name, which waits for input for ever.</td><td>Fixed the script. No effect on the image.</td></tr>
-<tr><td>Test driver errors: a vllm file path that does not exist in current vllm (the driver created an empty file there; removed, <code>git status</code> in vllm is clean), and an unanswered lsp "Select action" question that stopped one run.</td><td>Driver now checks the file exists and answers the question in advance.</td></tr>
+<tr><td>Builds 1, 2: native compilation failed in the final image (<code>ld: cannot find crtbeginS.o</code>, <code>-lgcc</code>, <code>-lc</code>).</td><td>Bundle GCC's link files in <code>emacs/lib/gcc</code>; set <code>native-comp-driver-options</code> in <code>site-start.el</code>.</td></tr>
+<tr><td>Packages were installed at first start, into a volume.</td><td>You asked for a self-contained image: <code>bake.sh</code> at build time (build 7).</td></tr>
+<tr><td>The verl side needed apt packages, a PATH rule, files in <code>/root</code>, a git setting.</td><td>One folder plus launcher, tools bundled (builds 8 to 10).</td></tr>
+<tr><td>Native code was lost when <code>.emacs.d</code> was moved.</td><td>Native files are tied to the path they were compiled at. Bake at the final path.</td></tr>
+<tr><td>Build 8 failed: the launcher was not executable after my upload.</td><td><code>COPY --chmod=755</code> in the Dockerfile; work from a git clone on the box.</td></tr>
+<tr><td>Spell-check broken in build 10 ("Error enabling Flyspell mode"): bundled aspell did not find its filter modules. My check only tested that the program exists.</td><td><code>--filter-path</code> in the aspell wrapper; the build now checks that a misspelt line is marked.</td></tr>
+<tr><td>First start compiled about 200 built-in files in the background (9 s to respond in the test).</td><td>Warm-start step in <code>bake.sh</code>.</td></tr>
+<tr><td>About 2.5 hours lost: a poll script of mine had a <code>grep</code> with no file name and waited for ever.</td><td>Fixed. Long jobs are now watched with a plain timer and I read the logs myself each time.</td></tr>
+<tr><td>Test driver errors: a vllm path that no longer exists (it left an empty file, removed), and lsp's "Select action" question left unanswered twice.</td><td>Driver checks the file exists and answers the question in advance.</td></tr>
 </table>
-
-<h2 id="verl">Use with the verl image</h2>
-<p><span class="ok">Tested on the Tokyo box.</span> <code>verlai/verl:uv.cu130.dev5</code> was pulled there (26.9 GB unpacked, Ubuntu 24.04.3) and this Dockerfile was built on top of it as <code>verl-spacemacs:test</code> (27.9 GB, about 1 GB added):</p>
-<pre><code>FROM verlai/verl:uv.cu130.dev5
-RUN apt-get update &amp;&amp; apt-get install -y --no-install-recommends ripgrep fd-find jq aspell aspell-en tmux \
- &amp;&amp; ln -sf /usr/bin/fdfind /usr/local/bin/fd &amp;&amp; rm -rf /var/lib/apt/lists/* \
- &amp;&amp; git config --system --add safe.directory '*'
-COPY --from=spacemacs-u24:latest /opt/spacemacs /opt/spacemacs
-COPY --from=spacemacs-u24:latest /root/.emacs.d /root/.emacs.d
-COPY --from=spacemacs-u24:latest /root/.spacemacs.d /root/.spacemacs.d
-# Emacs first; the tools last, so the image's own python3 stays in front.
-ENV PATH=/opt/spacemacs/emacs/bin:$PATH:/opt/spacemacs/tools/bin</code></pre>
-<ul>
-<li>The same test as above was run inside it with <code>--network none</code>: all four repos and JSON passed, 289 packages loaded, native code used, no packages installed. Emacs did not block: 434 probes, slowest 35 ms. Log: <code>/opt/spacemacs-dev/logs/verify-inverl.log</code>; the Dockerfile is <code>/opt/spacemacs-dev/verl-test/Dockerfile</code>.</li>
-<li>The verl image has no <code>ripgrep</code>, <code>fd</code>, <code>jq</code>, <code>aspell</code> or <code>tmux</code>; without <code>aspell</code> Emacs prints "Error enabling Flyspell mode". That is what the <code>apt-get</code> line is for (<code>tmux</code> was only needed by the test).</li>
-<li>Put <code>/opt/spacemacs/tools/bin</code> at the end of PATH. At the front, its <code>python3</code> hides the image's own.</li>
-<li>The verl image sets <code>VIRTUAL_ENV=/workspace/verl/.venv</code>, but that folder is not in the image and <code>/usr/bin/python3</code> has no <code>torch</code>. So torch imports stay unresolved in the editor until that environment is created. I did not create it.</li>
-</ul>
 
 <h2 id="refs">References</h2>
 <table>
 <tr><th>What</th><th>Where</th></tr>
-<tr><td>Branch and worktree (Mac)</td><td><code>spacemacs-overhaul</code> in <code>/Users/changli/sg21CodeLab/GitConfig-wt-spacemacs-overhaul</code>. Not pushed to GitHub.</td></tr>
-<tr><td>Commits for this work</td><td><span class="hash">319a652</span> JSON without node + first Dockerfile; <span class="hash">47c49a1</span> GCC link files, trim; and the commit that adds this page (bake at build time, python3, safe.directory).</td></tr>
-<tr><td>Image files in the repo</td><td><code>spacemacs/docker/ubuntu24/Dockerfile</code>, <code>bake.sh</code>, <code>native-compile-all.el</code>, <code>run.sh</code>, and <code>spacemacs/.dockerignore</code></td></tr>
-<tr><td>JSON config</td><td><code>spacemacs/init.linux.el</code>, <code>init.macos.el</code> (json layer); <code>spacemacs/layers/sdev/funcs.el</code> (<code>sdev/json-pretty</code>, <code>-sorted</code>, <code>-minify</code>); <code>layers/sdev/keybindings.el</code></td></tr>
-<tr><td>On the Tokyo box</td><td><code>/opt/spacemacs-dev/GitConfig/spacemacs</code> (copy of the config, build context), <code>/opt/spacemacs-dev/repos</code> (the four repos), <code>/usr/local/bin/smx</code> (helper)</td></tr>
-<tr><td>Logs on the box</td><td><code>/opt/spacemacs-dev/logs/build-1.log</code> to <code>build-7.log</code> (7 is the final build), <code>bake-dev-1.log</code> (scratch container run), <code>verify-offline.log</code> (final test), <code>verify-v1.log</code>, <code>verify-v2.log</code>, <code>first-start-1.log</code> (old design), <code>clone-*.log</code></td></tr>
-<tr><td>Logs in the image</td><td><code>/var/log/spacemacs-bake/install.log</code>, <code>second.log</code>, <code>native.log</code></td></tr>
+<tr><td>Branch</td><td><code>spacemacs-overhaul</code> on <code>github.com/spacegoing/GitConfig</code> (public). Mac worktree: <code>/Users/changli/sg21CodeLab/GitConfig-wt-spacemacs-overhaul</code>.</td></tr>
+<tr><td>Commits for this work</td><td><span class="hash">319a652</span> JSON without node; <span class="hash">47c49a1</span>, <span class="hash">f5dcd86</span> first image; <span class="hash">6d07f96</span> one folder; <span class="hash">49431a1</span> spell-check, warm start (the image is built from this tree); then the commit with this page and the test driver.</td></tr>
+<tr><td>Files</td><td><code>spacemacs/docker/ubuntu24/</code>: <code>Dockerfile</code>, <code>bake.sh</code>, <code>bundle-tools.sh</code>, <code>emacs-launcher.sh</code>, <code>native-compile-all.el</code>, <code>run.sh</code>, <code>test/</code>. <code>spacemacs/docker/verl/Dockerfile</code>. <code>spacemacs/.dockerignore</code>.</td></tr>
+<tr><td>JSON config</td><td><code>spacemacs/init.linux.el</code>, <code>init.macos.el</code>; <code>layers/sdev/funcs.el</code>, <code>keybindings.el</code></td></tr>
+<tr><td>On the Tokyo box</td><td><code>/opt/spacemacs-dev/src/GitConfig</code> (git clone, build context), <code>/opt/spacemacs-dev/repos</code>, <code>/usr/local/bin/smx</code>. <code>/opt/spacemacs-dev/GitConfig</code> is the older uploaded copy and can be deleted.</td></tr>
+<tr><td>Logs on the box</td><td><code>/opt/spacemacs-dev/logs/</code>: <code>build-1</code> to <code>build-11.log</code> (11 is final), <code>bake-dev-1/2.log</code> (scratch runs), <code>verify-next2.log</code>, <code>verify-inverl3.log</code> (final tests), <code>pull-verl.log</code>, <code>verl-uv-run.log</code></td></tr>
+<tr><td>Images on the box</td><td><code>spacemacs-u24:latest</code> <span class="hash">bf3b88533029</span>; <code>verl-spacemacs:latest</code> <span class="hash">9eac46976df1</span>; <code>verlai/verl:uv.cu130.dev5</code>, pulled digest <span class="hash">sha256:21e75451badbd7080a221f4cf408306ce637b77d5bb9df80a37e4387b5310146</span></td></tr>
 <tr><td>Repo commits tested</td><td>verl <span class="hash">8a2d1d9</span>, vllm <span class="hash">43c1db8</span>, Megatron-LM <span class="hash">97b50bd</span>, transformers <span class="hash">109a7d1</span></td></tr>
-<tr><td>verl image</td><td><code>verlai/verl:uv.cu130.dev5</code>, pulled digest <span class="hash">sha256:21e75451badbd7080a221f4cf408306ce637b77d5bb9df80a37e4387b5310146</span></td></tr>
-<tr><td>Other pages</td><td><a href="spacemacs-manual.html">spacemacs-manual.html</a> (keys, now with JSON), <a href="spacemacs-overhaul-report.html">spacemacs-overhaul-report.html</a> (October rebuild)</td></tr>
+<tr><td>Other pages</td><td><a href="spacemacs-manual.html">spacemacs-manual.html</a>, <a href="spacemacs-overhaul-report.html">spacemacs-overhaul-report.html</a></td></tr>
 </table>
-<p class="small">The image was built from the box copy of the config: commit 319a652 plus the files listed under "Image files in the repo". The committed Dockerfile differs from the one used for build 7 by one comment line.</p>
 
 <h2 id="open">Open points</h2>
 <ul>
-<li>The image is x86_64 only as built. The Dockerfile has the arm64 paths but that build was not run.</li>
-<li>The image exists only on the Tokyo box. It is not pushed to a registry.</li>
-<li>The repos have no Python environment, so basedpyright reports third-party imports (torch and others) as unresolved. Create one with <code>uv venv</code> in a repo, or work inside the verl image.</li>
-<li>A config change means a rebuild of the last step (about 13 minutes), or use <code>LIVE_CONFIG=1</code>.</li>
+<li>vllm diagnostics: none within 90 s, cause not found.</li>
+<li>x86_64 only as built. The Dockerfile has arm64 paths but that build was not run.</li>
+<li>The images exist only on the Tokyo box; not pushed to a registry.</li>
+<li>The folder still expects two things from the image it is copied into: <code>git</code> (for Magit), and <code>binutils</code> if you install more packages and want them native-compiled. The verl image has both.</li>
+<li>The folder must stay at <code>/opt/spacemacs</code>; its native code is tied to that path.</li>
+<li>The branch on GitHub is public and its reports contain local paths from your Mac. The old GitHub token in <code>master</code>'s history should be revoked if it is not already.</li>
 </ul>
 
-<h2 id="dockerfile">Dockerfile</h2>
-<p><code>spacemacs/docker/ubuntu24/Dockerfile</code></p>
+<h2 id="files">The files</h2>
+<h3>docker/ubuntu24/Dockerfile</h3>
 <pre><code># syntax=docker/dockerfile:1
 #
-# spacemacs-u24: a small, portable Spacemacs image on Ubuntu 24.04.
+# spacemacs-u24: Spacemacs as one self-contained folder, on Ubuntu 24.04.
 #
-# Same Ubuntu as verlai/verl:uv.cu130.dev5 (nvidia/cuda 13.0.2 on ubuntu24.04),
-# so the same glibc: project venvs built in that image resolve here, and the
-# two directories this image produces can be mounted into that image as is.
+# Everything the editor needs is under /opt/spacemacs and is made at build time:
 #
-#   /opt/spacemacs/emacs   Emacs 30 (terminal build, native compilation), with
-#                          the shared libraries it needs bundled in lib/
-#   /opt/spacemacs/tools   uv, basedpyright, ruff and the Python they run on
-#   /root/.emacs.d         Spacemacs (develop) with every package installed and
-#                          native-compiled at build time (bake.sh)
-#   /root/.spacemacs.d     the config from this repo, copied in
+#   /opt/spacemacs/bin/emacs     launcher (the only thing to put on PATH)
+#   /opt/spacemacs/emacs         Emacs 30 (terminal build, native compilation),
+#                                with the shared libraries it needs in lib/
+#   /opt/spacemacs/tools         basedpyright, ruff, rg, fd, jq, aspell;
+#                                fallback/ holds uv and a python3 used only when
+#                                the surrounding image has none
+#   /opt/spacemacs/emacs.d       Spacemacs (develop), every package installed
+#                                and native-compiled (bake.sh)
+#   /opt/spacemacs/spacemacs.d   the config from this repo
 #
-# Nothing is downloaded when a container starts: `docker run -it spacemacs-u24 emacs`
-# works with the network off.
+# Nothing is downloaded when a container starts and nothing lives in $HOME.
+#
+# Use it in another Ubuntu 24.04 image (same Ubuntu as verlai/verl:uv.cu130.dev5)
+# with two lines; that image only needs git:
+#   COPY --from=spacemacs-u24:latest /opt/spacemacs /opt/spacemacs
+#   ENV PATH=/opt/spacemacs/bin:$PATH
 #
 # The build context is the spacemacs/ directory (the config), not this folder:
 #   docker build -t spacemacs-u24 -f docker/ubuntu24/Dockerfile .
@@ -236,91 +269,127 @@ RUN set -eux; cd /opt/spacemacs/emacs; mkdir -p lib; \
     find share/emacs -name &#x27;*.el.gz&#x27; -path &#x27;*/leim/*&#x27; -delete || true; \
     ./bin/emacs --batch --eval &#x27;(princ (format &quot;%s native=%s json=%s treesit=%s\n&quot; emacs-version (native-comp-available-p) (fboundp (quote json-parse-string)) (treesit-available-p)))&#x27;
 
+# ---------------------------------------------------------------- bundle tools
+# rg, fd, jq and aspell copied out of Ubuntu&#x27;s packages into the folder, with
+# their libraries, so the folder does not depend on apt packages elsewhere.
+FROM ubuntu:${UBUNTU} AS tools-build
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update &amp;&amp; apt-get install -y --no-install-recommends \
+      ripgrep fd-find jq aspell aspell-en patchelf
+COPY docker/ubuntu24/bundle-tools.sh /tmp/bundle-tools.sh
+RUN bash /tmp/bundle-tools.sh /opt/spacemacs/tools
+
 # ---------------------------------------------------------------- final image
 FROM ubuntu:${UBUNTU}
 ARG DEBIAN_FRONTEND=noninteractive
-# git/curl/gnupg: Spacemacs and package downloads.  ripgrep/fd: SPC / and SPC p f.
-# jq: JSON syntax check (flycheck).  aspell: spell-checking layer.
-# binutils: the assembler and linker libgccjit calls to turn Lisp into native
-# code at run time. Everything else it needs is bundled in /opt/spacemacs/emacs.
+# For this stand-alone image only (none of it is needed inside /opt/spacemacs):
+# git for Magit and the Spacemacs download, curl/gnupg for package downloads at
+# build time, binutils for the native compiler, tmux/less/ssh for comfort.
 RUN apt-get update &amp;&amp; apt-get install -y --no-install-recommends \
-      ca-certificates git curl gnupg openssh-client less tmux \
-      ripgrep fd-find jq aspell aspell-en \
-      binutils \
- &amp;&amp; ln -s /usr/bin/fdfind /usr/local/bin/fd \
+      ca-certificates git curl gnupg openssh-client less tmux binutils \
  &amp;&amp; rm -rf /var/lib/apt/lists/* /usr/share/doc/* /usr/share/man/*
 
 COPY --from=emacs-build /opt/spacemacs/emacs /opt/spacemacs/emacs
+COPY --from=tools-build /opt/spacemacs/tools /opt/spacemacs/tools
+COPY --chmod=755 docker/ubuntu24/emacs-launcher.sh /opt/spacemacs/bin/emacs
+RUN ln -s ../emacs/bin/emacsclient /opt/spacemacs/bin/emacsclient
 
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8 TERM=xterm-256color COLORTERM=truecolor \
-    PATH=/opt/spacemacs/emacs/bin:/opt/spacemacs/tools/bin:/root/.local/bin:/root/.cargo/bin:$PATH
-RUN printf &#x27;export PATH=/opt/spacemacs/emacs/bin:/opt/spacemacs/tools/bin:$HOME/.local/bin:$HOME/.cargo/bin:$PATH\n&#x27; \
-      &gt; /etc/profile.d/10-spacemacs.sh
+    PATH=/opt/spacemacs/bin:$PATH
+RUN printf &#x27;export PATH=/opt/spacemacs/bin:$PATH\n&#x27; &gt; /etc/profile.d/10-spacemacs.sh
 
-# uv installs the language servers into /opt/spacemacs/tools, together with the
-# standalone Python they run on. basedpyright brings its own node.
-RUN set -eux; export UV_UNMANAGED_INSTALL=/opt/spacemacs/tools/bin; \
-    curl -LsSf https://astral.sh/uv/install.sh | sh; \
-    export UV_TOOL_DIR=/opt/spacemacs/tools/uv UV_TOOL_BIN_DIR=/opt/spacemacs/tools/bin \
-           UV_PYTHON_INSTALL_DIR=/opt/spacemacs/tools/python UV_NO_CACHE=1; \
-    uv tool install basedpyright; uv tool install ruff; \
+# Language servers, pinned, installed by uv together with the standalone Python
+# they run on. basedpyright brings its own node. uv itself and a python3 link go
+# to tools/fallback, which the launcher puts last on PATH.
+ARG UV_VERSION=0.13.8
+ARG BASEDPYRIGHT_VERSION=1.40.2
+ARG RUFF_VERSION=0.17.5
+RUN set -eux; t=/opt/spacemacs/tools; mkdir -p $t/fallback; \
+    export UV_UNMANAGED_INSTALL=$t/fallback; \
+    curl -LsSf https://astral.sh/uv/${UV_VERSION}/install.sh | sh; \
+    export PATH=$t/fallback:$t/bin:$PATH UV_TOOL_DIR=$t/uv UV_TOOL_BIN_DIR=$t/bin \
+           UV_PYTHON_INSTALL_DIR=$t/python UV_NO_CACHE=1; \
+    uv tool install basedpyright==${BASEDPYRIGHT_VERSION}; uv tool install ruff==${RUFF_VERSION}; \
     # the standalone Python only has to run basedpyright&#x27;s small launcher: drop
-    # its test suite, Tk, IDLE, headers and static libraries (about 70 MB)
-    py=$(readlink -f /opt/spacemacs/tools/python/cpython-*-gnu | head -1); test -d &quot;$py/lib&quot;; \
+    # its test suite, Tk, IDLE, headers and static libraries
+    py=$(readlink -f $t/python/cpython-*-gnu | head -1); test -d &quot;$py/lib&quot;; \
     rm -rf &quot;$py&quot;/lib/python3*/test &quot;$py&quot;/lib/python3*/idlelib &quot;$py&quot;/lib/python3*/tkinter \
            &quot;$py&quot;/lib/python3*/turtledemo &quot;$py&quot;/lib/python3*/ensurepip &quot;$py&quot;/lib/python3*/config-* \
            &quot;$py&quot;/lib/tcl* &quot;$py&quot;/lib/tk* &quot;$py&quot;/lib/itcl* &quot;$py&quot;/lib/thread* &quot;$py&quot;/lib/*.a \
            &quot;$py&quot;/include &quot;$py&quot;/share; \
-    find /opt/spacemacs/tools -name __pycache__ -prune -exec rm -rf {} +; \
-    basedpyright --version; ruff --version; du -sh /opt/spacemacs/tools/*
-
-# Emacs&#x27; Python layer runs &quot;python3&quot; for small helper scripts, and Ubuntu&#x27;s
-# minimal image has none. Reuse the interpreter uv already installed (no extra
-# size); a project venv earlier on PATH still wins.
-# Mounted repos belong to a host user, not to root: tell git to accept them,
-# otherwise Magit fails with &quot;dubious ownership&quot;.
-RUN set -eux; py=$(readlink -f /opt/spacemacs/tools/python/cpython-*-gnu | head -1); test -d &quot;$py/lib&quot;; \
-    ln -s &quot;$py/bin/python3&quot; /opt/spacemacs/tools/bin/python3; \
-    ln -s python3 /opt/spacemacs/tools/bin/python; \
-    python3 -c &#x27;import sys, json, ast; print(&quot;python3&quot;, sys.version.split()[0])&#x27;; \
-    git config --system --add safe.directory &#x27;*&#x27;
+    find $t -name __pycache__ -prune -exec rm -rf {} +; \
+    ln -s &quot;$py/bin/python3&quot; $t/fallback/python3; ln -s python3 $t/fallback/python; \
+    basedpyright --version; ruff --version; $t/fallback/python3 --version; du -sh $t/*
 
 # Spacemacs itself, pinned to the commit the config was developed against.
 ARG SPACEMACS_REF=88393ec346620f8794348798ab28f8bdf562b767
-RUN set -eux; git init -q /root/.emacs.d; cd /root/.emacs.d; \
+RUN set -eux; git init -q /opt/spacemacs/emacs.d; cd /opt/spacemacs/emacs.d; \
     git remote add origin https://github.com/syl20bnr/spacemacs; \
     git fetch -q --depth 1 origin &quot;$SPACEMACS_REF&quot;; git checkout -q -B develop FETCH_HEAD; \
     git gc -q --prune=now
 
-# Prove native compilation works with only the runtime pieces above.
-RUN emacs --batch --eval &#x27;(progn (require (quote comp)) (let ((f &quot;/tmp/t.el&quot;)) (with-temp-file f (insert &quot;;;; -*- lexical-binding: t -*-\n(defun t-add (a b) (+ a b))\n&quot;)) (princ (format &quot;native-compiled: %s\n&quot; (native-compile f)))))&#x27; \
- &amp;&amp; rm -rf /tmp/* /root/.emacs.d/eln-cache
-
 # The config, then everything it asks for: bake.sh installs all packages, checks
-# a second start installs nothing, and native-compiles the packages. Logs stay in
-# /var/log/spacemacs-bake. The same script was developed by hand in a container.
-COPY . /root/.spacemacs.d
-RUN BAKE_LOG=/var/log/spacemacs-bake bash /root/.spacemacs.d/docker/ubuntu24/bake.sh \
+# a second start installs nothing, native-compiles the packages and checks the
+# result. Logs stay in /opt/spacemacs/bake-log. The same script was developed by
+# hand in a container.
+COPY . /opt/spacemacs/spacemacs.d
+RUN BAKE_LOG=/opt/spacemacs/bake-log bash /opt/spacemacs/spacemacs.d/docker/ubuntu24/bake.sh \
+ &amp;&amp; ln -s /opt/spacemacs/spacemacs.d /root/.spacemacs.d \
  &amp;&amp; rm -rf /tmp/* /root/.cache
 
 WORKDIR /work
 CMD [&quot;bash&quot;, &quot;-l&quot;]
 </code></pre>
-<h3>bake.sh</h3>
+<h3>docker/verl/Dockerfile</h3>
+<pre><code># verl + Spacemacs: the verl image with the editor folder added. Nothing else.
+#
+# Everything about the editor is decided in docker/ubuntu24 (spacemacs-u24).
+# This file only composes: one folder, one PATH entry. No apt packages, no
+# settings, no order rules. verl&#x27;s own python, uv and .venv are left alone.
+#
+#   docker build -t verl-spacemacs docker/verl
+#   docker run --rm -it --gpus all verl-spacemacs      # then: emacs
+ARG VERL=verlai/verl:uv.cu130.dev5
+ARG SPACEMACS=spacemacs-u24:latest
+FROM ${SPACEMACS} AS spacemacs
+FROM ${VERL}
+COPY --from=spacemacs /opt/spacemacs /opt/spacemacs
+ENV PATH=/opt/spacemacs/bin:$PATH
+</code></pre>
+<h3>docker/ubuntu24/emacs-launcher.sh</h3>
+<pre><code>#!/bin/sh
+# /opt/spacemacs/bin/emacs - Spacemacs launcher.
+# Everything lives under /opt/spacemacs; nothing is read from or written to $HOME.
+#  - the editor&#x27;s tools (ruff, basedpyright, rg, fd, jq, aspell) go on PATH for
+#    Emacs only, so they never change what the surrounding image runs;
+#  - python3 and uv from here go last: the image&#x27;s own (or a project venv) win;
+#  - repos mounted from a host belong to another user: allow git (Magit) to open
+#    them, for Emacs only.
+S=/opt/spacemacs
+export SPACEMACSDIR=$S/spacemacs.d/
+export PATH=$S/tools/bin:$PATH:$S/tools/fallback
+export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0=&#x27;*&#x27;
+exec $S/emacs/bin/emacs --init-directory=$S/emacs.d &quot;$@&quot;
+</code></pre>
+<h3>docker/ubuntu24/bake.sh</h3>
 <pre><code>#!/usr/bin/env bash
 # bake.sh - make Spacemacs ready to use with no network at start-up.
 # Run by the Dockerfile (and by hand in a scratch container while developing).
-# Needs: Emacs on PATH, Spacemacs in ~/.emacs.d, the config in ~/.spacemacs.d.
+# Needs the final layout: /opt/spacemacs/{bin/emacs,emacs.d,spacemacs.d}. Native
+# code is tied to the path it was compiled at, so bake where it will be used.
 #   1. install every package the config asks for
 #   2. run again and fail if anything is still being installed
 #   3. native-compile all packages now, so Emacs does not do it at first use
+#   4. run a real session so Emacs&#x27; own built-in Lisp is compiled too
+#   5. check the result: native code in use, every tool works, spell-check works
 set -euo pipefail
-cd &quot;$HOME&quot;
+S=/opt/spacemacs
 here=$(cd &quot;$(dirname &quot;$0&quot;)&quot; &amp;&amp; pwd)
-ln -sfn init.linux.el &quot;$HOME/.spacemacs.d/init.el&quot;
-boot=(emacs --batch -l &quot;$HOME/.emacs.d/early-init.el&quot; -l &quot;$HOME/.emacs.d/init.el&quot;
+ln -sfn init.linux.el &quot;$S/spacemacs.d/init.el&quot;
+boot=(&quot;$S/bin/emacs&quot; --batch -l &quot;$S/emacs.d/early-init.el&quot; -l &quot;$S/emacs.d/init.el&quot;
       --eval &quot;(run-hooks &#x27;emacs-startup-hook)&quot;)
-log=${BAKE_LOG:-/tmp/bake}; mkdir -p &quot;$log&quot;
+log=${BAKE_LOG:-/tmp/bake}; mkdir -p &quot;$log&quot;; cd /
+trap &#x27;echo &quot;bake failed; last log lines:&quot;; tail -n 15 &quot;$log&quot;/*.log&#x27; ERR
 
 echo &quot;== 1. install packages&quot;; t=$SECONDS
 &quot;${boot[@]}&quot; &lt;/dev/null &gt;&quot;$log/install.log&quot; 2&gt;&amp;1
@@ -331,26 +400,80 @@ echo &quot;== 2. second start must install nothing&quot;; t=$SECONDS
 if grep -q &#x27;installing package&#x27; &quot;$log/second.log&quot;; then
   grep &#x27;installing package&#x27; &quot;$log/second.log&quot; | head; echo &quot;packages still missing&quot;; exit 1
 fi
-echo &quot;   ok in $((SECONDS-t)) s, $(ls &quot;$HOME&quot;/.emacs.d/elpa/*/develop | grep -vc archives) package dirs&quot;
+echo &quot;   ok in $((SECONDS-t)) s, $(ls &quot;$S&quot;/emacs.d/elpa/*/develop | grep -vc archives) package dirs&quot;
 
 echo &quot;== 3. native-compile&quot;; t=$SECONDS
 &quot;${boot[@]}&quot; -l &quot;$here/native-compile-all.el&quot; &lt;/dev/null &gt;&quot;$log/native.log&quot; 2&gt;&amp;1
-tail -1 &quot;$log/native.log&quot;
-echo &quot;   $(find &quot;$HOME/.emacs.d/eln-cache&quot; -name &#x27;*.eln&#x27; | wc -l) .eln files in $((SECONDS-t)) s&quot;
-du -sh &quot;$HOME/.emacs.d&quot; &quot;$HOME/.emacs.d/elpa&quot; &quot;$HOME/.emacs.d/eln-cache&quot;
+n=$(find &quot;$S/emacs.d/eln-cache&quot; -name &#x27;*.eln&#x27; | wc -l)
+echo &quot;   $n .eln files in $((SECONDS-t)) s&quot;
+[ &quot;$n&quot; -gt 1000 ] || { echo &quot;too few native files&quot;; exit 1; }
+
+echo &quot;== 4. warm start&quot;; t=$SECONDS
+# Emacs compiles its own built-in Lisp the first time a session loads it. Run a
+# real terminal session now, open the usual kinds of file, and wait until the
+# background compiler is idle; then a second session must find nothing to do.
+ec() { &quot;$S/emacs/bin/emacsclient&quot; -s bake --eval &quot;$1&quot; 2&gt;/dev/null; }
+warm() {
+  TERM=xterm-256color &quot;$S/tools/fallback/python3&quot; -c &#x27;import pty,sys; pty.spawn(sys.argv[1:])&#x27; \
+    sh -c &quot;stty rows 50 cols 200; exec $S/bin/emacs -nw --eval &#x27;(progn (setq server-name \&quot;bake\&quot;) (server-start))&#x27;&quot; \
+    &lt;/dev/null &gt;/dev/null 2&gt;&amp;1 &amp;
+  for _ in $(seq 1 600); do ec t &gt;/dev/null &amp;&amp; break; sleep 0.2; done
+  ec &quot;$1&quot; &gt;/dev/null || true
+  for _ in $(seq 1 300); do
+    [ &quot;$(ec &#x27;(and (null comp-files-queue) (zerop (comp--async-runnings)))&#x27;)&quot; = t ] &amp;&amp; break; sleep 2
+  done
+  queued=$(ec &#x27;(length comp-files-queue)&#x27; || echo unknown)
+  flyspell_error=$(ec &#x27;(with-current-buffer &quot;*Messages*&quot; (save-excursion (goto-char (point-min)) (if (search-forward &quot;Error enabling Flyspell&quot; nil t) 1 0)))&#x27; || echo unknown)
+  ec &#x27;(kill-emacs)&#x27; &gt;/dev/null || true; wait || true
+}
+w=$(mktemp -d); printf &#x27;import os\nx = 1\n&#x27; &gt;&quot;$w/w.py&quot;; printf &#x27;{&quot;a&quot;:1}\n&#x27; &gt;&quot;$w/w.json&quot;
+printf &#x27;# t\n&#x27; &gt;&quot;$w/w.md&quot;; printf &#x27;(message &quot;t&quot;)\n&#x27; &gt;&quot;$w/w.el&quot;; printf &#x27;helo wrld\n&#x27; &gt;&quot;$w/w.txt&quot;
+warm &quot;(progn (dolist (f &#x27;(\&quot;w.py\&quot; \&quot;w.json\&quot; \&quot;w.md\&quot; \&quot;w.el\&quot; \&quot;w.txt\&quot;)) (find-file (expand-file-name f \&quot;$w\&quot;))) (dolist (p &#x27;(magit lsp-mode lsp-ui company helm flycheck)) (require p)) (dired \&quot;$w\&quot;) t)&quot;
+warm t
+echo &quot;   second session: $queued files left to compile, flyspell error: $flyspell_error, $((SECONDS-t)) s&quot;
+[ &quot;$queued&quot; = 0 ] &amp;&amp; [ &quot;$flyspell_error&quot; = 0 ] || { echo &quot;warm start check failed&quot;; exit 1; }
+rm -rf &quot;$w&quot;
+echo &quot;   $(find &quot;$S/emacs.d/eln-cache&quot; -name &#x27;*.eln&#x27; | wc -l) .eln files now&quot;
+
+echo &quot;== 5. self-check&quot;
+&quot;${boot[@]}&quot; --eval &quot;(progn (require &#x27;magit) (unless (subr-native-elisp-p (symbol-function &#x27;magit-status)) (error \&quot;magit is not native-compiled\&quot;)) (dolist (p &#x27;(\&quot;ruff\&quot; \&quot;basedpyright-langserver\&quot; \&quot;rg\&quot; \&quot;fd\&quot; \&quot;jq\&quot; \&quot;aspell\&quot; \&quot;python3\&quot;)) (unless (executable-find p) (error \&quot;missing tool %s\&quot; p))) (with-temp-buffer (text-mode) (insert \&quot;helo wrld\&quot;) (flyspell-mode 1) (flyspell-buffer) (unless (seq-some (lambda (o) (overlay-get o &#x27;flyspell-overlay)) (overlays-in (point-min) (point-max))) (error \&quot;spell-check found nothing in a misspelt line\&quot;))) (princ \&quot;   self-check ok\n\&quot;))&quot; &lt;/dev/null 2&gt;&quot;$log/check.log&quot; | grep &quot;self-check ok&quot;
+for tool in rg fd jq; do &quot;$S/tools/bin/$tool&quot; --version &gt;/dev/null; done
+echo helo | &quot;$S/tools/bin/aspell&quot; -a 2&gt;&amp;1 | grep -q &#x27;^&amp; helo&#x27; 
+! echo helo | &quot;$S/tools/bin/aspell&quot; -a 2&gt;&amp;1 | grep -qi &#x27;warning\|error&#x27;
+# The native-compile workers are plain child Emacs processes and may leave an
+# empty ~/.emacs.d/snippets behind. Remove empty leftovers; real files are an error.
+[ ! -d &quot;$HOME/.emacs.d&quot; ] || find &quot;$HOME/.emacs.d&quot; -depth -type d -empty -delete
+[ ! -e &quot;$HOME/.emacs.d&quot; ] || { echo &quot;something wrote to ~/.emacs.d:&quot;; find &quot;$HOME/.emacs.d&quot; | head; exit 1; }
+du -sh &quot;$S&quot; &quot;$S&quot;/*
 </code></pre>
-<h3>native-compile-all.el</h3>
-<pre><code>;;; native-compile-all.el --- compile every installed package ahead of time  -*- lexical-binding: t -*-
-;; Loaded by bake.sh after Spacemacs has started in batch mode. Without this,
-;; Emacs compiles each package in the background the first time it is used.
-(require &#x27;comp)
-(setq native-comp-async-jobs-number (max 1 (num-processors))
-      native-comp-async-report-warnings-errors &#x27;silent)
-(native-compile-async (list package-user-dir) &#x27;recursively)
-(let ((running (if (fboundp &#x27;comp--async-runnings) #&#x27;comp--async-runnings #&#x27;comp-async-runnings))
-      (start (float-time)))
-  (while (or comp-files-queue (&gt; (funcall running) 0))
-    (accept-process-output nil 2))
-  (message &quot;native-compile-all: done in %d s&quot; (- (float-time) start)))
+<h3>docker/ubuntu24/bundle-tools.sh</h3>
+<pre><code>#!/usr/bin/env bash
+# bundle-tools.sh - copy rg, fd, jq and aspell (with its English dictionary) out
+# of Ubuntu&#x27;s packages into one relocatable folder, so the editor does not
+# depend on apt packages being installed in the image it is copied into.
+#   bundle-tools.sh /opt/spacemacs/tools
+# Needs: apt packages ripgrep fd-find jq aspell aspell-en patchelf.
+set -euo pipefail
+dst=$1; mkdir -p &quot;$dst&quot;/{bin,lib,libexec,share/aspell}
+libs_of() { ldd &quot;$1&quot; | awk &#x27;$3 ~ /^\// {print $3}&#x27; \
+  | grep -Ev &#x27;/(libc|libm|libdl|libpthread|librt|libresolv|libgcc_s|libstdc\+\+|ld-linux[^/]*)\.so&#x27; || true; }
+put() { # put &lt;binary&gt; &lt;dest dir&gt; &lt;name&gt;: copy it, copy its libraries, point it at them
+  cp -L &quot;$1&quot; &quot;$2/$3&quot;
+  for l in $(libs_of &quot;$1&quot;); do cp -Ln &quot;$l&quot; &quot;$dst/lib/&quot;; done
+  patchelf --set-rpath &quot;$dst/lib&quot; &quot;$2/$3&quot;; }
+put /usr/bin/rg     &quot;$dst/bin&quot; rg
+put /usr/bin/fdfind &quot;$dst/bin&quot; fd
+put /usr/bin/jq     &quot;$dst/bin&quot; jq
+put /usr/bin/aspell &quot;$dst/libexec&quot; aspell
+for l in &quot;$dst&quot;/lib/*.so*; do patchelf --set-rpath &quot;$dst/lib&quot; &quot;$l&quot;; done
+# aspell looks for its data in fixed /usr paths: keep data and dictionaries
+# together here and tell it where they are.
+cp -rL /usr/lib/aspell/. /var/lib/aspell/. &quot;$dst/share/aspell/&quot;
+# Its filter modules (*.amf, *-filter.so) are in an arch-named sub-folder.
+filters=$(cd &quot;$dst/share/aspell&quot; &amp;&amp; ls -d */ | head -1)
+printf &#x27;#!/bin/sh\nexec %s/libexec/aspell --data-dir=%s/share/aspell --dict-dir=%s/share/aspell --filter-path=%s/share/aspell/%s &quot;$@&quot;\n&#x27; \
+  &quot;$dst&quot; &quot;$dst&quot; &quot;$dst&quot; &quot;$dst&quot; &quot;${filters%/}&quot; &gt; &quot;$dst/bin/aspell&quot;
+chmod +x &quot;$dst/bin/aspell&quot;
+ls &quot;$dst/bin&quot; &quot;$dst/lib&quot;; du -sh &quot;$dst&quot;
 </code></pre>
 </main></body></html>

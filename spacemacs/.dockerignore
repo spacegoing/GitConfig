@@ -5,3 +5,4 @@ local.el
 .spacemacs.env
 .spacemacs.env.*
 *.elc
+docker/ubuntu24/test
