@@ -126,13 +126,22 @@ smx              # or a shell in the container; then type: emacs</code></pre>
 </table>
 
 <h2 id="verl">Use with the verl image</h2>
-<p><span class="warn">Not tested yet</span> (the verl image is a 12 GB download; I did not pull it). The design is that the three folders can be copied into any Ubuntu 24.04 image, for example in a Dockerfile:</p>
+<p><span class="ok">Tested on the Tokyo box.</span> <code>verlai/verl:uv.cu130.dev5</code> was pulled there (26.9 GB unpacked, Ubuntu 24.04.3) and this Dockerfile was built on top of it as <code>verl-spacemacs:test</code> (27.9 GB, about 1 GB added):</p>
 <pre><code>FROM verlai/verl:uv.cu130.dev5
-COPY --from=spacemacs-u24:latest /opt/spacemacs   /opt/spacemacs
-COPY --from=spacemacs-u24:latest /root/.emacs.d   /root/.emacs.d
+RUN apt-get update &amp;&amp; apt-get install -y --no-install-recommends ripgrep fd-find jq aspell aspell-en tmux \
+ &amp;&amp; ln -sf /usr/bin/fdfind /usr/local/bin/fd &amp;&amp; rm -rf /var/lib/apt/lists/* \
+ &amp;&amp; git config --system --add safe.directory '*'
+COPY --from=spacemacs-u24:latest /opt/spacemacs /opt/spacemacs
+COPY --from=spacemacs-u24:latest /root/.emacs.d /root/.emacs.d
 COPY --from=spacemacs-u24:latest /root/.spacemacs.d /root/.spacemacs.d
-ENV PATH=/opt/spacemacs/emacs/bin:/opt/spacemacs/tools/bin:$PATH</code></pre>
-<p>What supports this: Emacs carries its own libraries, and both images use Ubuntu 24.04's glibc. What could still differ: the home directory must be <code>/root</code> (native code file names depend on the path), and the apt tools (<code>ripgrep</code>, <code>fd-find</code>, <code>jq</code>, <code>aspell</code>, <code>binutils</code>) must be in the verl image or installed there.</p>
+# Emacs first; the tools last, so the image's own python3 stays in front.
+ENV PATH=/opt/spacemacs/emacs/bin:$PATH:/opt/spacemacs/tools/bin</code></pre>
+<ul>
+<li>The same test as above was run inside it with <code>--network none</code>: all four repos and JSON passed, 289 packages loaded, native code used, no packages installed. Emacs did not block: 434 probes, slowest 35 ms. Log: <code>/opt/spacemacs-dev/logs/verify-inverl.log</code>; the Dockerfile is <code>/opt/spacemacs-dev/verl-test/Dockerfile</code>.</li>
+<li>The verl image has no <code>ripgrep</code>, <code>fd</code>, <code>jq</code>, <code>aspell</code> or <code>tmux</code>; without <code>aspell</code> Emacs prints "Error enabling Flyspell mode". That is what the <code>apt-get</code> line is for (<code>tmux</code> was only needed by the test).</li>
+<li>Put <code>/opt/spacemacs/tools/bin</code> at the end of PATH. At the front, its <code>python3</code> hides the image's own.</li>
+<li>The verl image sets <code>VIRTUAL_ENV=/workspace/verl/.venv</code>, but that folder is not in the image and <code>/usr/bin/python3</code> has no <code>torch</code>. So torch imports stay unresolved in the editor until that environment is created. I did not create it.</li>
+</ul>
 
 <h2 id="refs">References</h2>
 <table>
@@ -145,14 +154,13 @@ ENV PATH=/opt/spacemacs/emacs/bin:/opt/spacemacs/tools/bin:$PATH</code></pre>
 <tr><td>Logs on the box</td><td><code>/opt/spacemacs-dev/logs/build-1.log</code> to <code>build-7.log</code> (7 is the final build), <code>bake-dev-1.log</code> (scratch container run), <code>verify-offline.log</code> (final test), <code>verify-v1.log</code>, <code>verify-v2.log</code>, <code>first-start-1.log</code> (old design), <code>clone-*.log</code></td></tr>
 <tr><td>Logs in the image</td><td><code>/var/log/spacemacs-bake/install.log</code>, <code>second.log</code>, <code>native.log</code></td></tr>
 <tr><td>Repo commits tested</td><td>verl <span class="hash">8a2d1d9</span>, vllm <span class="hash">43c1db8</span>, Megatron-LM <span class="hash">97b50bd</span>, transformers <span class="hash">109a7d1</span></td></tr>
-<tr><td>verl image</td><td><code>verlai/verl:uv.cu130.dev5</code>, digest <span class="hash">sha256:466853285884bccd04c85f1c474cf5c4cc8f3ba4348d893f10de7738d3efc504</span></td></tr>
+<tr><td>verl image</td><td><code>verlai/verl:uv.cu130.dev5</code>, pulled digest <span class="hash">sha256:21e75451badbd7080a221f4cf408306ce637b77d5bb9df80a37e4387b5310146</span></td></tr>
 <tr><td>Other pages</td><td><a href="spacemacs-manual.html">spacemacs-manual.html</a> (keys, now with JSON), <a href="spacemacs-overhaul-report.html">spacemacs-overhaul-report.html</a> (October rebuild)</td></tr>
 </table>
 <p class="small">The image was built from the box copy of the config: commit 319a652 plus the files listed under "Image files in the repo". The committed Dockerfile differs from the one used for build 7 by one comment line.</p>
 
 <h2 id="open">Open points</h2>
 <ul>
-<li>Mounting into the real verl image is not tested (see above).</li>
 <li>The image is x86_64 only as built. The Dockerfile has the arm64 paths but that build was not run.</li>
 <li>The image exists only on the Tokyo box. It is not pushed to a registry.</li>
 <li>The repos have no Python environment, so basedpyright reports third-party imports (torch and others) as unresolved. Create one with <code>uv venv</code> in a repo, or work inside the verl image.</li>
