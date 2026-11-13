@@ -5,4 +5,7 @@ local.el
 .spacemacs.env
 .spacemacs.env.*
 *.elc
-docker/ubuntu24/test
+docker/spacemacs-u24/test
+docker/README.md
+docker/spacemacs-dev
+docker/verl-spacemacs

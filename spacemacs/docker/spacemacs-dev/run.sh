@@ -12,7 +12,7 @@
 #   SPACEMACS_SRC  host directory with a Spacemacs checkout, mounted read-only at /mnt/spacemacs
 set -euo pipefail
 here=$(cd "$(dirname "$0")" && pwd)
-dotdir=$(cd "$here/.." && pwd)
+dotdir=$(cd "$here/../.." && pwd)
 name=${NAME:-spacemacs-dev}
 proxy=${PROXY:-http://host.docker.internal:7897}
 

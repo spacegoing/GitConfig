@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Build (once) and start the spacemacs-u24 container, then open a shell in it.
 #
-#   docker/ubuntu24/run.sh            # shell in the container; type `emacs`
-#   docker/ubuntu24/run.sh emacs      # straight into Emacs
+#   docker/spacemacs-u24/run.sh            # shell in the container; type `emacs`
+#   docker/spacemacs-u24/run.sh emacs      # straight into Emacs
 #
 # The image is complete: Emacs, Spacemacs, all packages and the config are inside.
 # Mounts (both optional):

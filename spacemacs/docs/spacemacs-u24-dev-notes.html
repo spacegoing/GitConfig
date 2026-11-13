@@ -68,13 +68,13 @@ emacs            # add --gpus all to the docker run line when you need the GPUs<
 <h2 id="boundary">The boundary</h2>
 <div class="grid">
 <div class="card"><h3>Spacemacs Dockerfile owns the editor</h3>
-<p><code>docker/ubuntu24/Dockerfile</code></p>
+<p><code>docker/spacemacs-u24/Dockerfile</code></p>
 <ul><li>Emacs, Spacemacs, all packages and their native code, your config.</li>
 <li>The language servers and every tool the editor calls: basedpyright, ruff, rg, fd, jq, aspell.</li>
 <li>Pinned versions, and checks that fail the build.</li>
 <li>Its contract: one folder <code>/opt/spacemacs</code>, one command <code>/opt/spacemacs/bin/emacs</code>, for Ubuntu 24.04 x86_64.</li></ul></div>
 <div class="card"><h3>The verl Dockerfile only composes</h3>
-<p><code>docker/verl/Dockerfile</code></p>
+<p><code>docker/verl-spacemacs/Dockerfile</code></p>
 <pre><code>FROM verlai/verl:uv.cu130.dev5
 COPY --from=spacemacs-u24 /opt/spacemacs /opt/spacemacs
 ENV PATH=/opt/spacemacs/bin:$PATH</code></pre>
@@ -105,8 +105,8 @@ ENV PATH=/opt/spacemacs/bin:$PATH</code></pre>
 <p>On the box, from the git clone (the build context is the config folder):</p>
 <pre><code>cd /opt/spacemacs-dev
 sudo docker build -t spacemacs-u24:latest \
-  -f src/GitConfig/spacemacs/docker/ubuntu24/Dockerfile src/GitConfig/spacemacs
-sudo docker build -t verl-spacemacs:latest src/GitConfig/spacemacs/docker/verl</code></pre>
+  -f src/GitConfig/spacemacs/docker/spacemacs-u24/Dockerfile src/GitConfig/spacemacs
+sudo docker build -t verl-spacemacs:latest src/GitConfig/spacemacs/docker/verl-spacemacs</code></pre>
 <ol>
 <li><b>Stage emacs-build</b> compiles Emacs and makes its folder self-contained (about 6 minutes on 8 cores, cached afterwards).</li>
 <li><b>Stage tools-build</b> runs <code>bundle-tools.sh</code>: copies rg, fd, jq and aspell with their libraries out of Ubuntu's packages (18 MB).</li>
@@ -122,7 +122,7 @@ sudo docker build -t verl-spacemacs:latest src/GitConfig/spacemacs/docker/verl</
   -v /opt/spacemacs-dev/repos:/work spacemacs-u24:latest sleep infinity</code></pre>
 
 <h2 id="test">Test results</h2>
-<p>A script (<code>docker/ubuntu24/test/verify.sh</code>, on the box at <code>/opt/spacemacs-dev/repos/_verify/</code>) starts a real terminal Emacs in a fresh container with <code>--network none</code> and drives it through one large file per repo. A second loop asks Emacs a trivial question every 0.3 s; a slow answer means Emacs was blocked. Numbers below are from the final image (build 11), one run each.</p>
+<p>A script (<code>docker/spacemacs-u24/test/verify.sh</code>, on the box at <code>/opt/spacemacs-dev/repos/_verify/</code>) starts a real terminal Emacs in a fresh container with <code>--network none</code> and drives it through one large file per repo. A second loop asks Emacs a trivial question every 0.3 s; a slow answer means Emacs was blocked. Numbers below are from the final image (build 11), one run each.</p>
 <table>
 <tr><th>Check</th><th>Stand-alone image</th><th>Inside the verl image</th></tr>
 <tr><td>Packages loaded, native code, config location</td><td>289, yes, <code>/opt/spacemacs</code></td><td>289, yes, <code>/opt/spacemacs</code></td></tr>
@@ -176,7 +176,7 @@ uv run --frozen --offline --all-packages --extra vllm --extra fsdp python3 -c "i
 <tr><th>What</th><th>Where</th></tr>
 <tr><td>Branch</td><td><code>spacemacs-overhaul</code> on <code>github.com/spacegoing/GitConfig</code> (public). Mac worktree: <code>/Users/changli/sg21CodeLab/GitConfig-wt-spacemacs-overhaul</code>.</td></tr>
 <tr><td>Commits for this work</td><td><span class="hash">319a652</span> JSON without node; <span class="hash">47c49a1</span>, <span class="hash">f5dcd86</span> first image; <span class="hash">6d07f96</span> one folder; <span class="hash">49431a1</span> spell-check, warm start (the image is built from this tree); then the commit with this page and the test driver.</td></tr>
-<tr><td>Files</td><td><code>spacemacs/docker/ubuntu24/</code>: <code>Dockerfile</code>, <code>bake.sh</code>, <code>bundle-tools.sh</code>, <code>emacs-launcher.sh</code>, <code>native-compile-all.el</code>, <code>run.sh</code>, <code>test/</code>. <code>spacemacs/docker/verl/Dockerfile</code>. <code>spacemacs/.dockerignore</code>.</td></tr>
+<tr><td>Files</td><td><code>spacemacs/docker/spacemacs-u24/</code>: <code>Dockerfile</code>, <code>run.sh</code>, <code>build/</code> (<code>bake.sh</code>, <code>bundle-tools.sh</code>, <code>emacs-launcher.sh</code>, <code>native-compile-all.el</code>), <code>test/</code>. File map: <code>spacemacs/docker/README.md</code>. <code>spacemacs/docker/verl-spacemacs/Dockerfile</code>. <code>spacemacs/.dockerignore</code>.</td></tr>
 <tr><td>JSON config</td><td><code>spacemacs/init.linux.el</code>, <code>init.macos.el</code>; <code>layers/sdev/funcs.el</code>, <code>keybindings.el</code></td></tr>
 <tr><td>On the Tokyo box</td><td><code>/opt/spacemacs-dev/src/GitConfig</code> (git clone, build context), <code>/opt/spacemacs-dev/repos</code>, <code>/usr/local/bin/smx</code>. <code>/opt/spacemacs-dev/GitConfig</code> is the older uploaded copy and can be deleted.</td></tr>
 <tr><td>Logs on the box</td><td><code>/opt/spacemacs-dev/logs/</code>: <code>build-1</code> to <code>build-11.log</code> (11 is final), <code>bake-dev-1/2.log</code> (scratch runs), <code>verify-next2.log</code>, <code>verify-inverl3.log</code> (final tests), <code>pull-verl.log</code>, <code>verl-uv-run.log</code></td></tr>
@@ -196,7 +196,7 @@ uv run --frozen --offline --all-packages --extra vllm --extra fsdp python3 -c "i
 </ul>
 
 <h2 id="files">The files</h2>
-<h3>docker/ubuntu24/Dockerfile</h3>
+<h3>docker/spacemacs-u24/Dockerfile</h3>
 <pre><code># syntax=docker/dockerfile:1
 #
 # spacemacs-u24: Spacemacs as one self-contained folder, on Ubuntu 24.04.
@@ -221,7 +221,7 @@ uv run --frozen --offline --all-packages --extra vllm --extra fsdp python3 -c "i
 #   ENV PATH=/opt/spacemacs/bin:$PATH
 #
 # The build context is the spacemacs/ directory (the config), not this folder:
-#   docker build -t spacemacs-u24 -f docker/ubuntu24/Dockerfile .
+#   docker build -t spacemacs-u24 -f docker/spacemacs-u24/Dockerfile .
 ARG UBUNTU=24.04
 
 # ---------------------------------------------------------------- build Emacs
@@ -276,7 +276,7 @@ FROM ubuntu:${UBUNTU} AS tools-build
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update &amp;&amp; apt-get install -y --no-install-recommends \
       ripgrep fd-find jq aspell aspell-en patchelf
-COPY docker/ubuntu24/bundle-tools.sh /tmp/bundle-tools.sh
+COPY docker/spacemacs-u24/build/bundle-tools.sh /tmp/bundle-tools.sh
 RUN bash /tmp/bundle-tools.sh /opt/spacemacs/tools
 
 # ---------------------------------------------------------------- final image
@@ -291,7 +291,7 @@ RUN apt-get update &amp;&amp; apt-get install -y --no-install-recommends \
 
 COPY --from=emacs-build /opt/spacemacs/emacs /opt/spacemacs/emacs
 COPY --from=tools-build /opt/spacemacs/tools /opt/spacemacs/tools
-COPY --chmod=755 docker/ubuntu24/emacs-launcher.sh /opt/spacemacs/bin/emacs
+COPY --chmod=755 docker/spacemacs-u24/build/emacs-launcher.sh /opt/spacemacs/bin/emacs
 RUN ln -s ../emacs/bin/emacsclient /opt/spacemacs/bin/emacsclient
 
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8 TERM=xterm-256color COLORTERM=truecolor \
@@ -333,21 +333,21 @@ RUN set -eux; git init -q /opt/spacemacs/emacs.d; cd /opt/spacemacs/emacs.d; \
 # result. Logs stay in /opt/spacemacs/bake-log. The same script was developed by
 # hand in a container.
 COPY . /opt/spacemacs/spacemacs.d
-RUN BAKE_LOG=/opt/spacemacs/bake-log bash /opt/spacemacs/spacemacs.d/docker/ubuntu24/bake.sh \
+RUN BAKE_LOG=/opt/spacemacs/bake-log bash /opt/spacemacs/spacemacs.d/docker/spacemacs-u24/build/bake.sh \
  &amp;&amp; ln -s /opt/spacemacs/spacemacs.d /root/.spacemacs.d \
  &amp;&amp; rm -rf /tmp/* /root/.cache
 
 WORKDIR /work
 CMD [&quot;bash&quot;, &quot;-l&quot;]
 </code></pre>
-<h3>docker/verl/Dockerfile</h3>
+<h3>docker/verl-spacemacs/Dockerfile</h3>
 <pre><code># verl + Spacemacs: the verl image with the editor folder added. Nothing else.
 #
-# Everything about the editor is decided in docker/ubuntu24 (spacemacs-u24).
+# Everything about the editor is decided in docker/spacemacs-u24 (spacemacs-u24).
 # This file only composes: one folder, one PATH entry. No apt packages, no
 # settings, no order rules. verl&#x27;s own python, uv and .venv are left alone.
 #
-#   docker build -t verl-spacemacs docker/verl
+#   docker build -t verl-spacemacs docker/verl-spacemacs
 #   docker run --rm -it --gpus all verl-spacemacs      # then: emacs
 ARG VERL=verlai/verl:uv.cu130.dev5
 ARG SPACEMACS=spacemacs-u24:latest
@@ -356,7 +356,7 @@ FROM ${VERL}
 COPY --from=spacemacs /opt/spacemacs /opt/spacemacs
 ENV PATH=/opt/spacemacs/bin:$PATH
 </code></pre>
-<h3>docker/ubuntu24/emacs-launcher.sh</h3>
+<h3>docker/spacemacs-u24/build/emacs-launcher.sh</h3>
 <pre><code>#!/bin/sh
 # /opt/spacemacs/bin/emacs - Spacemacs launcher.
 # Everything lives under /opt/spacemacs; nothing is read from or written to $HOME.
@@ -371,7 +371,7 @@ export PATH=$S/tools/bin:$PATH:$S/tools/fallback
 export GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=safe.directory GIT_CONFIG_VALUE_0=&#x27;*&#x27;
 exec $S/emacs/bin/emacs --init-directory=$S/emacs.d &quot;$@&quot;
 </code></pre>
-<h3>docker/ubuntu24/bake.sh</h3>
+<h3>docker/spacemacs-u24/build/bake.sh</h3>
 <pre><code>#!/usr/bin/env bash
 # bake.sh - make Spacemacs ready to use with no network at start-up.
 # Run by the Dockerfile (and by hand in a scratch container while developing).
@@ -446,7 +446,7 @@ echo helo | &quot;$S/tools/bin/aspell&quot; -a 2&gt;&amp;1 | grep -q &#x27;^&amp
 [ ! -e &quot;$HOME/.emacs.d&quot; ] || { echo &quot;something wrote to ~/.emacs.d:&quot;; find &quot;$HOME/.emacs.d&quot; | head; exit 1; }
 du -sh &quot;$S&quot; &quot;$S&quot;/*
 </code></pre>
-<h3>docker/ubuntu24/bundle-tools.sh</h3>
+<h3>docker/spacemacs-u24/build/bundle-tools.sh</h3>
 <pre><code>#!/usr/bin/env bash
 # bundle-tools.sh - copy rg, fd, jq and aspell (with its English dictionary) out
 # of Ubuntu&#x27;s packages into one relocatable folder, so the editor does not

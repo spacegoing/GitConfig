@@ -2,6 +2,7 @@
 # Runs INSIDE the spacemacs-u24 container: drive a real terminal Emacs (in a pty) through
 # a developer session on /work repos and log what happened.   verify.sh <label>
 set -uo pipefail
+here=$(cd "$(dirname "$0")" && pwd)
 label=${1:-v1}; LOG=/work/_verify/logs/$label; rm -rf "$LOG"; mkdir -p "$LOG"
 now_ms() { echo $(( $(date +%s%N) / 1000000 )); }
 log() { printf '%s %s\n' "$(date +%H:%M:%S)" "$*" | tee -a "$LOG/steps.log"; }
@@ -17,7 +18,7 @@ export TERM=xterm-256color
 until emacsclient -s test --eval t >/dev/null 2>&1; do sleep 0.5; (( $(now_ms) - t0 > 900000 )) && { log "emacs did not start"; exit 1; }; done
 log "emacs up after $(( $(now_ms) - t0 ))ms"
 log "initialized: $(wait_for 120 "(and (boundp 'spacemacs-initialized) spacemacs-initialized)")"
-ec "(progn (require 'lsp-mode) (load \"/work/_verify/helpers.el\"))" >/dev/null
+ec "(progn (require 'lsp-mode) (load \"$here/helpers.el\"))" >/dev/null
 # library stubs reached by go-to-definition: answer lsp's "Select action" question in advance (same as pressing d)
 ec "(dolist (d '(\"/opt/spacemacs/tools\" \"/usr/lib\" \"/usr/local/lib\" \"/workspace/verl/.venv\")) (push d (lsp-session-folders-blocklist (lsp-session))))" >/dev/null
 log "env: $(ec '(format "emacs=%s native=%s spacemacs=%s packages=%d undo=%s" emacs-version (native-comp-available-p) spacemacs-version (length package-alist) dotspacemacs-undo-system)')"

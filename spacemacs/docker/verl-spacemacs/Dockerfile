@@ -1,10 +1,10 @@
 # verl + Spacemacs: the verl image with the editor folder added. Nothing else.
 #
-# Everything about the editor is decided in docker/ubuntu24 (spacemacs-u24).
+# Everything about the editor is decided in docker/spacemacs-u24 (spacemacs-u24).
 # This file only composes: one folder, one PATH entry. No apt packages, no
 # settings, no order rules. verl's own python, uv and .venv are left alone.
 #
-#   docker build -t verl-spacemacs docker/verl
+#   docker build -t verl-spacemacs docker/verl-spacemacs
 #   docker run --rm -it --gpus all verl-spacemacs      # then: emacs
 ARG VERL=verlai/verl:uv.cu130.dev5
 ARG SPACEMACS=spacemacs-u24:latest

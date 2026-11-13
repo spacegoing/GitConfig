@@ -22,7 +22,7 @@
 #   ENV PATH=/opt/spacemacs/bin:$PATH
 #
 # The build context is the spacemacs/ directory (the config), not this folder:
-#   docker build -t spacemacs-u24 -f docker/ubuntu24/Dockerfile .
+#   docker build -t spacemacs-u24 -f docker/spacemacs-u24/Dockerfile .
 ARG UBUNTU=24.04
 
 # ---------------------------------------------------------------- build Emacs
@@ -77,7 +77,7 @@ FROM ubuntu:${UBUNTU} AS tools-build
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
       ripgrep fd-find jq aspell aspell-en patchelf
-COPY docker/ubuntu24/bundle-tools.sh /tmp/bundle-tools.sh
+COPY docker/spacemacs-u24/build/bundle-tools.sh /tmp/bundle-tools.sh
 RUN bash /tmp/bundle-tools.sh /opt/spacemacs/tools
 
 # ---------------------------------------------------------------- final image
@@ -92,7 +92,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY --from=emacs-build /opt/spacemacs/emacs /opt/spacemacs/emacs
 COPY --from=tools-build /opt/spacemacs/tools /opt/spacemacs/tools
-COPY --chmod=755 docker/ubuntu24/emacs-launcher.sh /opt/spacemacs/bin/emacs
+COPY --chmod=755 docker/spacemacs-u24/build/emacs-launcher.sh /opt/spacemacs/bin/emacs
 RUN ln -s ../emacs/bin/emacsclient /opt/spacemacs/bin/emacsclient
 
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8 TERM=xterm-256color COLORTERM=truecolor \
@@ -134,7 +134,7 @@ RUN set -eux; git init -q /opt/spacemacs/emacs.d; cd /opt/spacemacs/emacs.d; \
 # result. Logs stay in /opt/spacemacs/bake-log. The same script was developed by
 # hand in a container.
 COPY . /opt/spacemacs/spacemacs.d
-RUN BAKE_LOG=/opt/spacemacs/bake-log bash /opt/spacemacs/spacemacs.d/docker/ubuntu24/bake.sh \
+RUN BAKE_LOG=/opt/spacemacs/bake-log bash /opt/spacemacs/spacemacs.d/docker/spacemacs-u24/build/bake.sh \
  && ln -s /opt/spacemacs/spacemacs.d /root/.spacemacs.d \
  && rm -rf /tmp/* /root/.cache
 

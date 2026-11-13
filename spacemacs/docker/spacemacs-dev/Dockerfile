@@ -4,8 +4,8 @@
 # develop branch without touching the Emacs on the host.  Emacs runs in a
 # terminal (emacs -nw) inside tmux; there is no X server here.
 #
-#   docker build -t spacemacs-dev docker/
-#   docker/run.sh            # creates/attaches the container, see run.sh
+#   docker build -t spacemacs-dev docker/spacemacs-dev
+#   docker/spacemacs-dev/run.sh            # creates/attaches the container, see run.sh
 FROM debian:trixie-slim
 
 ARG DEBIAN_FRONTEND=noninteractive
