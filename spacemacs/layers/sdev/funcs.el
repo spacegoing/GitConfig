@@ -58,3 +58,32 @@ old freeze sources on large Python repos)."
              (derived-mode-p 'python-base-mode)
              (bound-and-true-p lsp-mode))
     (mapc #'lsp-workspace-restart (lsp-workspaces))))
+
+;;;; JSON formatting (, = = / , = s / , = m in json buffers)
+;; Uses Emacs' own JSON parser (C code in Emacs 30): no node, no jq, fast on
+;; multi-megabyte files. Works on the region when one is active, else on the
+;; whole buffer. Key order is kept except by the "sorted" command.
+(defun sdev//json-bounds ()
+  (if (use-region-p)
+      (cons (region-beginning) (region-end))
+    (cons (point-min) (point-max))))
+
+(defun sdev/json-pretty ()
+  "Pretty-print the JSON in the region or buffer (indent `js-indent-level')."
+  (interactive)
+  (let ((b (sdev//json-bounds))
+        (json-encoding-default-indentation (make-string js-indent-level ?\s)))
+    (json-pretty-print (car b) (cdr b))))
+
+(defun sdev/json-pretty-sorted ()
+  "Pretty-print the JSON in the region or buffer with object keys sorted."
+  (interactive)
+  (let ((b (sdev//json-bounds))
+        (json-encoding-default-indentation (make-string js-indent-level ?\s)))
+    (json-pretty-print-ordered (car b) (cdr b))))
+
+(defun sdev/json-minify ()
+  "Collapse the JSON in the region or buffer to a single line."
+  (interactive)
+  (let ((b (sdev//json-bounds)))
+    (json-pretty-print (car b) (cdr b) t)))

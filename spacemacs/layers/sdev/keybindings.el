@@ -14,3 +14,13 @@
 (spacemacs/set-leader-keys
   "jm" 'lsp-ui-imenu
   "jM" 'helm-semantic-or-imenu)
+
+;; JSON buffers (json layer):
+;; , = =  pretty-print region/buffer   , = s  same, keys sorted   , = m  minify
+;; , T h  (from the layer) browse the document as a tree
+(dolist (mode '(json-mode json-ts-mode jsonc-mode))
+  (spacemacs/declare-prefix-for-mode mode "m=" "format")
+  (spacemacs/set-leader-keys-for-major-mode mode
+    "==" 'sdev/json-pretty
+    "=s" 'sdev/json-pretty-sorted
+    "=m" 'sdev/json-minify))

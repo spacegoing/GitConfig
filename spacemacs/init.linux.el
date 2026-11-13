@@ -43,7 +43,11 @@ This function should only modify configuration layer settings."
      emacs-lisp
      git
      markdown
-     json
+     ;; JSON without node: no language server, formatting by Emacs itself.
+     ;; , = = pretty-print  , = s same with sorted keys  , = m minify (layers/sdev)
+     (json :variables
+           json-backend 'company-json
+           json-fmt-tool nil)
      multiple-cursors
      org
      spell-checking

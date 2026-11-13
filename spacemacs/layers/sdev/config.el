@@ -10,7 +10,8 @@
 ;; ~/.local/bin : basedpyright + ruff  (scripts/install-lsp-servers.sh, via uv)
 ;; ~/.cargo/bin : rust-analyzer        (rustup component)
 ;; First on PATH so a stale `ruff' inside a conda env does not shadow them.
-(sdev//prepend-to-path "~/.cargo/bin" "~/.local/bin")
+;; /opt/spacemacs/tools/bin : the same servers inside the spacemacs-u24 image
+(sdev//prepend-to-path "/opt/spacemacs/tools/bin" "~/.cargo/bin" "~/.local/bin")
 
 ;;;; lsp-mode: keep a large repo from freezing Emacs
 ;; These are the settings that made vllm / verl / Megatron usable. Each one
