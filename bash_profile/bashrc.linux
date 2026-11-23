@@ -37,7 +37,7 @@ dil() {                                   # image -> git commit of its Dockerfil
 
 # ---- docker compose ----
 alias dcu='docker compose up -d'
-alias dcugpu='docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d'
+alias dcugpu='docker compose -f compose.yaml -f compose.gpu.yaml up -d'
 alias dcd='docker compose down'
 alias dcdrmv='docker compose down --volumes'
 alias dcps='docker compose ps'
