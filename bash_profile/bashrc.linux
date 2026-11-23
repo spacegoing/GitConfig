@@ -1,0 +1,48 @@
+# Shell settings for my Linux containers. /etc/bash.bashrc sources this file.
+
+# ---- environment ----
+export LANG=${LANG:-C.UTF-8}
+
+# ---- tmux ----
+tnew() { tmux new ${1:+-s "$1"}; }
+tat()  { tmux attach -t "$1"; }
+tkl()  { tmux kill-session -t "$1"; }
+tsg() {                                   # my sessions: e (emacs + run), r, d, b
+  local s
+  for s in e r d b; do
+    tmux new -d -s $s -n $s -x "$(tput cols)" -y "$(($(tput lines) - 1))"
+  done
+  tmux send -t e:e emacs C-m
+  tmux new-window -d -t e -n run
+}
+
+# ---- git ----
+alias gitr='git pull origin master'
+alias gitpullall='git pull origin master && git submodule update --recursive --remote'
+
+# ---- docker (host daemon) ----
+alias di='docker images'
+alias dps='docker ps'
+alias dpsa='docker ps -a'
+alias drmiall='docker image prune -f'
+alias drmv='docker volume prune'
+dbash() { docker exec -it "$1" bash; }
+drmc()  { docker stop "$@" && docker rm -v "$@"; }
+dil() {                                   # image -> git commit of its Dockerfile
+  docker images --format '{{.Repository}}:{{.Tag}}' | while read -r i; do
+    c=$(docker inspect -f '{{index .Config.Labels "commit"}}' "$i")
+    [ -z "$c" ] || echo "$i: $c"
+  done
+}
+
+# ---- docker compose ----
+alias dcu='docker compose up -d'
+alias dcugpu='docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d'
+alias dcd='docker compose down'
+alias dcdrmv='docker compose down --volumes'
+alias dcps='docker compose ps'
+alias dclogs='docker compose logs'
+
+# ---- claude code ----
+alias clauden='IS_SANDBOX=1 claude --dangerously-skip-permissions'
+alias claudec='clauden --continue'

@@ -1,0 +1,11 @@
+[alias]
+	cm = commit
+	cmm = commit -m
+	cfm = commit -a -m
+	st = status
+	co = checkout
+	br = branch
+	unstage = reset HEAD
+	last = log -1 HEAD
+[safe]
+	directory = *
